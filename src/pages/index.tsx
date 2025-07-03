@@ -19,7 +19,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
+      <main className="min-h-screen bg-gradient">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
           <header className="text-center mb-12">
