@@ -30,6 +30,9 @@ export default function Home() {
               Never wonder "what's for dinner?" again. Get AI-powered weekly meal plans 
               and organized grocery lists in seconds.
             </p>
+            <p className="text-sm text-gray-500 mt-2">
+              🚀 Live on Vercel - Updated via GitHub!
+            </p>
           </header>
 
           {/* Main CTA */}
