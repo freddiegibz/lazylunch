@@ -1,46 +1,108 @@
-# LazyLunch
+# LazyMenu
 
-A powerful SaaS platform for growing your social media presence with intelligent bot followers and content systems.
+A simple SaaS app that generates weekly dinner meal plans and grocery lists, helping users save time and money by removing dinner decision fatigue.
 
-## Features
+## 🎯 What it does
 
-- **Bot Followers Management**: Automated follower growth systems
-- **Viral Content System**: AI-powered content creation and optimization
-- **Competitor Analysis**: Advanced analytics and insights
-- **Priority Support**: Dedicated customer success
+- **Generates weekly dinner meal plans** automatically using AI
+- **Creates grocery lists** matching those meals to real supermarket products
+- **Saves time and money** by eliminating dinner decision fatigue
+- **Streamlines shopping** with organized ingredient lists
 
-## Pricing Tiers
+## ✨ Core Features (MVP)
 
-### 🚀 Try It - £1 Trial
-- 300 bot followers
-- Basic content tools
-- Perfect for getting started
+- **User Preferences**: Optional inputs (vegan, budget meals, dietary restrictions)
+- **AI Meal Planning**: Uses OpenAI GPT-4o to generate 7-day dinner plans
+- **Smart Grocery Mapping**: Maps recipe ingredients to real SKU grocery items
+- **Clean Interface**: Displays meal plans and grocery lists in an intuitive web app
+- **Subscription Model**: Monthly payments via Stripe for full access
+- **Future Mobile App**: Expo React Native wrapper for iOS/Android
 
-### 📈 Scale It - £25/month
-- 7,500 bot followers
-- Full viral content system
-- Advanced analytics
-- Email support
+## 🛠 Technical Stack
 
-### 👑 Dominate It - £50/month
-- 15,000 bot followers
-- Complete viral content system
-- Competitor analysis tools
-- Priority support
-- Advanced features
+- **Frontend**: Next.js (React framework)
+- **Backend**: Next.js API routes
+- **Database**: Supabase (Postgres + Authentication)
+- **AI**: OpenAI GPT-4o for meal plan generation
+- **Payments**: Stripe integration
+- **Hosting**: Vercel
+- **Mobile**: Expo React Native + WebView (future)
 
-## Getting Started
+## 🚀 Getting Started
 
-Coming soon...
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+- Supabase account
+- OpenAI API key
+- Stripe account
 
-## Technology Stack
+### Installation
 
-Coming soon...
+```bash
+# Clone the repository
+git clone https://github.com/freddiegibz/lazylunch.git
+cd lazylunch
 
-## Contributing
+# Install dependencies
+npm install
 
-Coming soon...
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your API keys
 
-## License
+# Run the development server
+npm run dev
+```
 
-Coming soon... 
+## 📋 Development Roadmap
+
+### Phase 1: MVP Core Features
+- [ ] Backend route for OpenAI meal plan generation
+- [ ] Frontend page to display meal plans
+- [ ] Hard-coded SKU mapping for grocery items (demo)
+- [ ] User authentication via Supabase
+- [ ] Basic Stripe integration
+
+### Phase 2: Enhanced Features
+- [ ] Advanced SKU mapping
+- [ ] User preference management
+- [ ] Meal plan history
+- [ ] Enhanced UI/UX
+
+### Phase 3: Mobile & Scaling
+- [ ] Mobile app development
+- [ ] Advanced grocery store integrations
+- [ ] Social features
+
+## 🔑 Environment Variables
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+OPENAI_API_KEY=your_openai_api_key
+STRIPE_SECRET_KEY=your_stripe_secret_key
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+```
+
+## 📖 Problem & Solution
+
+**Problem**: People hate deciding "what's for dinner" every night, leading to stress, food waste, and poor dietary choices.
+
+**Solution**: Automated meal planning that saves time, reduces waste, and streamlines the entire dinner planning and shopping process.
+
+## 📱 Future Vision
+
+LazyMenu will become the go-to solution for dinner planning, eventually expanding to:
+- Multiple meal types (breakfast, lunch)
+- Advanced dietary optimization
+- Smart kitchen inventory management
+- Direct grocery delivery integration
+
+## 🤝 Contributing
+
+This is currently a private project in development. Contributing guidelines will be added once the MVP is complete.
+
+## 📄 License
+
+All rights reserved. 

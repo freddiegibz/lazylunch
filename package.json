@@ -1,0 +1,46 @@
+{
+  "name": "lazymenu",
+  "version": "1.0.0",
+  "description": "A simple SaaS app that generates weekly dinner meal plans and grocery lists, helping users save time and money by removing dinner decision fatigue.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/freddiegibz/lazylunch.git"
+  },
+  "keywords": [
+    "meal-planning",
+    "saas",
+    "ai",
+    "grocery-list",
+    "meal-prep"
+  ],
+  "author": "freddiegibz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/freddiegibz/lazylunch/issues"
+  },
+  "homepage": "https://github.com/freddiegibz/lazylunch#readme",
+  "dependencies": {
+    "@stripe/stripe-js": "^7.4.0",
+    "@supabase/supabase-js": "^2.50.3",
+    "next": "^15.3.4",
+    "openai": "^5.8.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "stripe": "^18.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.7",
+    "@types/react": "^19.0.15",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.7.3"
+  }
+}
