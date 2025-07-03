@@ -159,10 +159,11 @@ Make sure all ingredient names are simple and common (like "chicken breast", "ri
 
   } catch (error) {
     console.error('Error generating meal plan:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
     res.status(500).json({
       success: false,
       message: 'Failed to generate meal plan',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      error: process.env.NODE_ENV === 'development' ? errorMessage : 'Internal server error'
     })
   }
 } 
