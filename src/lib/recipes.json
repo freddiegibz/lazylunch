@@ -1,0 +1,488 @@
+[
+  {
+    "id": "spag-bolo",
+    "name": "Spaghetti Bolognese",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Spaghetti",        "qty": "400 g",  "estCost": 0.60, "allergens": ["gluten"] },
+      { "item": "Beef mince",       "qty": "500 g",  "estCost": 3.50, "allergens": [] },
+      { "item": "Onion",            "qty": "1",      "estCost": 0.15, "allergens": [] },
+      { "item": "Garlic cloves",    "qty": "2",      "estCost": 0.05, "allergens": [] },
+      { "item": "Tinned tomatoes",  "qty": "400 g",  "estCost": 0.45, "allergens": [] },
+      { "item": "Tomato purée",     "qty": "1 tbsp", "estCost": 0.05, "allergens": [] },
+      { "item": "Dried oregano",    "qty": "1 tsp",  "estCost": 0.03, "allergens": [] },
+      { "item": "Olive oil",        "qty": "1 tbsp", "estCost": 0.05, "allergens": [] },
+      { "item": "Salt & pepper",    "qty": "to taste", "estCost": 0.02, "allergens": [] }
+    ],
+    "steps": [
+      "Cook pasta as pack directs.",
+      "Sauté onion/garlic, brown mince.",
+      "Add tomatoes, purée, oregano; simmer 15 min.",
+      "Season, toss with pasta."
+    ],
+    "image": "/images/spaghettibolognaise.png",
+    "tags": ["beef","kid-friendly","freezer-friendly"],
+    "estTotalCost": 4.90
+  },
+  {
+    "id": "chicken-tacos",
+    "name": "Chicken Tacos",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Chicken breast", "qty": "500 g", "estCost": 3.00, "allergens": [] },
+      { "item": "Taco seasoning", "qty": "1 pkt", "estCost": 0.40, "allergens": [] },
+      { "item": "Tortillas",      "qty": "8",     "estCost": 1.40, "allergens": ["gluten"] },
+      { "item": "Lettuce",        "qty": "½ head","estCost": 0.30, "allergens": [] },
+      { "item": "Cheddar",        "qty": "100 g", "estCost": 0.70, "allergens": ["dairy"] },
+      { "item": "Salsa",          "qty": "100 g", "estCost": 0.50, "allergens": [] }
+    ],
+    "steps": [
+      "Cook seasoned chicken strips 8 min.",
+      "Warm tortillas; assemble with fillings."
+    ],
+    "image": "/images/ChickenTacos.png",
+    "tags": ["chicken","mexican","quick"],
+    "estTotalCost": 5.90
+  },
+  {
+    "id": "mac-cheese-bake",
+    "name": "Oven-Baked Mac & Cheese",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Macaroni",  "qty": "350 g", "estCost": 0.55, "allergens": ["gluten"] },
+      { "item": "Butter",    "qty": "40 g",  "estCost": 0.25, "allergens": ["dairy"] },
+      { "item": "Flour",     "qty": "2 tbsp","estCost": 0.03, "allergens": ["gluten"] },
+      { "item": "Milk",      "qty": "500 ml","estCost": 0.50, "allergens": ["dairy"] },
+      { "item": "Cheddar",   "qty": "200 g","estCost": 1.40, "allergens": ["dairy"] },
+      { "item": "Breadcrumbs","qty": "30 g", "estCost": 0.10, "allergens": ["gluten"] }
+    ],
+    "steps": [
+      "Boil pasta 7 min.",
+      "Make cheese sauce; mix with pasta.",
+      "Top with crumbs, bake 15 min @ 200 °C."
+    ],
+    "image": "/images/ovenbakedmacandcheese.png",
+    "tags": ["vegetarian","kid-friendly","comfort"],
+    "estTotalCost": 2.83
+  },
+  {
+    "id": "roast-chicken",
+    "name": "Whole Roast Chicken & Veg",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Whole chicken","qty": "1.5 kg","estCost": 4.20,"allergens": [] },
+      { "item": "Carrots",      "qty": "3",    "estCost": 0.35,"allergens": [] },
+      { "item": "Potatoes",     "qty": "600 g","estCost": 0.50,"allergens": [] },
+      { "item": "Onion",        "qty": "1",    "estCost": 0.15,"allergens": [] },
+      { "item": "Olive oil",    "qty": "2 tbsp","estCost": 0.10,"allergens": [] },
+      { "item": "Dried herbs",  "qty": "1 tsp","estCost": 0.03,"allergens": [] }
+    ],
+    "steps": [
+      "Season chicken, surround with veg, roast 1 h 20 min @ 190 °C."
+    ],
+    "image": "/images/roastchickenandveg.png",
+    "tags": ["chicken","one-pan","leftovers"],
+    "estTotalCost": 5.33
+  },
+  {
+    "id": "chili",
+    "name": "Chili con Carne",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Beef mince",       "qty": "500 g","estCost": 3.50,"allergens": [] },
+      { "item": "Kidney beans",     "qty": "400 g","estCost": 0.45,"allergens": [] },
+      { "item": "Chopped tomatoes", "qty": "400 g","estCost": 0.45,"allergens": [] },
+      { "item": "Onion",            "qty": "1","estCost": 0.15,"allergens": [] },
+      { "item": "Chili powder",     "qty": "1 tbsp","estCost": 0.05,"allergens": [] },
+      { "item": "Garlic",           "qty": "2 cloves","estCost": 0.05,"allergens": [] },
+      { "item": "Rice",             "qty": "250 g","estCost": 0.20,"allergens": [] }
+    ],
+    "steps": [
+      "Brown mince with onion/garlic.",
+      "Add tomatoes, beans, chili, simmer 20 min.",
+      "Serve over cooked rice."
+    ],
+    "image": "/images/chilliconcarne.png",
+    "tags": ["beef","freezer-friendly","budget"],
+    "estTotalCost": 4.85
+  },
+  {
+    "id": "shepherds-pie",
+    "name": "Shepherd's Pie",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Lamb mince",  "qty": "500 g","estCost": 4.50,"allergens": [] },
+      { "item": "Onion",       "qty": "1","estCost": 0.15,"allergens": [] },
+      { "item": "Carrots",     "qty": "2","estCost": 0.25,"allergens": [] },
+      { "item": "Peas",        "qty": "100 g","estCost": 0.25,"allergens": [] },
+      { "item": "Stock cube",  "qty": "1","estCost": 0.10,"allergens": [] },
+      { "item": "Potatoes",    "qty": "700 g","estCost": 0.60,"allergens": [] },
+      { "item": "Butter",      "qty": "40 g","estCost": 0.25,"allergens": ["dairy"] }
+    ],
+    "steps": [
+      "Cook mince + veg 10 min, add stock, simmer.",
+      "Top with mashed potato, bake 20 min."
+    ],
+    "image": "/images/shepherds-pie.png",
+    "tags": ["lamb","comfort","freezer-friendly"],
+    "estTotalCost": 6.10
+  },
+  {
+    "id": "beef-burgers",
+    "name": "Beef Burgers & Oven Fries",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Burger buns",   "qty": "4",     "estCost": 1.00, "allergens": ["gluten"] },
+      { "item": "Beef patties",  "qty": "4 × 125 g","estCost": 3.60,"allergens": [] },
+      { "item": "Cheddar slice", "qty": "4",     "estCost": 0.60, "allergens": ["dairy"] },
+      { "item": "Potatoes",      "qty": "600 g", "estCost": 0.50, "allergens": [] },
+      { "item": "Lettuce",       "qty": "½ head","estCost": 0.30, "allergens": [] },
+      { "item": "Tomato",        "qty": "1",     "estCost": 0.25, "allergens": [] }
+    ],
+    "steps": [
+      "Shape/cook patties 6 min / side.",
+      "Bake fries 25 min.",
+      "Assemble burgers with cheese & salad."
+    ],
+    "image": "/images/beefburgersovenfries.png",
+    "tags": ["beef","kid-friendly","friday-night"],
+    "estTotalCost": 6.25
+  },
+  {
+    "id": "pesto-pasta",
+    "name": "Pesto Pasta with Cherry Tomatoes",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Penne",           "qty": "350 g","estCost": 0.55,"allergens": ["gluten"] },
+      { "item": "Pesto",           "qty": "4 tbsp","estCost": 0.80,"allergens": ["nuts","dairy"] },
+      { "item": "Cherry tomatoes", "qty": "200 g","estCost": 1.00,"allergens": [] }
+    ],
+    "steps": [
+      "Boil pasta; drain reserving splash.",
+      "Stir through pesto & tomatoes."
+    ],
+    "image": "/images/pestopastacherrytomatos.png",
+    "tags": ["vegetarian","15-min","budget"],
+    "estTotalCost": 2.35
+  },
+  {
+    "id": "baked-salmon",
+    "name": "Baked Salmon & Lemon Rice",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Salmon fillets","qty": "4 × 120 g","estCost": 6.00,"allergens": ["fish"] },
+      { "item": "Rice",          "qty": "250 g",   "estCost": 0.20,"allergens": [] },
+      { "item": "Lemon",         "qty": "1",       "estCost": 0.30,"allergens": [] },
+      { "item": "Broccoli",      "qty": "200 g",   "estCost": 0.60,"allergens": [] }
+    ],
+    "steps": [
+      "Bake salmon 15 min @ 200 °C.",
+      "Cook rice; add lemon zest/juice.",
+      "Steam broccoli; serve together."
+    ],
+    "image": "/images/bakedsalmonandlemonrice.png",
+    "tags": ["fish","healthy","quick"],
+    "estTotalCost": 7.10
+  },
+  {
+    "id": "sausage-mash",
+    "name": "Sausage & Mash with Onion Gravy",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Pork sausages", "qty": "8",     "estCost": 2.80,"allergens": [] },
+      { "item": "Potatoes",      "qty": "700 g", "estCost": 0.60,"allergens": [] },
+      { "item": "Butter",        "qty": "40 g",  "estCost": 0.25,"allergens": ["dairy"] },
+      { "item": "Onion",         "qty": "1",     "estCost": 0.15,"allergens": [] },
+      { "item": "Stock cube",    "qty": "1",     "estCost": 0.10,"allergens": [] },
+      { "item": "Flour",         "qty": "1 tbsp","estCost": 0.02,"allergens": ["gluten"] }
+    ],
+    "steps": [
+      "Grill sausages 20 min.",
+      "Boil/mash potatoes with butter.",
+      "Make onion gravy with flour & stock."
+    ],
+    "image": "/images/sausageandmash.png",
+    "tags": ["pork","comfort","budget"],
+    "estTotalCost": 3.92
+  },
+  {
+    "id": "chicken-fajitas",
+    "name": "Chicken Fajitas",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Chicken breast","qty": "500 g","estCost": 3.00,"allergens": [] },
+      { "item": "Fajita spice",  "qty": "1 pkt","estCost": 0.40,"allergens": [] },
+      { "item": "Bell peppers",  "qty": "2",   "estCost": 1.00,"allergens": [] },
+      { "item": "Onion",         "qty": "1",   "estCost": 0.15,"allergens": [] },
+      { "item": "Tortillas",     "qty": "8",   "estCost": 1.40,"allergens": ["gluten"] },
+      { "item": "Sour cream",    "qty": "80 g","estCost": 0.50,"allergens": ["dairy"] }
+    ],
+    "steps": [
+      "Stir-fry chicken & veg with spice 10 min.",
+      "Serve in warm tortillas with sour cream."
+    ],
+    "image": "/images/chickenfajitas.png",
+    "tags": ["chicken","mexican","one-pan"],
+    "estTotalCost": 6.45
+  },
+  {
+    "id": "meatballs",
+    "name": "Beef Meatballs in Tomato Sauce",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Beef mince","qty": "500 g","estCost": 3.50,"allergens": [] },
+      { "item": "Breadcrumbs","qty": "30 g","estCost": 0.10,"allergens": ["gluten"] },
+      { "item": "Egg",        "qty": "1","estCost": 0.15,"allergens": ["eggs"] },
+      { "item": "Garlic",     "qty": "2 cloves","estCost": 0.05,"allergens": [] },
+      { "item": "Passata",    "qty": "400 g","estCost": 0.45,"allergens": [] },
+      { "item": "Spaghetti",  "qty": "400 g","estCost": 0.60,"allergens": ["gluten"] }
+    ],
+    "steps": [
+      "Mix mince, crumbs, egg, season; shape balls.",
+      "Brown, add passata, simmer 15 min.",
+      "Boil spaghetti; serve with sauce."
+    ],
+    "image": "/images/beefmeatballstomatosauce.png",
+    "tags": ["beef","kid-friendly","freezer"],
+    "estTotalCost": 4.85
+  },
+  {
+    "id": "veg-chickpea-curry",
+    "name": "Vegetable Chickpea Curry",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Chickpeas",       "qty": "400 g","estCost": 0.45,"allergens": [] },
+      { "item": "Coconut milk",    "qty": "400 g","estCost": 0.80,"allergens": [] },
+      { "item": "Curry paste",     "qty": "2 tbsp","estCost": 0.30,"allergens": [] },
+      { "item": "Mixed vegetables","qty": "400 g","estCost": 1.00,"allergens": [] },
+      { "item": "Rice",            "qty": "250 g","estCost": 0.20,"allergens": [] }
+    ],
+    "steps": [
+      "Simmer curry paste, veg, chickpeas 10 min.",
+      "Add coconut milk, cook 10 min, serve with rice."
+    ],
+    "image": "/images/vegchickpeacurry.png",
+    "tags": ["vegetarian","budget","one-pot"],
+    "estTotalCost": 2.75
+  },
+  {
+    "id": "turkey-meatloaf",
+    "name": "Turkey Meatloaf & Roast Potatoes",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Turkey mince","qty": "500 g","estCost": 3.20,"allergens": [] },
+      { "item": "Breadcrumbs", "qty": "30 g","estCost": 0.10,"allergens": ["gluten"] },
+      { "item": "Egg",         "qty": "1","estCost": 0.15,"allergens": ["eggs"] },
+      { "item": "Ketchup",     "qty": "2 tbsp","estCost": 0.10,"allergens": [] },
+      { "item": "Potatoes",    "qty": "600 g","estCost": 0.50,"allergens": [] }
+    ],
+    "steps": [
+      "Mix loaf, bake 45 min @ 180 °C.",
+      "Roast potatoes alongside 40 min."
+    ],
+    "image": "/images/turkeymeatloaf.png",
+    "tags": ["poultry","comfort","leftovers"],
+    "estTotalCost": 4.05
+  },
+  {
+    "id": "pulled-pork",
+    "name": "Slow-Cooker Pulled-Pork Sandwiches",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Pork shoulder","qty": "1 kg","estCost": 4.00,"allergens": [] },
+      { "item": "BBQ sauce",    "qty": "150 g","estCost": 0.60,"allergens": [] },
+      { "item": "Burger buns",  "qty": "4",   "estCost": 1.00,"allergens": ["gluten"] },
+      { "item": "Coleslaw mix", "qty": "200 g","estCost": 0.70,"allergens": ["eggs"]}
+    ],
+    "steps": [
+      "Slow-cook pork + BBQ 8 h; shred.",
+      "Serve in buns with slaw."
+    ],
+    "image": "/images/pulledporksandwich.png",
+    "tags": ["pork","slow-cooker","friday"],
+    "estTotalCost": 6.30
+  },
+  {
+    "id": "bbq-drumsticks",
+    "name": "BBQ Chicken Drumsticks & Corn",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Chicken drumsticks","qty": "8","estCost": 3.20,"allergens": [] },
+      { "item": "BBQ sauce",        "qty": "100 g","estCost": 0.40,"allergens": [] },
+      { "item": "Corn on cob",      "qty": "4","estCost": 1.60,"allergens": [] }
+    ],
+    "steps": [
+      "Coat drumsticks, bake 35 min @ 200 °C.",
+      "Boil/steam corn 8 min."
+    ],
+    "image": "/images/bbqchickendrumsticks&corn.png",
+    "tags": ["chicken","summer","budget"],
+    "estTotalCost": 5.20
+  },
+  {
+    "id": "gyros",
+    "name": "Greek-Style Chicken Gyros",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Chicken thigh","qty": "600 g","estCost": 3.00,"allergens": [] },
+      { "item": "Greek yoghurt","qty": "120 g","estCost": 0.40,"allergens": ["dairy"] },
+      { "item": "Flatbreads",   "qty": "4","estCost": 1.00,"allergens": ["gluten"] },
+      { "item": "Cucumber",     "qty": "½","estCost": 0.30,"allergens": [] },
+      { "item": "Tomato",       "qty": "1","estCost": 0.25,"allergens": [] }
+    ],
+    "steps": [
+      "Marinate/grill chicken 15 min.",
+      "Assemble in flatbreads with yoghurt, salad."
+    ],
+    "image": "/images/greekchickengyros.png",
+    "tags": ["chicken","mediterranean","quick"],
+    "estTotalCost": 4.95
+  },
+  {
+    "id": "veg-quesadillas",
+    "name": "Veggie Quesadillas",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Tortillas",   "qty": "8","estCost": 1.40,"allergens": ["gluten"] },
+      { "item": "Cheddar",     "qty": "120 g","estCost": 0.85,"allergens": ["dairy"] },
+      { "item": "Mixed veg",   "qty": "250 g","estCost": 0.90,"allergens": [] }
+    ],
+    "steps": [
+      "Sauté veg, layer with cheese in tortillas.",
+      "Pan-fry both sides until golden."
+    ],
+    "image": "/images/veggiequesadillas.png",
+    "tags": ["vegetarian","kid-friendly","under-15"],
+    "estTotalCost": 3.15
+  },
+  {
+    "id": "lentil-soup",
+    "name": "Lentil & Carrot Soup + Bread",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Red lentils", "qty": "250 g","estCost": 0.60,"allergens": [] },
+      { "item": "Carrots",     "qty": "3",   "estCost": 0.35,"allergens": [] },
+      { "item": "Onion",       "qty": "1",   "estCost": 0.15,"allergens": [] },
+      { "item": "Veg stock",   "qty": "1 litre","estCost": 0.20,"allergens": [] },
+      { "item": "Crusty loaf", "qty": "1",   "estCost": 1.00,"allergens": ["gluten"] }
+    ],
+    "steps": [
+      "Simmer lentils, veg, stock 25 min, blend.",
+      "Serve with sliced bread."
+    ],
+    "image": "/images/lentilsoup.png",
+    "tags": ["vegetarian","budget","freezer"],
+    "estTotalCost": 2.30
+  },
+  {
+    "id": "tuna-pasta-bake",
+    "name": "Tuna Pasta Bake",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Penne",        "qty": "350 g","estCost": 0.55,"allergens": ["gluten"] },
+      { "item": "Canned tuna",  "qty": "2 × 120 g","estCost": 1.40,"allergens": ["fish"] },
+      { "item": "Sweetcorn",    "qty": "150 g","estCost": 0.35,"allergens": [] },
+      { "item": "Cheddar",      "qty": "100 g","estCost": 0.70,"allergens": ["dairy"] },
+      { "item": "White sauce",  "qty": "300 ml","estCost": 0.60,"allergens": ["dairy","gluten"] }
+    ],
+    "steps": [
+      "Mix cooked pasta, tuna, corn, sauce in dish.",
+      "Top with cheese; bake 15 min."
+    ],
+    "image": "/images/tunapastabake.png",
+    "tags": ["fish","kid-friendly","budget"],
+    "estTotalCost": 3.60
+  },
+  {
+    "id": "omelette-salad",
+    "name": "Ham & Cheese Omelette + Side Salad",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Eggs",     "qty": "8","estCost": 1.20,"allergens": ["eggs"] },
+      { "item": "Diced ham","qty": "100 g","estCost": 1.00,"allergens": [] },
+      { "item": "Cheddar",  "qty": "80 g","estCost": 0.60,"allergens": ["dairy"] },
+      { "item": "Mixed salad leaves","qty": "120 g","estCost": 0.80,"allergens": [] }
+    ],
+    "steps": [
+      "Whisk eggs, pour, add fillings, fold.",
+      "Serve with salad."
+    ],
+    "image": "/images/hamandcheeseomellete.png",
+    "tags": ["15-min","budget","high-protein"],
+    "estTotalCost": 3.60
+  },
+  {
+    "id": "beef-stew",
+    "name": "Beef & Vegetable Stew",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Stewing beef","qty": "600 g","estCost": 4.80,"allergens": [] },
+      { "item": "Carrots",     "qty": "2","estCost": 0.25,"allergens": [] },
+      { "item": "Potatoes",    "qty": "500 g","estCost": 0.45,"allergens": [] },
+      { "item": "Onion",       "qty": "1","estCost": 0.15,"allergens": [] },
+      { "item": "Beef stock",  "qty": "750 ml","estCost": 0.30,"allergens": [] }
+    ],
+    "steps": [
+      "Brown beef; add veg, stock.",
+      "Slow cook 2 h until tender."
+    ],
+    "image": "/images/beefandvegetablestew.png",
+    "tags": ["beef","slow-cooker","freezer"],
+    "estTotalCost": 5.95
+  },
+  {
+    "id": "fish-chips",
+    "name": "Oven-Baked Fish & Chips",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Breaded fish fillets","qty": "4","estCost": 3.60,"allergens": ["fish","gluten"] },
+      { "item": "Potatoes",           "qty": "700 g","estCost": 0.60,"allergens": [] },
+      { "item": "Frozen peas",        "qty": "200 g","estCost": 0.35,"allergens": [] }
+    ],
+    "steps": [
+      "Bake fillets 20 min @ 200 °C.",
+      "Cut, oil, bake chips 30 min.",
+      "Microwave peas 2 min."
+    ],
+    "image": "/images/fishandchipsovenbaked.png",
+    "tags": ["fish","kid-friendly","friday"],
+    "estTotalCost": 4.55
+  },
+  {
+    "id": "tacos-veggie",
+    "name": "Vegetable Bean Tacos",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Black beans",    "qty": "400 g","estCost": 0.45,"allergens": [] },
+      { "item": "Sweetcorn",      "qty": "150 g","estCost": 0.35,"allergens": [] },
+      { "item": "Taco seasoning", "qty": "1 pkt","estCost": 0.40,"allergens": [] },
+      { "item": "Tortillas",      "qty": "8","estCost": 1.40,"allergens": ["gluten"] },
+      { "item": "Cheddar",        "qty": "80 g","estCost": 0.60,"allergens": ["dairy"] }
+    ],
+    "steps": [
+      "Heat beans, corn, spice 5 min.",
+      "Serve in tortillas with cheese."
+    ],
+    "image": "/images/ovenbakedbeantacos.png",
+    "tags": ["vegetarian","mexican","budget"],
+    "estTotalCost": 3.20
+  },
+  {
+    "id": "sheet-pan-sausage",
+    "name": "Sheet-Pan Sausage & Veg",
+    "baseServings": 4,
+    "ingredients": [
+      { "item": "Smoked sausages","qty": "6","estCost": 3.00,"allergens": [] },
+      { "item": "Bell peppers",   "qty": "2","estCost": 1.00,"allergens": [] },
+      { "item": "Courgette",      "qty": "1","estCost": 0.50,"allergens": [] },
+      { "item": "Red onion",      "qty": "1","estCost": 0.15,"allergens": [] },
+      { "item": "Olive oil",      "qty": "1 tbsp","estCost": 0.05,"allergens": [] }
+    ],
+    "steps": [
+      "Toss all with oil, roast 25 min @ 200 °C."
+    ],
+    "image": "/images/sheetpansausageandveg.png",
+    "tags": ["pork","one-tray","quick"],
+    "estTotalCost": 4.70
+  }
+] 

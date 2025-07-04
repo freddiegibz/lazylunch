@@ -1,0 +1,39 @@
+🎨 LazyLunch Colour Scheme
+Use	Colour	Hex Code	Notes
+Primary	Pastel Green	#A8D5BA	Calm, fresh, food-related
+Secondary	Navy Blue	#2C3E50	Trust, stability, professional
+Accent	Soft Coral	#F28C8C	Warmth for CTAs and highlights
+Text (Body)	Dark Grey	#333333	High readability
+Background	White / Off-white	#FFFFFF / #F9FAFB	Clean, minimal, spacious
+
+✅ Usage notes:
+
+Buttons: Pastel green background with navy text
+
+CTAs: Soft coral for highlights and secondary accents
+
+Headings: Navy blue or dark grey for clarity
+
+Links: Navy blue with hover underline or slight coral tint
+
+Let me know if you want this formatted as a Tailwind config snippet for direct implementation.
+
+🔤 LazyLunch Font Stack
+Use	Font Family	Weight & Style	Notes
+Headings	Playfair Display	Semi-Bold (600)	Elegant serif for brand personality
+Subheadings	Poppins	Regular (400)	Modern, clean readability
+Body Text	Inter	Regular (400)	Highly legible for paragraphs
+CTAs	Poppins	Bold (700), Uppercase	Clear, strong calls to action
+Emphasis	Playfair Display	Italic (400)	For quotes or highlighted phrases
+
+🔹 Implementation Notes
+✅ Import from Google Fonts: Playfair Display, Poppins, Inter
+✅ Keep max 2-3 fonts for performance & coherence
+✅ Adjust line heights for clarity:
+
+Headings: 1.1
+
+Subheadings: 1.3
+
+Body: 1.5
+
