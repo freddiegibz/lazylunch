@@ -22,7 +22,7 @@ A simple SaaS app that generates weekly dinner meal plans and grocery lists, hel
 
 - **Frontend**: Next.js (React framework)
 - **Backend**: Next.js API routes
-- **Database**: Supabase (Postgres + Authentication)
+- **Database**: (To be determined)
 - **AI**: OpenAI GPT-4o for meal plan generation
 - **Payments**: Stripe integration
 - **Hosting**: Vercel
@@ -33,7 +33,6 @@ A simple SaaS app that generates weekly dinner meal plans and grocery lists, hel
 ### Prerequisites
 - Node.js 18+ 
 - npm or yarn
-- Supabase account
 - OpenAI API key
 - Stripe account
 
@@ -61,7 +60,7 @@ npm run dev
 - [ ] Backend route for OpenAI meal plan generation
 - [ ] Frontend page to display meal plans
 - [ ] Hard-coded SKU mapping for grocery items (demo)
-- [ ] User authentication via Supabase
+- [ ] User authentication (to be implemented)
 - [ ] Basic Stripe integration
 
 ### Phase 2: Enhanced Features
@@ -78,8 +77,6 @@ npm run dev
 ## 🔑 Environment Variables
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 OPENAI_API_KEY=your_openai_api_key
 STRIPE_SECRET_KEY=your_stripe_secret_key
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key

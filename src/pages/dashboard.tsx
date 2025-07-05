@@ -1,36 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
-import { getCurrentUser, signOut } from '../lib/supabase'
 
 export default function Dashboard() {
-  const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<any>({ email: 'demo@example.com' })
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
-
-  useEffect(() => {
-    checkUser()
-  }, [])
-
-  const checkUser = async () => {
-    try {
-      const currentUser = await getCurrentUser()
-      if (!currentUser) {
-        router.push('/signin')
-        return
-      }
-      setUser(currentUser)
-    } catch (error) {
-      console.error('Error checking user:', error)
-      router.push('/signin')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const handleSignOut = async () => {
     try {
-      await signOut()
+      // Mock signout - just redirect to home
       router.push('/')
     } catch (error) {
       console.error('Error signing out:', error)

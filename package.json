@@ -28,7 +28,7 @@
   "homepage": "https://github.com/freddiegibz/lazylunch#readme",
   "dependencies": {
     "@stripe/stripe-js": "^7.4.0",
-    "@supabase/supabase-js": "^2.50.3",
+
     "next": "^15.3.4",
     "openai": "^5.8.2",
     "react": "^19.1.0",

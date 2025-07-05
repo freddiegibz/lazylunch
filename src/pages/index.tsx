@@ -15,11 +15,7 @@ export default function Home() {
     setExpandedFAQ(expandedFAQ === index ? null : index)
   }
 
-  // Temporary debug info - remove this after fixing the issue
-  const debugInfo = {
-    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Missing',
-    supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Missing'
-  }
+
 
   const faqs = [
     {
@@ -84,12 +80,7 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Temporary Debug Info - Remove after fixing */}
-        {process.env.NODE_ENV === 'development' && (
-          <div style={{ background: '#f0f0f0', padding: '10px', textAlign: 'center', fontSize: '12px' }}>
-            Debug: Supabase URL: {debugInfo.supabaseUrl} | Supabase Key: {debugInfo.supabaseKey}
-          </div>
-        )}
+
 
         {/* Hero Section */}
         <section className="hero-section">

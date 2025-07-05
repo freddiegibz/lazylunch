@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import Head from 'next/head'
-import { signUp } from '../lib/supabase'
 
 export default function SignUp() {
   const [email, setEmail] = useState('')
@@ -33,20 +32,12 @@ export default function SignUp() {
     }
 
     try {
-      const { data, error } = await signUp(email, password)
-      
-      if (error) {
-        setError(error.message)
-        return
-      }
-      
-      if (data.user) {
-        setSuccess(true)
-        // Show success message and redirect after a delay
-        setTimeout(() => {
-          router.push('/dashboard')
-        }, 2000)
-      }
+      // Mock signup - just show success
+      setSuccess(true)
+      // Show success message and redirect after a delay
+      setTimeout(() => {
+        router.push('/dashboard')
+      }, 2000)
     } catch (err) {
       setError('Failed to create account. Please try again.')
     } finally {
