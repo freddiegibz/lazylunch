@@ -1,5 +1,17 @@
 /* LazyLunch Landing Page Styles - Pure CSS */
 
+/* CSS Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
 /* CSS Variables for Color Palette */
 :root {
   --pastel-green: #A8D5BA;
@@ -12,11 +24,6 @@
 }
 
 /* Base Styles */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
 
 html {
   scroll-behavior: smooth;
