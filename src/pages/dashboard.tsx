@@ -1,15 +1,44 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
+import { supabase } from '../lib/supabase'
 
 export default function Dashboard() {
-  const [user, setUser] = useState<any>({ email: 'demo@example.com' })
-  const [loading, setLoading] = useState(false)
+  const [user, setUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
   const router = useRouter()
+
+  useEffect(() => {
+    // Get current user session
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setUser(user)
+      } else {
+        // No user found, redirect to signin
+        router.push('/signin')
+      }
+      setLoading(false)
+    }
+
+    getCurrentUser()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        setUser(null)
+        router.push('/signin')
+      } else if (session?.user) {
+        setUser(session.user)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [router])
 
   const handleSignOut = async () => {
     try {
-      // Mock signout - just redirect to home
+      await supabase.auth.signOut()
       router.push('/')
     } catch (error) {
       console.error('Error signing out:', error)
@@ -27,6 +56,10 @@ export default function Dashboard() {
     )
   }
 
+  if (!user) {
+    return null // Will redirect to signin
+  }
+
   return (
     <>
       <Head>
@@ -40,7 +73,7 @@ export default function Dashboard() {
           <div className="dashboard-header-content">
             <div className="dashboard-logo">LazyLunch</div>
             <div className="dashboard-nav">
-              <span className="dashboard-user">Welcome, {user?.email}</span>
+              <span className="dashboard-user">Welcome, {user.email}</span>
               <button
                 onClick={handleSignOut}
                 className="dashboard-signout"

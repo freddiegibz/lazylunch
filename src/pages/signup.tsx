@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import Head from 'next/head'
+import { supabase } from '../lib/supabase'
 
 export default function SignUp() {
   const [email, setEmail] = useState('')
@@ -32,14 +33,24 @@ export default function SignUp() {
     }
 
     try {
-      // Mock signup - just show success
-      setSuccess(true)
-      // Show success message and redirect after a delay
-      setTimeout(() => {
-        router.push('/dashboard')
-      }, 2000)
-    } catch (err) {
-      setError('Failed to create account. Please try again.')
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      })
+
+      if (error) {
+        throw error
+      }
+
+      if (data.user) {
+        setSuccess(true)
+        // Show success message and redirect after a delay
+        setTimeout(() => {
+          router.push('/dashboard')
+        }, 2000)
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to create account. Please try again.')
     } finally {
       setLoading(false)
     }
