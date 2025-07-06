@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
+import Link from 'next/link'
 import { supabase } from '../lib/supabase'
 
 export default function Dashboard() {
@@ -99,9 +100,9 @@ export default function Dashboard() {
               <div className="dashboard-card">
                 <h3>Generate Meal Plan</h3>
                 <p>Create a personalized weekly meal plan based on your preferences.</p>
-                <button className="dashboard-card-button">
+                <Link href="/generate-meal-plan" className="dashboard-card-button" style={{ textDecoration: 'none', display: 'inline-block' }}>
                   Get Started
-                </button>
+                </Link>
               </div>
               
               <div className="dashboard-card">
