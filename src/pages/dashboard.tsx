@@ -106,11 +106,11 @@ export default function Dashboard() {
               </div>
               
               <div className="dashboard-card">
-                <h3>View Recipes</h3>
-                <p>Browse our collection of family-friendly recipes.</p>
-                <button className="dashboard-card-button">
-                  Browse Recipes
-                </button>
+                <h3>My Meal Plans</h3>
+                <p>View and manage your saved meal plans.</p>
+                <Link href="/my-meal-plans" className="dashboard-card-button" style={{ textDecoration: 'none', display: 'inline-block' }}>
+                  View Plans
+                </Link>
               </div>
               
               <div className="dashboard-card">

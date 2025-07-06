@@ -1317,6 +1317,86 @@ button, .primary-cta, .secondary-cta, .pricing-cta {
   color: #9BC8AB;
 }
 
+/* My Meal Plans Styles */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background-color: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-grey);
+}
+
+.empty-state h3 {
+  color: var(--navy-blue);
+  margin-bottom: 16px;
+  font-size: 1.5rem;
+}
+
+.empty-state p {
+  color: var(--dark-grey);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.meal-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.meal-plan-card {
+  background-color: var(--white);
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-grey);
+}
+
+.meal-plan-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-grey);
+}
+
+.meal-plan-card-header h3 {
+  color: var(--navy-blue);
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.meal-plan-date {
+  color: var(--dark-grey);
+  font-size: 0.875rem;
+}
+
+.meal-plan-preview {
+  margin-bottom: 20px;
+}
+
+.meal-plan-preview p {
+  color: var(--dark-grey);
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.meal-plan-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.create-new-section {
+  text-align: center;
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border-grey);
+}
+
 /* Responsive Design for Auth Pages */
 @media (max-width: 480px) {
   .auth-card {

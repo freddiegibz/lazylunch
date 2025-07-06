@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
+import { MealPlanService } from '../lib/meal-plan-service'
 
 // Static meal plan data for testing
 const sampleMealPlan = {
@@ -99,11 +100,34 @@ export default function GenerateMealPlan() {
   const generateMealPlan = async () => {
     setLoading(true)
     
-    // Simulate API call delay
-    setTimeout(() => {
-      setMealPlan(sampleMealPlan)
+    try {
+      // Simulate API call delay
+      setTimeout(async () => {
+        try {
+          // Save the meal plan to Supabase
+          const savedMealPlan = await MealPlanService.saveMealPlan(
+            sampleMealPlan.week,
+            sampleMealPlan.shoppingList
+          )
+          
+          if (savedMealPlan) {
+            setMealPlan({
+              ...sampleMealPlan,
+              id: savedMealPlan.id,
+              created_at: savedMealPlan.created_at
+            })
+          }
+        } catch (error) {
+          console.error('Error saving meal plan:', error)
+          // Still show the meal plan even if saving fails
+          setMealPlan(sampleMealPlan)
+        }
+        setLoading(false)
+      }, 2000)
+    } catch (error) {
+      console.error('Error generating meal plan:', error)
       setLoading(false)
-    }, 2000)
+    }
   }
 
   const downloadMealPlan = () => {
