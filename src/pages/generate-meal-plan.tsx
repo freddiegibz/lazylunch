@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
@@ -95,6 +95,8 @@ export default function GenerateMealPlan() {
   const [loading, setLoading] = useState(false)
   const [mealPlan, setMealPlan] = useState<any>(null)
   const [showShoppingList, setShowShoppingList] = useState(false)
+  const [savedMealPlans, setSavedMealPlans] = useState<any[]>([])
+  const [loadingSavedPlans, setLoadingSavedPlans] = useState(true)
   const router = useRouter()
 
   const generateMealPlan = async () => {
@@ -130,19 +132,57 @@ export default function GenerateMealPlan() {
     }
   }
 
+  // Load saved meal plans on component mount
+  useEffect(() => {
+    loadSavedMealPlans()
+  }, [])
+
+  const loadSavedMealPlans = async () => {
+    try {
+      setLoadingSavedPlans(true)
+      const plans = await MealPlanService.getAllMealPlans()
+      setSavedMealPlans(plans)
+    } catch (error) {
+      console.error('Error loading saved meal plans:', error)
+    } finally {
+      setLoadingSavedPlans(false)
+    }
+  }
+
+  const loadSavedMealPlan = async (planId: string) => {
+    try {
+      setLoading(true)
+      const plan = savedMealPlans.find(p => p.id === planId)
+      if (plan) {
+        setMealPlan({
+          week: plan.week_data,
+          shoppingList: plan.shopping_list,
+          id: plan.id,
+          created_at: plan.created_at
+        })
+      }
+    } catch (error) {
+      console.error('Error loading saved meal plan:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const downloadMealPlan = () => {
     // Create a simple text version for download
     let content = 'LazyLunch Weekly Meal Plan\n\n'
     
-    sampleMealPlan.week.forEach(day => {
+    const planData = mealPlan.week || sampleMealPlan.week
+    planData.forEach((day: any) => {
       content += `${day.day}:\n`
       content += `  Breakfast: ${day.meals.breakfast}\n`
       content += `  Lunch: ${day.meals.lunch}\n`
       content += `  Dinner: ${day.meals.dinner}\n\n`
     })
     
+    const shoppingList = mealPlan.shoppingList || sampleMealPlan.shoppingList
     content += 'Shopping List:\n'
-    sampleMealPlan.shoppingList.forEach(item => {
+    shoppingList.forEach((item: string) => {
       content += `- ${item}\n`
     })
     
@@ -199,6 +239,44 @@ export default function GenerateMealPlan() {
                   >
                     {loading ? 'Generating Meal Plan...' : 'Generate Meal Plan'}
                   </button>
+
+                  {/* Load Saved Plans Section */}
+                  {!loadingSavedPlans && savedMealPlans.length > 0 && (
+                    <div className="load-saved-plans">
+                      <div className="divider">
+                        <span>or</span>
+                      </div>
+                      
+                      <h4>Load a Saved Meal Plan</h4>
+                      <div className="saved-plans-list">
+                        {savedMealPlans.slice(0, 3).map((plan) => (
+                          <button
+                            key={plan.id}
+                            onClick={() => loadSavedMealPlan(plan.id)}
+                            disabled={loading}
+                            className="load-plan-button"
+                          >
+                            <span className="plan-date">
+                              {new Date(plan.created_at).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric'
+                              })}
+                            </span>
+                            <span className="plan-details">
+                              {plan.week_data?.length || 0} days • {plan.shopping_list?.length || 0} items
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                      
+                      {savedMealPlans.length > 3 && (
+                        <Link href="/my-meal-plans" className="view-all-plans">
+                          View all {savedMealPlans.length} meal plans →
+                        </Link>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -226,6 +304,16 @@ export default function GenerateMealPlan() {
                       className="dashboard-card-button"
                     >
                       Download Plan
+                    </button>
+                    <button
+                      onClick={() => {
+                        setMealPlan(null)
+                        setShowShoppingList(false)
+                      }}
+                      className="dashboard-card-button"
+                      style={{ backgroundColor: 'var(--pastel-green)' }}
+                    >
+                      Generate New Plan
                     </button>
                   </div>
                 </div>

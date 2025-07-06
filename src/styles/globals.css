@@ -1192,6 +1192,98 @@ button, .primary-cta, .secondary-cta, .pricing-cta {
   line-height: 1.6;
 }
 
+/* Load Saved Plans Styles */
+.load-saved-plans {
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border-grey);
+}
+
+.load-saved-plans h4 {
+  color: var(--navy-blue);
+  margin-bottom: 16px;
+  font-size: 1.125rem;
+  text-align: center;
+}
+
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 24px 0;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: var(--border-grey);
+}
+
+.divider span {
+  background-color: var(--white);
+  padding: 0 16px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.saved-plans-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.load-plan-button {
+  background-color: var(--light-grey);
+  border: 1px solid var(--border-grey);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.load-plan-button:hover {
+  background-color: #e9ecef;
+  border-color: var(--pastel-green);
+}
+
+.load-plan-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.plan-date {
+  font-weight: 600;
+  color: var(--navy-blue);
+  font-size: 0.95rem;
+}
+
+.plan-details {
+  color: var(--dark-grey);
+  font-size: 0.875rem;
+}
+
+.view-all-plans {
+  color: var(--pastel-green);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  display: block;
+  transition: color 0.2s ease;
+}
+
+.view-all-plans:hover {
+  color: #9BC8AB;
+}
+
 .meal-plan-results {
   max-width: 1200px;
   margin: 0 auto;
