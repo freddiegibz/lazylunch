@@ -1,0 +1,148 @@
+[
+  {
+    "id": "chicken-caesar-wrap",
+    "name": "Chicken Caesar Wrap",
+    "baseServings": 1,
+    "ingredients": [
+      { "item": "Tortilla wrap", "qty": "1", "estCost": 0.25, "allergens": ["gluten"] },
+      { "item": "Cooked chicken breast", "qty": "100 g", "estCost": 0.95, "allergens": [] },
+      { "item": "Caesar dressing", "qty": "2 Tbsp", "estCost": 0.22, "allergens": ["dairy"] },
+      { "item": "Lettuce leaves", "qty": "handful", "estCost": 0.09, "allergens": [] },
+      { "item": "Grated parmesan cheese", "qty": "10 g", "estCost": 0.20, "allergens": ["dairy"] }
+    ],
+    "steps": [
+      "Gather all ingredients: tortilla wrap, cooked chicken breast, Caesar dressing, lettuce, and grated parmesan.",
+      "Place the cooked chicken breast on a chopping board and cut into bite-sized pieces or strips.",
+      "In a small bowl, add the chopped chicken pieces.",
+      "Spoon in the Caesar dressing and mix until chicken is coated evenly.",
+      "Lay the tortilla wrap flat on a clean surface or plate.",
+      "Place washed lettuce leaves in the centre of the wrap.",
+      "Spoon the chicken Caesar mixture onto the lettuce.",
+      "Sprinkle grated parmesan cheese evenly over the chicken.",
+      "Fold in the sides of the tortilla wrap slightly, then roll it tightly from bottom to top to secure the filling.",
+      "Slice the wrap in half diagonally for easier eating.",
+      "Serve immediately with optional extra salad on the side."
+    ],
+    "image": "/foodimages/chickenceasarwrap.png",
+    "tags": ["chicken", "wrap", "quick"],
+    "estTotalCost": 1.71
+  },
+  {
+    "id": "tuna-salad-sandwich",
+    "name": "Tuna Salad Sandwich",
+    "baseServings": 1,
+    "ingredients": [
+      { "item": "Canned tuna", "qty": "120 g drained", "estCost": 0.62, "allergens": ["fish"] },
+      { "item": "Mayonnaise", "qty": "2 Tbsp", "estCost": 0.15, "allergens": ["eggs"] },
+      { "item": "Bread", "qty": "2 slices", "estCost": 0.40, "allergens": ["gluten"] },
+      { "item": "Lettuce leaves", "qty": "handful", "estCost": 0.09, "allergens": [] },
+      { "item": "Tomato", "qty": "1", "estCost": 0.43, "allergens": [] }
+    ],
+    "steps": [
+      "Gather all ingredients: canned tuna, mayonnaise, bread slices, lettuce, and tomato.",
+      "Open the can of tuna and drain the liquid completely.",
+      "Place the drained tuna into a small mixing bowl.",
+      "Add mayonnaise to the tuna.",
+      "Mix thoroughly with a fork until the tuna and mayonnaise are well combined.",
+      "Wash the lettuce leaves and tomato.",
+      "Slice the tomato into thin slices.",
+      "Lay two slices of bread flat on a clean surface or plate.",
+      "Place lettuce leaves onto one slice of bread.",
+      "Spoon the tuna mayonnaise mixture onto the lettuce, spreading it evenly.",
+      "Lay tomato slices on top of the tuna mixture.",
+      "Place the second slice of bread on top to form a sandwich.",
+      "Cut the sandwich in half diagonally if desired.",
+      "Serve immediately."
+    ],
+    "image": "/foodimages/Tunacrunchsandwich.png",
+    "tags": ["fish", "sandwich", "quick"],
+    "estTotalCost": 2.35
+  },
+  {
+    "id": "chickpea-salad-bowl",
+    "name": "Chickpea Salad Bowl",
+    "baseServings": 1,
+    "ingredients": [
+      { "item": "Canned chickpeas", "qty": "240 g drained", "estCost": 0.34, "allergens": [] },
+      { "item": "Cucumber", "qty": "1", "estCost": 0.50, "allergens": [] },
+      { "item": "Tomatoes", "qty": "2", "estCost": 0.86, "allergens": [] },
+      { "item": "Red onion", "qty": "½", "estCost": 0.10, "allergens": [] },
+      { "item": "Olive oil", "qty": "2 Tbsp", "estCost": 0.25, "allergens": [] }
+    ],
+    "steps": [
+      "Gather all ingredients: canned chickpeas, cucumber, tomatoes, red onion, and olive oil.",
+      "Open the can of chickpeas, drain, and rinse thoroughly under cold water. Set aside to drain.",
+      "Wash the cucumber and tomatoes.",
+      "Dice the cucumber into small cubes.",
+      "Dice the tomatoes into small pieces.",
+      "Peel the red onion and finely dice half of it.",
+      "Place the drained chickpeas into a mixing bowl.",
+      "Add the diced cucumber, tomatoes, and red onion to the chickpeas.",
+      "Drizzle olive oil over the salad mixture.",
+      "Mix gently with a spoon until everything is combined and evenly coated with olive oil.",
+      "Optional: season with salt, pepper, or a squeeze of lemon juice.",
+      "Transfer to a serving bowl and serve immediately."
+    ],
+    "image": "/foodimages/chickpeasalad.png",
+    "tags": ["vegetarian", "salad", "healthy"],
+    "estTotalCost": 2.05
+  },
+  {
+    "id": "turkey-hummus-wrap",
+    "name": "Turkey & Hummus Wrap",
+    "baseServings": 1,
+    "ingredients": [
+      { "item": "Tortilla wrap", "qty": "1", "estCost": 0.25, "allergens": ["gluten"] },
+      { "item": "Turkey breast slices", "qty": "3", "estCost": 0.75, "allergens": [] },
+      { "item": "Hummus", "qty": "2 Tbsp", "estCost": 0.40, "allergens": [] },
+      { "item": "Fresh spinach", "qty": "handful", "estCost": 0.20, "allergens": [] }
+    ],
+    "steps": [
+      "Gather all ingredients: tortilla wrap, turkey breast slices, hummus, and spinach.",
+      "Lay the tortilla wrap flat on a clean surface or plate.",
+      "Using a knife or spoon, spread hummus evenly across the entire surface of the wrap.",
+      "Lay turkey breast slices evenly over the hummus layer.",
+      "Wash the spinach thoroughly and pat dry.",
+      "Place a handful of spinach on top of the turkey slices, spreading it evenly.",
+      "Fold in the sides of the tortilla wrap slightly.",
+      "Roll the wrap tightly from bottom to top to secure all fillings.",
+      "Slice the wrap in half diagonally for easier eating if desired.",
+      "Serve immediately as a light, protein-rich lunch."
+    ],
+    "image": "/foodimages/turkeyhummuswrap.png",
+    "tags": ["turkey", "wrap", "protein"],
+    "estTotalCost": 1.99
+  },
+  {
+    "id": "egg-fried-rice",
+    "name": "Egg Fried Rice",
+    "baseServings": 1,
+    "ingredients": [
+      { "item": "Cooked rice", "qty": "200 g", "estCost": 0.20, "allergens": [] },
+      { "item": "Eggs", "qty": "2", "estCost": 0.76, "allergens": ["eggs"] },
+      { "item": "Mixed frozen vegetables", "qty": "100 g", "estCost": 0.09, "allergens": [] },
+      { "item": "Soy sauce", "qty": "2 Tbsp", "estCost": 0.15, "allergens": ["soy"] },
+      { "item": "Oil", "qty": "1 tsp", "estCost": 0.01, "allergens": [] }
+    ],
+    "steps": [
+      "Gather all ingredients: cooked rice, eggs, mixed frozen vegetables, and soy sauce.",
+      "If you do not have pre-cooked rice, cook rice according to packet instructions and allow to cool slightly before using.",
+      "Heat a non-stick frying pan or wok over medium-high heat.",
+      "Add a small amount of oil if needed to prevent sticking.",
+      "Pour mixed frozen vegetables into the pan.",
+      "Stir-fry the vegetables for 2-3 minutes until they begin to soften.",
+      "Push the vegetables to one side of the pan to create space.",
+      "Crack both eggs into the empty space in the pan.",
+      "Scramble the eggs using a spatula until fully cooked through.",
+      "Mix the scrambled eggs together with the vegetables.",
+      "Add the cooked rice into the pan.",
+      "Pour soy sauce over the rice mixture.",
+      "Stir everything together thoroughly, ensuring rice is heated through and evenly coated with soy sauce.",
+      "Cook for an additional 2 minutes, stirring occasionally.",
+      "Transfer to a bowl or plate and serve hot."
+    ],
+    "image": "/foodimages/eggfriedrice.png",
+    "tags": ["vegetarian", "asian", "quick"],
+    "estTotalCost": 1.38
+  }
+] 

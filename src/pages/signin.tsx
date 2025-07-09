@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import Head from 'next/head'
+import { supabase } from '../lib/supabase'
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
@@ -16,10 +17,20 @@ export default function SignIn() {
     setError('')
 
     try {
-      // Mock signin - just redirect to dashboard
-      router.push('/dashboard')
-    } catch (err) {
-      setError('Failed to sign in. Please check your credentials.')
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (error) {
+        throw error
+      }
+
+      if (data.user) {
+        router.push('/dashboard')
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to sign in. Please check your credentials.')
     } finally {
       setLoading(false)
     }
