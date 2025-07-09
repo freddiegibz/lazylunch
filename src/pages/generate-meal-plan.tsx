@@ -3,92 +3,110 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
 import { MealPlanService } from '../lib/meal-plan-service'
+import { getRandomRecipe, MealType, getRecipesByMealTypeWithOverrides } from '../lib/recipe-categories'
+import recipes from '../lib/dinner.json'
 
-// Static meal plan data for testing
-const sampleMealPlan = {
-  week: [
-    {
-      day: 'Monday',
+// Preference options
+const FOCUS_OPTIONS = [
+  { value: 'variety', label: 'Variety - Mix of different cuisines and flavors' },
+  { value: 'taste', label: 'Taste - Focus on delicious, flavorful meals' },
+  { value: 'budget', label: 'Save Money - Budget-friendly recipes' },
+  { value: 'healthy', label: 'Healthy - Nutritious and balanced meals' },
+  { value: 'quick', label: 'Quick & Easy - Fast preparation meals' }
+]
+
+const ALLERGEN_OPTIONS = [
+  'gluten', 'dairy', 'nuts', 'eggs', 'fish', 'shellfish', 'soy', 'wheat'
+]
+
+const BUDGET_OPTIONS = [
+  { value: 'low', label: 'Budget-Friendly (£2-4 per meal)' },
+  { value: 'medium', label: 'Moderate (£4-7 per meal)' },
+  { value: 'high', label: 'Premium (£7+ per meal)' }
+]
+
+const CUISINE_OPTIONS = [
+  'italian', 'mexican', 'indian', 'chinese', 'thai', 'mediterranean', 
+  'british', 'american', 'french', 'japanese', 'greek', 'spanish',
+  'caribbean', 'middle eastern', 'african', 'vietnamese'
+]
+
+const DIETARY_OPTIONS = [
+  'vegetarian', 'vegan', 'pescatarian', 'keto', 'paleo', 'low-carb',
+  'high-protein', 'low-sodium', 'diabetic-friendly'
+]
+
+
+
+// Function to generate a meal plan using real recipes
+const generateMealPlanWithRecipes = () => {
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+  
+  // Track used recipes to avoid duplicates
+  const usedRecipes = new Set<string>()
+  const usedRecipesList: any[] = []
+  
+  const week = days.map(day => {
+    // Get recipes for this day, avoiding duplicates
+    let breakfastRecipe = getRandomRecipe('breakfast')
+    let lunchRecipe = getRandomRecipe('lunch')
+    let dinnerRecipe = getRandomRecipe('dinner')
+    
+    // Try to avoid duplicates by getting different recipes if already used
+    // Limit attempts to prevent infinite loops if we don't have enough recipes
+    let attempts = 0
+    while (breakfastRecipe && usedRecipes.has(breakfastRecipe.id) && attempts < 5) {
+      breakfastRecipe = getRandomRecipe('breakfast')
+      attempts++
+    }
+    
+    attempts = 0
+    while (lunchRecipe && usedRecipes.has(lunchRecipe.id) && attempts < 5) {
+      lunchRecipe = getRandomRecipe('lunch')
+      attempts++
+    }
+    
+    attempts = 0
+    while (dinnerRecipe && usedRecipes.has(dinnerRecipe.id) && attempts < 5) {
+      dinnerRecipe = getRandomRecipe('dinner')
+      attempts++
+    }
+    
+    // Add to used recipes and tracking list
+    if (breakfastRecipe) {
+      usedRecipes.add(breakfastRecipe.id)
+      usedRecipesList.push(breakfastRecipe)
+    }
+    if (lunchRecipe) {
+      usedRecipes.add(lunchRecipe.id)
+      usedRecipesList.push(lunchRecipe)
+    }
+    if (dinnerRecipe) {
+      usedRecipes.add(dinnerRecipe.id)
+      usedRecipesList.push(dinnerRecipe)
+    }
+    
+    return {
+      day,
       meals: {
-        breakfast: 'Oatmeal with berries and honey',
-        lunch: 'Grilled chicken salad with mixed greens',
-        dinner: 'Baked salmon with roasted vegetables'
-      }
-    },
-    {
-      day: 'Tuesday',
-      meals: {
-        breakfast: 'Greek yogurt with granola and banana',
-        lunch: 'Turkey and avocado sandwich',
-        dinner: 'Spaghetti with meatballs and marinara'
-      }
-    },
-    {
-      day: 'Wednesday',
-      meals: {
-        breakfast: 'Scrambled eggs with whole grain toast',
-        lunch: 'Quinoa bowl with roasted chickpeas',
-        dinner: 'Beef stir-fry with brown rice'
-      }
-    },
-    {
-      day: 'Thursday',
-      meals: {
-        breakfast: 'Smoothie bowl with tropical fruits',
-        lunch: 'Tuna salad with crackers',
-        dinner: 'Chicken fajitas with tortillas'
-      }
-    },
-    {
-      day: 'Friday',
-      meals: {
-        breakfast: 'Pancakes with maple syrup',
-        lunch: 'Caesar salad with grilled shrimp',
-        dinner: 'Pizza with homemade dough'
-      }
-    },
-    {
-      day: 'Saturday',
-      meals: {
-        breakfast: 'French toast with berries',
-        lunch: 'BLT sandwich with chips',
-        dinner: 'Grilled steak with mashed potatoes'
-      }
-    },
-    {
-      day: 'Sunday',
-      meals: {
-        breakfast: 'Eggs benedict with hollandaise',
-        lunch: 'Soup and grilled cheese',
-        dinner: 'Roast chicken with vegetables'
+        breakfast: breakfastRecipe?.name || 'No breakfast recipe available',
+        lunch: lunchRecipe?.name || 'No lunch recipe available',
+        dinner: dinnerRecipe?.name || 'No dinner recipe available'
       }
     }
-  ],
-  shoppingList: [
-    'Chicken breast',
-    'Salmon fillets',
-    'Ground beef',
-    'Eggs',
-    'Milk',
-    'Greek yogurt',
-    'Oatmeal',
-    'Bread',
-    'Tortillas',
-    'Rice',
-    'Pasta',
-    'Mixed greens',
-    'Tomatoes',
-    'Onions',
-    'Bell peppers',
-    'Carrots',
-    'Broccoli',
-    'Bananas',
-    'Berries',
-    'Cheese',
-    'Butter',
-    'Olive oil',
-    'Salt and pepper'
-  ]
+  })
+
+  // Extract unique ingredients from all recipes used
+  const allIngredients = new Set<string>()
+  usedRecipesList.forEach(recipe => {
+    recipe.ingredients.forEach((ingredient: any) => {
+      allIngredients.add(ingredient.item)
+    })
+  })
+
+  const shoppingList = Array.from(allIngredients)
+
+  return { week, shoppingList }
 }
 
 export default function GenerateMealPlan() {
@@ -97,24 +115,54 @@ export default function GenerateMealPlan() {
   const [showShoppingList, setShowShoppingList] = useState(false)
   const [savedMealPlans, setSavedMealPlans] = useState<any[]>([])
   const [loadingSavedPlans, setLoadingSavedPlans] = useState(true)
+  const [selectedMeal, setSelectedMeal] = useState<any>(null)
+  const [currentPage, setCurrentPage] = useState<'ingredients' | 'instructions'>('ingredients')
+  const [currentInstructionStep, setCurrentInstructionStep] = useState(0)
+  const [currentDayIndex, setCurrentDayIndex] = useState(0)
+  const [showPreferences, setShowPreferences] = useState(false)
+  const [preferences, setPreferences] = useState({
+    servings: 4,
+    focus: 'variety',
+    allergens: [] as string[],
+    budget: 'medium',
+    cuisine: [] as string[],
+    dietaryRestrictions: [] as string[]
+  })
   const router = useRouter()
+
+  // Function to find recipe by name and meal type
+  const findRecipeByName = (mealName: string, mealType: MealType) => {
+    const categorizedRecipes = getRecipesByMealTypeWithOverrides(mealType)
+    return categorizedRecipes.find(recipe => 
+      recipe.name.toLowerCase().includes(mealName.toLowerCase()) ||
+      mealName.toLowerCase().includes(recipe.name.toLowerCase())
+    )
+  }
+
+
 
   const generateMealPlan = async () => {
     setLoading(true)
+    
+    // Log preferences for OpenAI integration (frontend only)
+    console.log('User Preferences for OpenAI:', preferences)
     
     try {
       // Simulate API call delay
       setTimeout(async () => {
         try {
+          // Generate meal plan using real recipes (simplified for frontend)
+          const generatedMealPlan = generateMealPlanWithRecipes()
+          
           // Save the meal plan to Supabase
           const savedMealPlan = await MealPlanService.saveMealPlan(
-            sampleMealPlan.week,
-            sampleMealPlan.shoppingList
+            generatedMealPlan.week,
+            generatedMealPlan.shoppingList
           )
           
           if (savedMealPlan) {
             setMealPlan({
-              ...sampleMealPlan,
+              ...generatedMealPlan,
               id: savedMealPlan.id,
               created_at: savedMealPlan.created_at
             })
@@ -122,7 +170,8 @@ export default function GenerateMealPlan() {
         } catch (error) {
           console.error('Error saving meal plan:', error)
           // Still show the meal plan even if saving fails
-          setMealPlan(sampleMealPlan)
+          const generatedMealPlan = generateMealPlanWithRecipes()
+          setMealPlan(generatedMealPlan)
         }
         setLoading(false)
       }, 2000)
@@ -169,20 +218,20 @@ export default function GenerateMealPlan() {
   }
 
   const downloadMealPlan = () => {
+    if (!mealPlan) return
+    
     // Create a simple text version for download
     let content = 'LazyLunch Weekly Meal Plan\n\n'
     
-    const planData = mealPlan.week || sampleMealPlan.week
-    planData.forEach((day: any) => {
+    mealPlan.week.forEach((day: any) => {
       content += `${day.day}:\n`
       content += `  Breakfast: ${day.meals.breakfast}\n`
       content += `  Lunch: ${day.meals.lunch}\n`
       content += `  Dinner: ${day.meals.dinner}\n\n`
     })
     
-    const shoppingList = mealPlan.shoppingList || sampleMealPlan.shoppingList
     content += 'Shopping List:\n'
-    shoppingList.forEach((item: string) => {
+    mealPlan.shoppingList.forEach((item: string) => {
       content += `- ${item}\n`
     })
     
@@ -228,8 +277,155 @@ export default function GenerateMealPlan() {
             {!mealPlan && (
               <div className="meal-plan-generator">
                 <div className="generator-card">
-                  <h3>Ready to get started?</h3>
-                  <p>Click the button below to generate your weekly meal plan with delicious, family-friendly recipes.</p>
+                  <h3>Personalize Your Meal Plan</h3>
+                  <p>Tell us your preferences to get a perfectly tailored meal plan.</p>
+                  
+                  {/* Preferences Form */}
+                  <div className="preferences-form">
+                    {/* Servings */}
+                    <div className="preference-section">
+                      <label className="preference-label">How many people are you cooking for?</label>
+                      <select 
+                        value={preferences.servings}
+                        onChange={(e) => setPreferences({...preferences, servings: parseInt(e.target.value)})}
+                        className="preference-select"
+                      >
+                        <option value={1}>1 person</option>
+                        <option value={2}>2 people</option>
+                        <option value={3}>3 people</option>
+                        <option value={4}>4 people</option>
+                        <option value={5}>5 people</option>
+                        <option value={6}>6 people</option>
+                        <option value={7}>7 people</option>
+                        <option value={8}>8 people</option>
+                      </select>
+                    </div>
+
+                    {/* Focus */}
+                    <div className="preference-section">
+                      <label className="preference-label">What's your main focus?</label>
+                      <div className="preference-options">
+                        {FOCUS_OPTIONS.map(option => (
+                          <label key={option.value} className="preference-option">
+                            <input
+                              type="radio"
+                              name="focus"
+                              value={option.value}
+                              checked={preferences.focus === option.value}
+                              onChange={(e) => setPreferences({...preferences, focus: e.target.value})}
+                            />
+                            <span className="option-label">{option.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Budget */}
+                    <div className="preference-section">
+                      <label className="preference-label">What's your budget per meal?</label>
+                      <div className="preference-options">
+                        {BUDGET_OPTIONS.map(option => (
+                          <label key={option.value} className="preference-option">
+                            <input
+                              type="radio"
+                              name="budget"
+                              value={option.value}
+                              checked={preferences.budget === option.value}
+                              onChange={(e) => setPreferences({...preferences, budget: e.target.value})}
+                            />
+                            <span className="option-label">{option.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Allergens */}
+                    <div className="preference-section">
+                      <label className="preference-label">Any food allergies or intolerances?</label>
+                      <div className="preference-checkboxes">
+                        {ALLERGEN_OPTIONS.map(allergen => (
+                          <label key={allergen} className="preference-checkbox">
+                            <input
+                              type="checkbox"
+                              checked={preferences.allergens.includes(allergen)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setPreferences({
+                                    ...preferences, 
+                                    allergens: [...preferences.allergens, allergen]
+                                  })
+                                } else {
+                                  setPreferences({
+                                    ...preferences, 
+                                    allergens: preferences.allergens.filter(a => a !== allergen)
+                                  })
+                                }
+                              }}
+                            />
+                            <span className="checkbox-label">{allergen.charAt(0).toUpperCase() + allergen.slice(1)}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Cuisine Preferences */}
+                    <div className="preference-section">
+                      <label className="preference-label">What cuisines do you enjoy? (Select multiple)</label>
+                      <div className="preference-checkboxes">
+                        {CUISINE_OPTIONS.map(cuisine => (
+                          <label key={cuisine} className="preference-checkbox">
+                            <input
+                              type="checkbox"
+                              checked={preferences.cuisine.includes(cuisine)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setPreferences({
+                                    ...preferences, 
+                                    cuisine: [...preferences.cuisine, cuisine]
+                                  })
+                                } else {
+                                  setPreferences({
+                                    ...preferences, 
+                                    cuisine: preferences.cuisine.filter(c => c !== cuisine)
+                                  })
+                                }
+                              }}
+                            />
+                            <span className="checkbox-label">{cuisine.charAt(0).toUpperCase() + cuisine.slice(1)}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Dietary Restrictions */}
+                    <div className="preference-section">
+                      <label className="preference-label">Any dietary preferences?</label>
+                      <div className="preference-checkboxes">
+                        {DIETARY_OPTIONS.map(diet => (
+                          <label key={diet} className="preference-checkbox">
+                            <input
+                              type="checkbox"
+                              checked={preferences.dietaryRestrictions.includes(diet)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setPreferences({
+                                    ...preferences, 
+                                    dietaryRestrictions: [...preferences.dietaryRestrictions, diet]
+                                  })
+                                } else {
+                                  setPreferences({
+                                    ...preferences, 
+                                    dietaryRestrictions: preferences.dietaryRestrictions.filter(d => d !== diet)
+                                  })
+                                }
+                              }}
+                            />
+                            <span className="checkbox-label">{diet.charAt(0).toUpperCase() + diet.slice(1)}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                   
                   <button
                     onClick={generateMealPlan}
@@ -237,7 +433,7 @@ export default function GenerateMealPlan() {
                     className="auth-button"
                     style={{ marginTop: '20px' }}
                   >
-                    {loading ? 'Generating Meal Plan...' : 'Generate Meal Plan'}
+                    {loading ? 'Generating Meal Plan...' : 'Generate Personalized Meal Plan'}
                   </button>
 
                   {/* Load Saved Plans Section */}
@@ -318,26 +514,167 @@ export default function GenerateMealPlan() {
                   </div>
                 </div>
 
-                <div className="meal-plan-grid">
+                {/* Day Navigation */}
+                <div className="day-navigation">
                   {mealPlan.week.map((day: any, index: number) => (
-                    <div key={index} className="meal-day-card">
-                      <h4 className="day-title">{day.day}</h4>
-                      <div className="meals">
-                        <div className="meal">
-                          <span className="meal-type">Breakfast:</span>
-                          <span className="meal-name">{day.meals.breakfast}</span>
-                        </div>
-                        <div className="meal">
-                          <span className="meal-type">Lunch:</span>
-                          <span className="meal-name">{day.meals.lunch}</span>
-                        </div>
-                        <div className="meal">
-                          <span className="meal-type">Dinner:</span>
-                          <span className="meal-name">{day.meals.dinner}</span>
-                        </div>
-                      </div>
-                    </div>
+                    <button
+                      key={index}
+                      onClick={() => setCurrentDayIndex(index)}
+                      className={`day-tab ${currentDayIndex === index ? 'active' : ''}`}
+                    >
+                      {day.day}
+                    </button>
                   ))}
+                </div>
+
+                {/* Current Day Meals */}
+                <div className="current-day-meals">
+                  <h3 className="current-day-title">
+                    {mealPlan.week[currentDayIndex].day}
+                  </h3>
+                  
+                  <div className="meals-container">
+                    {(() => {
+                      const breakfastRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.breakfast, 'breakfast')
+                      return (
+                        <div className="meal-card">
+                          <div className="meal-content" onClick={() => {
+                            setSelectedMeal(breakfastRecipe)
+                            setCurrentPage('ingredients')
+                            setCurrentInstructionStep(0)
+                          }}>
+                            <div className="meal-image">
+                              <img 
+                                src={breakfastRecipe?.image || '/images/placeholder.png'} 
+                                alt={breakfastRecipe?.name || 'Breakfast'}
+                                onError={(e) => {
+                                  e.currentTarget.src = '/images/placeholder.png'
+                                }}
+                              />
+                            </div>
+                            <div className="meal-info">
+                              <h4 className="meal-type">Breakfast</h4>
+                              <p className="meal-name">{breakfastRecipe?.name || mealPlan.week[currentDayIndex].meals.breakfast}</p>
+                              {breakfastRecipe && (
+                                <div className="meal-tags">
+                                  <span className="cost-tag">£{breakfastRecipe.estTotalCost.toFixed(2)}</span>
+                                  <span className="servings-tag">{breakfastRecipe.baseServings} servings</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="meal-feedback">
+                            <button className="feedback-button thumbs-up" onClick={(e) => {
+                              e.stopPropagation()
+                              console.log('Thumbs up for breakfast:', breakfastRecipe?.name)
+                            }}>
+                              👍
+                            </button>
+                            <button className="feedback-button thumbs-down" onClick={(e) => {
+                              e.stopPropagation()
+                              console.log('Thumbs down for breakfast:', breakfastRecipe?.name)
+                            }}>
+                              👎
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })()}
+
+                    {(() => {
+                      const lunchRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.lunch, 'lunch')
+                      return (
+                        <div className="meal-card">
+                          <div className="meal-content" onClick={() => {
+                            setSelectedMeal(lunchRecipe)
+                            setCurrentPage('ingredients')
+                            setCurrentInstructionStep(0)
+                          }}>
+                            <div className="meal-image">
+                              <img 
+                                src={lunchRecipe?.image || '/images/placeholder.png'} 
+                                alt={lunchRecipe?.name || 'Lunch'}
+                                onError={(e) => {
+                                  e.currentTarget.src = '/images/placeholder.png'
+                                }}
+                              />
+                            </div>
+                            <div className="meal-info">
+                              <h4 className="meal-type">Lunch</h4>
+                              <p className="meal-name">{lunchRecipe?.name || mealPlan.week[currentDayIndex].meals.lunch}</p>
+                              {lunchRecipe && (
+                                <div className="meal-tags">
+                                  <span className="cost-tag">£{lunchRecipe.estTotalCost.toFixed(2)}</span>
+                                  <span className="servings-tag">{lunchRecipe.baseServings} servings</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="meal-feedback">
+                            <button className="feedback-button thumbs-up" onClick={(e) => {
+                              e.stopPropagation()
+                              console.log('Thumbs up for lunch:', lunchRecipe?.name)
+                            }}>
+                              👍
+                            </button>
+                            <button className="feedback-button thumbs-down" onClick={(e) => {
+                              e.stopPropagation()
+                              console.log('Thumbs down for lunch:', lunchRecipe?.name)
+                            }}>
+                              👎
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })()}
+
+                    {(() => {
+                      const dinnerRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.dinner, 'dinner')
+                      return (
+                        <div className="meal-card">
+                          <div className="meal-content" onClick={() => {
+                            setSelectedMeal(dinnerRecipe)
+                            setCurrentPage('ingredients')
+                            setCurrentInstructionStep(0)
+                          }}>
+                            <div className="meal-image">
+                              <img 
+                                src={dinnerRecipe?.image || '/images/placeholder.png'} 
+                                alt={dinnerRecipe?.name || 'Dinner'}
+                                onError={(e) => {
+                                  e.currentTarget.src = '/images/placeholder.png'
+                                }}
+                              />
+                            </div>
+                            <div className="meal-info">
+                              <h4 className="meal-type">Dinner</h4>
+                              <p className="meal-name">{dinnerRecipe?.name || mealPlan.week[currentDayIndex].meals.dinner}</p>
+                              {dinnerRecipe && (
+                                <div className="meal-tags">
+                                  <span className="cost-tag">£{dinnerRecipe.estTotalCost.toFixed(2)}</span>
+                                  <span className="servings-tag">{dinnerRecipe.baseServings} servings</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="meal-feedback">
+                            <button className="feedback-button thumbs-up" onClick={(e) => {
+                              e.stopPropagation()
+                              console.log('Thumbs up for dinner:', dinnerRecipe?.name)
+                            }}>
+                              👍
+                            </button>
+                            <button className="feedback-button thumbs-down" onClick={(e) => {
+                              e.stopPropagation()
+                              console.log('Thumbs down for dinner:', dinnerRecipe?.name)
+                            }}>
+                              👎
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })()}
+                  </div>
                 </div>
 
                 {showShoppingList && (
@@ -353,6 +690,143 @@ export default function GenerateMealPlan() {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Recipe Book Modal */}
+            {selectedMeal && (
+              <div className="recipe-modal-overlay" onClick={() => setSelectedMeal(null)}>
+                <div className="recipe-modal" onClick={(e) => e.stopPropagation()}>
+                  <div className="recipe-modal-header">
+                    <button 
+                      className="close-button"
+                      onClick={() => setSelectedMeal(null)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                  
+                  <div className="recipe-book">
+                    <div className="recipe-book-cover">
+                      <img 
+                        src={selectedMeal.image} 
+                        alt={selectedMeal.name}
+                        className="recipe-cover-image"
+                        onError={(e) => {
+                          e.currentTarget.src = '/images/placeholder.png'
+                        }}
+                      />
+                      <div className="recipe-cover-info">
+                        <h2 className="recipe-title">{selectedMeal.name}</h2>
+                        <div className="recipe-meta">
+                          <span className="recipe-cost">£{selectedMeal.estTotalCost.toFixed(2)}</span>
+                          <span className="recipe-servings">{selectedMeal.baseServings} servings</span>
+                        </div>
+                        <div className="recipe-tags">
+                          {selectedMeal.tags.map((tag: string, index: number) => (
+                            <span key={index} className="recipe-tag">{tag}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="recipe-book-content">
+                      <div className="recipe-page-navigation">
+                        <button 
+                          className={`page-nav-button ${currentPage === 'ingredients' ? 'active' : ''}`}
+                          onClick={() => setCurrentPage('ingredients')}
+                        >
+                          Ingredients
+                        </button>
+                        <button 
+                          className={`page-nav-button ${currentPage === 'instructions' ? 'active' : ''}`}
+                          onClick={() => setCurrentPage('instructions')}
+                        >
+                          Instructions
+                        </button>
+                      </div>
+                      
+                      <div className="recipe-page-content">
+                        {currentPage === 'ingredients' && (
+                          <div className="ingredients-page">
+                            <h3>Ingredients</h3>
+                            <div className="ingredients-list">
+                              {selectedMeal.ingredients.map((ingredient: any, index: number) => (
+                                <div key={index} className="ingredient-item">
+                                  <div className="ingredient-info">
+                                    <span className="ingredient-name">{ingredient.item}</span>
+                                    <span className="ingredient-qty">{ingredient.qty}</span>
+                                  </div>
+                                  <div className="ingredient-details">
+                                    <span className="ingredient-cost">£{ingredient.estCost.toFixed(2)}</span>
+                                    {ingredient.allergens.length > 0 && (
+                                      <div className="allergen-tags">
+                                        {ingredient.allergens.map((allergen: string, allergenIndex: number) => (
+                                          <span key={allergenIndex} className="allergen-tag">{allergen}</span>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="total-cost">
+                              <strong>Total Cost: £{selectedMeal.estTotalCost.toFixed(2)}</strong>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {currentPage === 'instructions' && (
+                          <div className="instructions-page">
+                            <h3>Instructions</h3>
+                            
+                            {/* Step Navigation */}
+                            <div className="step-navigation">
+                              <button 
+                                className="step-nav-button"
+                                onClick={() => setCurrentInstructionStep(Math.max(0, currentInstructionStep - 1))}
+                                disabled={currentInstructionStep === 0}
+                              >
+                                ← Previous
+                              </button>
+                              <span className="step-counter">
+                                Step {currentInstructionStep + 1} of {selectedMeal.steps.length}
+                              </span>
+                              <button 
+                                className="step-nav-button"
+                                onClick={() => setCurrentInstructionStep(Math.min(selectedMeal.steps.length - 1, currentInstructionStep + 1))}
+                                disabled={currentInstructionStep === selectedMeal.steps.length - 1}
+                              >
+                                Next →
+                              </button>
+                            </div>
+                            
+                            {/* Current Step */}
+                            <div className="current-step">
+                              <div className="step-number-large">{currentInstructionStep + 1}</div>
+                              <div className="step-content">
+                                <p className="step-text">{selectedMeal.steps[currentInstructionStep]}</p>
+                              </div>
+                            </div>
+                            
+                            {/* Step Progress */}
+                            <div className="step-progress">
+                              {selectedMeal.steps.map((step: string, index: number) => (
+                                <button
+                                  key={index}
+                                  className={`step-dot ${index === currentInstructionStep ? 'active' : ''}`}
+                                  onClick={() => setCurrentInstructionStep(index)}
+                                >
+                                  {index + 1}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>

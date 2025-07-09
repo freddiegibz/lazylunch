@@ -6,7 +6,9 @@ import { supabase } from '../lib/supabase'
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null)
+  const [membership, setMembership] = useState<string>('')
   const [loading, setLoading] = useState(true)
+  const [upgradeLoading, setUpgradeLoading] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -15,6 +17,13 @@ export default function Dashboard() {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         setUser(user)
+        // Fetch membership from profiles table
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('membership')
+          .eq('id', user.id)
+          .single()
+        setMembership(profile?.membership || 'free')
       } else {
         // No user found, redirect to signin
         router.push('/signin')
@@ -46,6 +55,46 @@ export default function Dashboard() {
     }
   }
 
+  const handleUpgrade = async () => {
+    console.log('=== UPGRADE BUTTON CLICKED ===')
+    console.log('Starting upgrade process...')
+    
+    setUpgradeLoading(true)
+    try {
+      console.log('🔄 Making API request to /api/create-checkout-session...')
+      console.log('Request method: POST')
+      console.log('Current URL:', window.location.href)
+      
+      const res = await fetch('/api/create-checkout-session', { method: 'POST' })
+      console.log('✅ API response received')
+      console.log('Response status:', res.status)
+      console.log('Response status text:', res.statusText)
+      console.log('Response headers:', Object.fromEntries(res.headers.entries()))
+      
+      const data = await res.json()
+      console.log('📄 Response data:', data)
+      
+      if (data.url) {
+        console.log('✅ Checkout URL received:', data.url)
+        console.log('🔄 Redirecting to Stripe checkout...')
+        window.location.href = data.url
+      } else {
+        console.error('❌ No checkout URL in response')
+        console.error('Response data:', data)
+        alert(`Error creating checkout session: ${data.error || 'Unknown error'}`)
+      }
+    } catch (err: any) {
+      console.error('❌ Fetch error occurred:')
+      console.error('Error type:', typeof err)
+      console.error('Error message:', err.message)
+      console.error('Full error:', err)
+      alert(`Error creating checkout session: ${err.message}`)
+    } finally {
+      console.log('🏁 Upgrade process finished')
+      setUpgradeLoading(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -61,6 +110,9 @@ export default function Dashboard() {
     return null // Will redirect to signin
   }
 
+  // Capitalize membership for display
+  const displayMembership = membership.charAt(0).toUpperCase() + membership.slice(1)
+
   return (
     <>
       <Head>
@@ -74,7 +126,17 @@ export default function Dashboard() {
           <div className="dashboard-header-content">
             <div className="dashboard-logo">LazyLunch</div>
             <div className="dashboard-nav">
-              <span className="dashboard-user">Welcome, {user.email}</span>
+              <span className="dashboard-user">Welcome, {user.email} <span style={{color:'#2C3E50', fontWeight:600, marginLeft:8}}>[{displayMembership} Member]</span></span>
+              {membership !== 'premium' && (
+                <button
+                  onClick={() => router.push('/upgrade-membership')}
+                  className="dashboard-signout"
+                  style={{ backgroundColor: '#F28C8C', marginLeft: 8 }}
+                  disabled={upgradeLoading}
+                >
+                  Upgrade Membership
+                </button>
+              )}
               <button
                 onClick={handleSignOut}
                 className="dashboard-signout"
@@ -119,6 +181,14 @@ export default function Dashboard() {
                 <button className="dashboard-card-button">
                   Create List
                 </button>
+              </div>
+              
+              <div className="dashboard-card">
+                <h3>Recipe Categories</h3>
+                <p>View recipes organized by meal type (breakfast, lunch, dinner, snack).</p>
+                <Link href="/recipe-categories" className="dashboard-card-button" style={{ textDecoration: 'none', display: 'inline-block' }}>
+                  View Categories
+                </Link>
               </div>
             </div>
           </div>
