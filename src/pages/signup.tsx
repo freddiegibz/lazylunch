@@ -43,6 +43,24 @@ export default function SignUp() {
       }
 
       if (data.user) {
+        // Create a profile record for the new user
+        try {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({ 
+              id: data.user.id, 
+              membership: 'free' 
+            })
+          
+          if (profileError) {
+            console.error('Error creating profile:', profileError)
+            // Don't throw here, user can still sign up
+          }
+        } catch (profileError) {
+          console.error('Error creating profile:', profileError)
+          // Don't throw here, user can still sign up
+        }
+
         setSuccess(true)
         // Show success message and redirect after a delay
         setTimeout(() => {

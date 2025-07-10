@@ -99,6 +99,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           quantity: 1,
         },
       ],
+      allow_promotion_codes: true, // Enable promo code field
       success_url: `${req.headers.origin}/dashboard?success=true`,
       cancel_url: `${req.headers.origin}/dashboard?canceled=true`,
     })
