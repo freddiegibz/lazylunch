@@ -11,6 +11,14 @@ export default function Dashboard() {
   const [upgradeLoading, setUpgradeLoading] = useState(false)
   const router = useRouter()
 
+  // Add this effect to force a reload if returning from Stripe with ?success=true
+  useEffect(() => {
+    if (router.query.success) {
+      // Remove the query param and reload the page to fetch fresh data
+      window.location.replace('/dashboard');
+    }
+  }, [router.query.success]);
+
   useEffect(() => {
     // Get current user session
     const getCurrentUser = async () => {
