@@ -18,12 +18,31 @@ export default function Dashboard() {
       if (user) {
         setUser(user)
         // Fetch membership from profiles table
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('membership')
-          .eq('id', user.id)
-          .single()
-        setMembership(profile?.membership || 'free')
+        try {
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('membership')
+            .eq('id', user.id)
+            .single()
+          
+          if (error) {
+            console.error('Error fetching profile:', error)
+            // If profile doesn't exist, create one with default membership
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert({ id: user.id, membership: 'free' })
+            
+            if (insertError) {
+              console.error('Error creating profile:', insertError)
+            }
+            setMembership('free')
+          } else {
+            setMembership(profile?.membership || 'free')
+          }
+        } catch (error) {
+          console.error('Error in profile fetch:', error)
+          setMembership('free')
+        }
       } else {
         // No user found, redirect to signin
         router.push('/signin')
@@ -131,7 +150,7 @@ export default function Dashboard() {
                 <button
                   onClick={() => router.push('/upgrade-membership')}
                   className="dashboard-signout"
-                  style={{ backgroundColor: '#F28C8C', marginLeft: 8 }}
+                  style={{ backgroundColor: '#A8D5BA', color: '#2C3E50', marginLeft: 8 }}
                   disabled={upgradeLoading}
                 >
                   Upgrade Membership
