@@ -9,6 +9,7 @@ export default function Dashboard() {
   const [membership, setMembership] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [upgradeLoading, setUpgradeLoading] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
   const router = useRouter()
 
   // Add this effect to force a reload if returning from Stripe with ?success=true
@@ -154,6 +155,14 @@ export default function Dashboard() {
             <div className="dashboard-logo">LazyLunch</div>
             <div className="dashboard-nav">
               <span className="dashboard-user">Welcome, {user.email} <span style={{color:'#2C3E50', fontWeight:600, marginLeft:8}}>[{displayMembership} Member]</span></span>
+              <button
+                onClick={() => setShowSettings(true)}
+                className="dashboard-settings-btn"
+                style={{ marginLeft: 12, background: 'none', border: 'none', cursor: 'pointer', fontSize: 20 }}
+                title="Account Settings"
+              >
+                ⚙️
+              </button>
               {membership !== 'premium' && (
                 <button
                   onClick={() => router.push('/upgrade-membership')}
@@ -173,6 +182,18 @@ export default function Dashboard() {
             </div>
           </div>
         </header>
+
+        {/* Settings Modal */}
+        {showSettings && (
+          <div className="settings-modal-overlay" onClick={() => setShowSettings(false)}>
+            <div className="settings-modal" onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 12, padding: 32, maxWidth: 400, margin: '80px auto', boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}>
+              <h2 style={{ marginBottom: 16 }}>Account Settings</h2>
+              <div style={{ marginBottom: 12 }}><strong>Account UUID:</strong><br /><span style={{ fontFamily: 'monospace', color: '#2C3E50' }}>{user.id}</span></div>
+              <div style={{ marginBottom: 12 }}><strong>Subscription Level:</strong><br /><span style={{ color: '#2C3E50' }}>{displayMembership}</span></div>
+              <button onClick={() => setShowSettings(false)} style={{ marginTop: 16, background: '#A8D5BA', color: '#2C3E50', border: 'none', borderRadius: 6, padding: '8px 20px', cursor: 'pointer' }}>Close</button>
+            </div>
+          </div>
+        )}
 
         {/* Main Content */}
         <main className="dashboard-main">
