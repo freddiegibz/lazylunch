@@ -20,6 +20,27 @@ export default function Dashboard() {
     }
   }, [router.query.success]);
 
+  // Function to create profile for new users (including Google OAuth users)
+  const createUserProfile = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .insert({ 
+          id: userId, 
+          membership: 'free' 
+        })
+      
+      if (error && error.code !== '23505') { // Ignore duplicate key errors
+        console.error('Error creating profile:', error)
+        return false
+      }
+      return true
+    } catch (error) {
+      console.error('Error creating profile:', error)
+      return false
+    }
+  }
+
   useEffect(() => {
     // Get current user session
     const getCurrentUser = async () => {
@@ -37,19 +58,15 @@ export default function Dashboard() {
           if (error) {
             console.error('Error fetching profile:', error)
             // If profile doesn't exist, create one with default membership
-            const { error: insertError } = await supabase
-              .from('profiles')
-              .insert({ id: user.id, membership: 'free' })
-            
-            if (insertError) {
-              console.error('Error creating profile:', insertError)
-            }
+            await createUserProfile(user.id)
             setMembership('free')
           } else {
             setMembership(profile?.membership || 'free')
           }
         } catch (error) {
           console.error('Error in profile fetch:', error)
+          // Try to create profile for new users
+          await createUserProfile(user.id)
           setMembership('free')
         }
       } else {
@@ -62,12 +79,32 @@ export default function Dashboard() {
     getCurrentUser()
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT') {
         setUser(null)
         router.push('/signin')
-      } else if (session?.user) {
+      } else if (event === 'SIGNED_IN' && session?.user) {
         setUser(session.user)
+        // For new users (including Google OAuth), ensure profile exists
+        try {
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('membership')
+            .eq('id', session.user.id)
+            .single()
+          
+          if (error) {
+            // Profile doesn't exist, create it
+            await createUserProfile(session.user.id)
+            setMembership('free')
+          } else {
+            setMembership(profile?.membership || 'free')
+          }
+        } catch (error) {
+          console.error('Error handling new user profile:', error)
+          await createUserProfile(session.user.id)
+          setMembership('free')
+        }
       }
     })
 

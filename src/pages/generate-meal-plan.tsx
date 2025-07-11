@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { MealPlanService } from '../lib/meal-plan-service'
 import { getRandomRecipe, MealType, getRecipesByMealTypeWithOverrides } from '../lib/recipe-categories'
 import recipes from '../lib/dinner.json'
+import { supabase } from '../lib/supabase'
 
 // Preference options
 const FOCUS_OPTIONS = [
@@ -115,9 +116,6 @@ export default function GenerateMealPlan() {
   const [showShoppingList, setShowShoppingList] = useState(false)
   const [savedMealPlans, setSavedMealPlans] = useState<any[]>([])
   const [loadingSavedPlans, setLoadingSavedPlans] = useState(true)
-  const [selectedMeal, setSelectedMeal] = useState<any>(null)
-  const [currentPage, setCurrentPage] = useState<'ingredients' | 'instructions'>('ingredients')
-  const [currentInstructionStep, setCurrentInstructionStep] = useState(0)
   const [currentDayIndex, setCurrentDayIndex] = useState(0)
   const [showPreferences, setShowPreferences] = useState(false)
   const [preferences, setPreferences] = useState({
@@ -128,7 +126,52 @@ export default function GenerateMealPlan() {
     cuisine: [] as string[],
     dietaryRestrictions: [] as string[]
   })
+  const [user, setUser] = useState<any>(null)
+  const [membership, setMembership] = useState<string>('')
+  const [loadingUser, setLoadingUser] = useState(true)
   const router = useRouter()
+
+
+
+  // Check user authentication and membership
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          setUser(user)
+          // Fetch membership from profiles table
+          try {
+            const { data: profile, error } = await supabase
+              .from('profiles')
+              .select('membership')
+              .eq('id', user.id)
+              .single()
+            
+            if (error) {
+              console.error('Error fetching profile:', error)
+              setMembership('free')
+            } else {
+              setMembership(profile?.membership || 'free')
+            }
+          } catch (error) {
+            console.error('Error in profile fetch:', error)
+            setMembership('free')
+          }
+        } else {
+          // No user found, redirect to signin
+          router.push('/signin')
+        }
+      } catch (error) {
+        console.error('Error checking user:', error)
+        router.push('/signin')
+      } finally {
+        setLoadingUser(false)
+      }
+    }
+
+    checkUser()
+  }, [router])
 
   // Function to find recipe by name and meal type
   const findRecipeByName = (mealName: string, mealType: MealType) => {
@@ -161,19 +204,16 @@ export default function GenerateMealPlan() {
           )
           
           if (savedMealPlan) {
-            setMealPlan({
-              ...generatedMealPlan,
-              id: savedMealPlan.id,
-              created_at: savedMealPlan.created_at
-            })
+            // Redirect to the meal plan detail page
+            router.push(`/meal-plan/${savedMealPlan.id}`)
+          } else {
+            console.error('Failed to save meal plan')
+            setLoading(false)
           }
         } catch (error) {
           console.error('Error saving meal plan:', error)
-          // Still show the meal plan even if saving fails
-          const generatedMealPlan = generateMealPlanWithRecipes()
-          setMealPlan(generatedMealPlan)
+          setLoading(false)
         }
-        setLoading(false)
       }, 2000)
     } catch (error) {
       console.error('Error generating meal plan:', error)
@@ -242,6 +282,108 @@ export default function GenerateMealPlan() {
     a.download = 'meal-plan.txt'
     a.click()
     URL.revokeObjectURL(url)
+  }
+
+
+
+  // Show paywall for free users
+  if (loadingUser) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p className="loading-text">Loading...</p>
+      </div>
+    )
+  }
+
+  if (membership === 'free') {
+    return (
+      <>
+        <Head>
+          <title>Upgrade Required - LazyLunch</title>
+          <meta name="description" content="Upgrade your membership to generate meal plans" />
+        </Head>
+        
+        <div className="dashboard-container">
+          {/* Header */}
+          <header className="dashboard-header">
+            <div className="dashboard-header-content">
+              <div className="dashboard-logo">LazyLunch</div>
+              <div className="dashboard-nav">
+                <Link href="/dashboard" className="dashboard-link">
+                  ← Back to Dashboard
+                </Link>
+              </div>
+            </div>
+          </header>
+
+          {/* Main Content */}
+          <main className="dashboard-main">
+            <div className="dashboard-content">
+              <div className="paywall-container" style={{ textAlign: 'center', padding: '60px 20px' }}>
+                <h1 style={{ fontSize: '2.5rem', color: '#2C3E50', marginBottom: '1rem' }}>
+                  🔒 Generate Meal Plans
+                </h1>
+                <p style={{ fontSize: '1.2rem', color: '#7F8C8D', marginBottom: '2rem', maxWidth: '600px', margin: '0 auto 2rem' }}>
+                  Upgrade your membership to unlock AI-powered meal plan generation. 
+                  Get personalized weekly meal plans tailored to your preferences.
+                </p>
+                
+                <div className="paywall-features" style={{ marginBottom: '3rem' }}>
+                  <h3 style={{ color: '#2C3E50', marginBottom: '1rem' }}>What you'll get:</h3>
+                  <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', maxWidth: '800px', margin: '0 auto' }}>
+                    <li style={{ padding: '1rem', background: '#F8F9FA', borderRadius: '8px', border: '1px solid #E9ECEF' }}>
+                      <strong>🎯 Personalized Plans</strong><br />
+                      AI-generated meal plans based on your preferences
+                    </li>
+                    <li style={{ padding: '1rem', background: '#F8F9FA', borderRadius: '8px', border: '1px solid #E9ECEF' }}>
+                      <strong>🛒 Shopping Lists</strong><br />
+                      Automatic grocery lists for your meal plans
+                    </li>
+                    <li style={{ padding: '1rem', background: '#F8F9FA', borderRadius: '8px', border: '1px solid #E9ECEF' }}>
+                      <strong>💰 Save Money</strong><br />
+                      Reduce food waste and optimize your grocery budget
+                    </li>
+                    <li style={{ padding: '1rem', background: '#F8F9FA', borderRadius: '8px', border: '1px solid #E9ECEF' }}>
+                      <strong>⏰ Save Time</strong><br />
+                      No more daily "what's for dinner" decisions
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="paywall-actions">
+                  <Link href="/upgrade-membership" style={{ 
+                    display: 'inline-block', 
+                    background: '#A8D5BA', 
+                    color: '#2C3E50', 
+                    padding: '1rem 2rem', 
+                    borderRadius: '8px', 
+                    textDecoration: 'none', 
+                    fontSize: '1.1rem', 
+                    fontWeight: '600',
+                    marginRight: '1rem'
+                  }}>
+                    Upgrade Now
+                  </Link>
+                  <Link href="/dashboard" style={{ 
+                    display: 'inline-block', 
+                    background: 'transparent', 
+                    color: '#7F8C8D', 
+                    padding: '1rem 2rem', 
+                    borderRadius: '8px', 
+                    textDecoration: 'none', 
+                    fontSize: '1.1rem',
+                    border: '1px solid #BDC3C7'
+                  }}>
+                    Back to Dashboard
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </>
+    )
   }
 
   return (
@@ -538,11 +680,7 @@ export default function GenerateMealPlan() {
                       const breakfastRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.breakfast, 'breakfast')
                       return (
                         <div className="meal-card">
-                          <div className="meal-content" onClick={() => {
-                            setSelectedMeal(breakfastRecipe)
-                            setCurrentPage('ingredients')
-                            setCurrentInstructionStep(0)
-                          }}>
+                          <div className="meal-content">
                             <div className="meal-image">
                               <img 
                                 src={breakfastRecipe?.image || '/images/placeholder.png'} 
@@ -563,20 +701,7 @@ export default function GenerateMealPlan() {
                               )}
                             </div>
                           </div>
-                          <div className="meal-feedback">
-                            <button className="feedback-button thumbs-up" onClick={(e) => {
-                              e.stopPropagation()
-                              console.log('Thumbs up for breakfast:', breakfastRecipe?.name)
-                            }}>
-                              👍
-                            </button>
-                            <button className="feedback-button thumbs-down" onClick={(e) => {
-                              e.stopPropagation()
-                              console.log('Thumbs down for breakfast:', breakfastRecipe?.name)
-                            }}>
-                              👎
-                            </button>
-                          </div>
+
                         </div>
                       )
                     })()}
@@ -585,11 +710,7 @@ export default function GenerateMealPlan() {
                       const lunchRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.lunch, 'lunch')
                       return (
                         <div className="meal-card">
-                          <div className="meal-content" onClick={() => {
-                            setSelectedMeal(lunchRecipe)
-                            setCurrentPage('ingredients')
-                            setCurrentInstructionStep(0)
-                          }}>
+                          <div className="meal-content">
                             <div className="meal-image">
                               <img 
                                 src={lunchRecipe?.image || '/images/placeholder.png'} 
@@ -610,20 +731,7 @@ export default function GenerateMealPlan() {
                               )}
                             </div>
                           </div>
-                          <div className="meal-feedback">
-                            <button className="feedback-button thumbs-up" onClick={(e) => {
-                              e.stopPropagation()
-                              console.log('Thumbs up for lunch:', lunchRecipe?.name)
-                            }}>
-                              👍
-                            </button>
-                            <button className="feedback-button thumbs-down" onClick={(e) => {
-                              e.stopPropagation()
-                              console.log('Thumbs down for lunch:', lunchRecipe?.name)
-                            }}>
-                              👎
-                            </button>
-                          </div>
+
                         </div>
                       )
                     })()}
@@ -632,11 +740,7 @@ export default function GenerateMealPlan() {
                       const dinnerRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.dinner, 'dinner')
                       return (
                         <div className="meal-card">
-                          <div className="meal-content" onClick={() => {
-                            setSelectedMeal(dinnerRecipe)
-                            setCurrentPage('ingredients')
-                            setCurrentInstructionStep(0)
-                          }}>
+                          <div className="meal-content">
                             <div className="meal-image">
                               <img 
                                 src={dinnerRecipe?.image || '/images/placeholder.png'} 
@@ -657,20 +761,7 @@ export default function GenerateMealPlan() {
                               )}
                             </div>
                           </div>
-                          <div className="meal-feedback">
-                            <button className="feedback-button thumbs-up" onClick={(e) => {
-                              e.stopPropagation()
-                              console.log('Thumbs up for dinner:', dinnerRecipe?.name)
-                            }}>
-                              👍
-                            </button>
-                            <button className="feedback-button thumbs-down" onClick={(e) => {
-                              e.stopPropagation()
-                              console.log('Thumbs down for dinner:', dinnerRecipe?.name)
-                            }}>
-                              👎
-                            </button>
-                          </div>
+
                         </div>
                       )
                     })()}
@@ -693,142 +784,7 @@ export default function GenerateMealPlan() {
               </div>
             )}
 
-            {/* Recipe Book Modal */}
-            {selectedMeal && (
-              <div className="recipe-modal-overlay" onClick={() => setSelectedMeal(null)}>
-                <div className="recipe-modal" onClick={(e) => e.stopPropagation()}>
-                  <div className="recipe-modal-header">
-                    <button 
-                      className="close-button"
-                      onClick={() => setSelectedMeal(null)}
-                    >
-                      ×
-                    </button>
-                  </div>
-                  
-                  <div className="recipe-book">
-                    <div className="recipe-book-cover">
-                      <img 
-                        src={selectedMeal.image} 
-                        alt={selectedMeal.name}
-                        className="recipe-cover-image"
-                        onError={(e) => {
-                          e.currentTarget.src = '/images/placeholder.png'
-                        }}
-                      />
-                      <div className="recipe-cover-info">
-                        <h2 className="recipe-title">{selectedMeal.name}</h2>
-                        <div className="recipe-meta">
-                          <span className="recipe-cost">£{selectedMeal.estTotalCost.toFixed(2)}</span>
-                          <span className="recipe-servings">{selectedMeal.baseServings} servings</span>
-                        </div>
-                        <div className="recipe-tags">
-                          {selectedMeal.tags.map((tag: string, index: number) => (
-                            <span key={index} className="recipe-tag">{tag}</span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="recipe-book-content">
-                      <div className="recipe-page-navigation">
-                        <button 
-                          className={`page-nav-button ${currentPage === 'ingredients' ? 'active' : ''}`}
-                          onClick={() => setCurrentPage('ingredients')}
-                        >
-                          Ingredients
-                        </button>
-                        <button 
-                          className={`page-nav-button ${currentPage === 'instructions' ? 'active' : ''}`}
-                          onClick={() => setCurrentPage('instructions')}
-                        >
-                          Instructions
-                        </button>
-                      </div>
-                      
-                      <div className="recipe-page-content">
-                        {currentPage === 'ingredients' && (
-                          <div className="ingredients-page">
-                            <h3>Ingredients</h3>
-                            <div className="ingredients-list">
-                              {selectedMeal.ingredients.map((ingredient: any, index: number) => (
-                                <div key={index} className="ingredient-item">
-                                  <div className="ingredient-info">
-                                    <span className="ingredient-name">{ingredient.item}</span>
-                                    <span className="ingredient-qty">{ingredient.qty}</span>
-                                  </div>
-                                  <div className="ingredient-details">
-                                    <span className="ingredient-cost">£{ingredient.estCost.toFixed(2)}</span>
-                                    {ingredient.allergens.length > 0 && (
-                                      <div className="allergen-tags">
-                                        {ingredient.allergens.map((allergen: string, allergenIndex: number) => (
-                                          <span key={allergenIndex} className="allergen-tag">{allergen}</span>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                            <div className="total-cost">
-                              <strong>Total Cost: £{selectedMeal.estTotalCost.toFixed(2)}</strong>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {currentPage === 'instructions' && (
-                          <div className="instructions-page">
-                            <h3>Instructions</h3>
-                            
-                            {/* Step Navigation */}
-                            <div className="step-navigation">
-                              <button 
-                                className="step-nav-button"
-                                onClick={() => setCurrentInstructionStep(Math.max(0, currentInstructionStep - 1))}
-                                disabled={currentInstructionStep === 0}
-                              >
-                                ← Previous
-                              </button>
-                              <span className="step-counter">
-                                Step {currentInstructionStep + 1} of {selectedMeal.steps.length}
-                              </span>
-                              <button 
-                                className="step-nav-button"
-                                onClick={() => setCurrentInstructionStep(Math.min(selectedMeal.steps.length - 1, currentInstructionStep + 1))}
-                                disabled={currentInstructionStep === selectedMeal.steps.length - 1}
-                              >
-                                Next →
-                              </button>
-                            </div>
-                            
-                            {/* Current Step */}
-                            <div className="current-step">
-                              <div className="step-number-large">{currentInstructionStep + 1}</div>
-                              <div className="step-content">
-                                <p className="step-text">{selectedMeal.steps[currentInstructionStep]}</p>
-                              </div>
-                            </div>
-                            
-                            {/* Step Progress */}
-                            <div className="step-progress">
-                              {selectedMeal.steps.map((step: string, index: number) => (
-                                <button
-                                  key={index}
-                                  className={`step-dot ${index === currentInstructionStep ? 'active' : ''}`}
-                                  onClick={() => setCurrentInstructionStep(index)}
-                                >
-                                  {index + 1}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+
           </div>
         </main>
       </div>
