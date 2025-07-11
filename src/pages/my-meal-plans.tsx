@@ -3,12 +3,58 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
 import { MealPlanService, MealPlan } from '../lib/meal-plan-service'
+import { MealType } from '../lib/recipe-categories'
+import breakfastRecipes from '../lib/breakfast.json'
+import lunchRecipes from '../lib/lunch.json'
+import dinnerRecipes from '../lib/dinner.json'
 
 export default function MyMealPlans() {
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const router = useRouter()
+
+  // Function to populate recipe objects from IDs
+  const populateRecipeObjects = (weekData: any[]) => {
+    const getRecipeById = (id: string, mealType: MealType) => {
+      if (mealType === 'breakfast') return breakfastRecipes.find(r => r.id === id);
+      if (mealType === 'lunch') return lunchRecipes.find(r => r.id === id);
+      if (mealType === 'dinner') return dinnerRecipes.find(r => r.id === id);
+      return null;
+    };
+
+    return weekData.map((day: any) => ({
+      ...day,
+      meals: {
+        breakfast: typeof day.meals.breakfast === 'string' 
+          ? getRecipeById(day.meals.breakfast, 'breakfast') 
+          : day.meals.breakfast,
+        lunch: typeof day.meals.lunch === 'string' 
+          ? getRecipeById(day.meals.lunch, 'lunch') 
+          : day.meals.lunch,
+        dinner: typeof day.meals.dinner === 'string' 
+          ? getRecipeById(day.meals.dinner, 'dinner') 
+          : day.meals.dinner,
+      }
+    }));
+  };
+
+  // Function to generate shopping list from recipe objects
+  const generateShoppingList = (weekData: any[]) => {
+    const allIngredients = new Set<string>();
+    
+    weekData.forEach((day: any) => {
+      Object.values(day.meals).forEach((meal: any) => {
+        if (meal && typeof meal === 'object' && meal.ingredients) {
+          meal.ingredients.forEach((ingredient: any) => {
+            allIngredients.add(ingredient.item);
+          });
+        }
+      });
+    });
+    
+    return Array.from(allIngredients).sort();
+  };
 
   useEffect(() => {
     loadMealPlans()
@@ -18,7 +64,17 @@ export default function MyMealPlans() {
     try {
       setLoading(true)
       const plans = await MealPlanService.getAllMealPlans()
-      setMealPlans(plans)
+      // Populate recipe objects for each plan and generate shopping lists
+      const populatedPlans = plans.map(plan => {
+        const populatedWeekData = populateRecipeObjects(plan.week_data);
+        const generatedShoppingList = generateShoppingList(populatedWeekData);
+        return {
+          ...plan,
+          week_data: populatedWeekData,
+          shopping_list: generatedShoppingList
+        };
+      });
+      setMealPlans(populatedPlans)
     } catch (error) {
       console.error('Error loading meal plans:', error)
       setError('Failed to load meal plans')
