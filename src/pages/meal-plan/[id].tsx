@@ -537,13 +537,30 @@ export default function MealPlanDetail() {
               <div className="recipe-modal-overlay" onClick={() => setSelectedMeal(null)}>
                 <div className="recipe-book-modal" onClick={(e) => e.stopPropagation()}>
                   <div className="recipe-modal-header">
-                              <button 
+                    <button 
                       className="close-button"
                       onClick={() => setSelectedMeal(null)}
                     >
                       ×
-                              </button>
+                    </button>
                   </div>
+                  {/* Navigation Arrows Overlay */}
+                  <button
+                    className="book-arrow book-arrow-left"
+                    onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                    disabled={currentPage === 0}
+                    aria-label="Previous page"
+                  >
+                    &#8592;
+                  </button>
+                  <button
+                    className="book-arrow book-arrow-right"
+                    onClick={() => setCurrentPage(Math.min(Math.ceil(selectedMeal.steps.length / 2), currentPage + 1))}
+                    disabled={currentPage >= Math.ceil(selectedMeal.steps.length / 2)}
+                    aria-label="Next page"
+                  >
+                    &#8594;
+                  </button>
                   <div className="recipe-book-container">
                     {/* Book Spread */}
                     <div className="book-spread">
@@ -665,40 +682,11 @@ export default function MealPlanDetail() {
                         </div>
                       </div>
                     </div>
-                    {/* Book Navigation */}
-                            <div className="book-navigation">
-                              <button 
-                        className="page-nav-button"
-                        onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
-                                disabled={currentPage === 0}
-                              >
-                        ← Previous Spread
-                              </button>
-                      <div className="page-indicator">
-                        <span className="page-counter">
-                          Spread {currentPage + 1} of {Math.ceil(selectedMeal.steps.length / 2) + 1}
-                        </span>
-                        <div className="page-dots">
-                          {Array.from({ length: Math.ceil(selectedMeal.steps.length / 2) + 1 }, (_, i) => (
-                              <button 
-                              key={i}
-                              className={`page-dot ${currentPage === i ? 'active' : ''}`}
-                              onClick={() => setCurrentPage(i)}
-                            >
-                              {i + 1}
-                              </button>
-                          ))}
-                            </div>
-                          </div>
-                      <button 
-                        className="page-nav-button"
-                        onClick={() => setCurrentPage(Math.min(Math.ceil(selectedMeal.steps.length / 2), currentPage + 1))}
-                        disabled={currentPage >= Math.ceil(selectedMeal.steps.length / 2)}
-                      >
-                        Next Spread →
-                      </button>
-                      </div>
-                </div>
+                    {/* Page X of Y indicator */}
+                    <div style={{ textAlign: 'center', marginTop: '8px', fontWeight: 600, color: 'var(--navy-blue)' }}>
+                      Page {currentPage + 1} of {Math.ceil(selectedMeal.steps.length / 2) + 1}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -1546,6 +1534,44 @@ export default function MealPlanDetail() {
           font-weight: 600;
         }
 
+        .book-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          background: var(--pastel-green);
+          border: none;
+          color: var(--navy-blue);
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          cursor: pointer;
+          font-size: 1.2rem;
+          transition: all 0.3s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .book-arrow-left {
+          left: 1rem;
+        }
+
+        .book-arrow-right {
+          right: 1rem;
+        }
+
+        .book-arrow:hover:not(:disabled) {
+          background: #9BC8AB;
+          transform: translateY(-50%) scale(1.1);
+        }
+
+        .book-arrow:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
         @media (max-width: 768px) {
           .dashboard-header-content {
             padding: 0 1rem;
@@ -1783,6 +1809,20 @@ export default function MealPlanDetail() {
             width: 25px;
             height: 25px;
             font-size: 0.7rem;
+          }
+
+          .book-arrow {
+            width: 30px;
+            height: 30px;
+            font-size: 1rem;
+          }
+
+          .book-arrow-left {
+            left: 0.5rem;
+          }
+
+          .book-arrow-right {
+            right: 0.5rem;
           }
         }
       `}</style>
