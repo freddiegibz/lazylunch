@@ -57,9 +57,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const promptPath = path.join(process.cwd(), 'src/lib/mealplan-chatgpt-prompt.txt');
   let promptTemplate = await fs.readFile(promptPath, 'utf8');
 
-  // 5. Gather user personalization and feedback (pseudo-code, replace with real queries)
-  const userData = {/* ...fetch user preferences... */};
-  const userFeedback = {/* ...fetch user likes/dislikes... */};
+  // 5. Gather user personalization and feedback from Supabase
+  // --- User Preferences ---
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('servings, focus, allergens, dietaryRestrictions, cuisine, otherPreferences')
+    .eq('id', user.id)
+    .single();
+
+  if (profileError) return res.status(500).json({ error: 'Failed to fetch user preferences' });
+
+  const userData = {
+    servings: profile.servings || 2,
+    focus: profile.focus || 'variety',
+    allergens: profile.allergens || [],
+    dietaryRestrictions: profile.dietaryRestrictions || [],
+    cuisine: profile.cuisine || [],
+    otherPreferences: profile.otherPreferences || [],
+  };
+
+  // --- User Feedback ---
+  const { data: feedbackRows, error: feedbackError } = await supabase
+    .from('recipe_feedback')
+    .select('recipe_id, feedback')
+    .eq('user_id', user.id);
+
+  if (feedbackError) return res.status(500).json({ error: 'Failed to fetch user feedback' });
+
+  const userFeedback = {
+    likes: feedbackRows.filter(f => f.feedback === 'like').map(f => f.recipe_id),
+    dislikes: feedbackRows.filter(f => f.feedback === 'dislike').map(f => f.recipe_id),
+  };
 
   // 6. Fill in the template (simple replace, you may want a real template engine)
   let prompt = promptTemplate

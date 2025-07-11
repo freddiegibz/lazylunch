@@ -330,53 +330,53 @@ export default function MealPlanDetail() {
             </div>
 
             {/* Day Navigation */}
-            <div className="day-navigation">
-              {mealPlan.week.map((day: any, index: number) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentDayIndex(index)}
-                  className={`day-tab ${currentDayIndex === index ? 'active' : ''}`}
-                >
-                  <span className="day-name">{day.day}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Current Day Content */}
-            <div className="current-day-content">
-              <div className="day-header">
-                <h3 className="current-day-title">
-                  {mealPlan.week[currentDayIndex].day}
-                </h3>
-                <div className="day-navigation-arrows">
+              <div className="day-navigation">
+                {mealPlan.week.map((day: any, index: number) => (
                   <button
-                    className="nav-arrow"
-                    onClick={() => setCurrentDayIndex(Math.max(0, currentDayIndex - 1))}
-                    disabled={currentDayIndex === 0}
+                    key={index}
+                    onClick={() => setCurrentDayIndex(index)}
+                    className={`day-tab ${currentDayIndex === index ? 'active' : ''}`}
                   >
-                    ←
+                    <span className="day-name">{day.day}</span>
                   </button>
-                  <span className="day-counter">
-                    {currentDayIndex + 1} of {mealPlan.week.length}
-                  </span>
-                  <button
-                    className="nav-arrow"
-                    onClick={() => setCurrentDayIndex(Math.min(mealPlan.week.length - 1, currentDayIndex + 1))}
-                    disabled={currentDayIndex === mealPlan.week.length - 1}
-                  >
-                    →
-                  </button>
-                </div>
+                ))}
               </div>
 
-              <div className="meals-container">
-                {(() => {
-                  const breakfastRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.breakfast, 'breakfast')
-                  return (
+            {/* Current Day Content */}
+              <div className="current-day-content">
+                <div className="day-header">
+                  <h3 className="current-day-title">
+                    {mealPlan.week[currentDayIndex].day}
+                  </h3>
+                  <div className="day-navigation-arrows">
+                    <button
+                    className="nav-arrow"
+                      onClick={() => setCurrentDayIndex(Math.max(0, currentDayIndex - 1))}
+                      disabled={currentDayIndex === 0}
+                    >
+                      ←
+                    </button>
+                    <span className="day-counter">
+                      {currentDayIndex + 1} of {mealPlan.week.length}
+                    </span>
+                    <button
+                    className="nav-arrow"
+                      onClick={() => setCurrentDayIndex(Math.min(mealPlan.week.length - 1, currentDayIndex + 1))}
+                      disabled={currentDayIndex === mealPlan.week.length - 1}
+                    >
+                      →
+                    </button>
+                  </div>
+                </div>
+
+                <div className="meals-container">
+                  {(() => {
+                    const breakfastRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.breakfast, 'breakfast')
+                    return (
                     <div className="meal-card">
                       <div className="meal-content" onClick={() => {
                         setSelectedMeal(breakfastRecipe)
-                        setCurrentPage(0)
+                          setCurrentPage(0)
                         setCurrentInstructionStep(0)
                       }}>
                         <div className="meal-image">
@@ -387,7 +387,7 @@ export default function MealPlanDetail() {
                               e.currentTarget.src = '/images/placeholder.png'
                             }}
                           />
-                        </div>
+                          </div>
                         <div className="meal-info">
                           <h4 className="meal-type">Breakfast</h4>
                           <p className="meal-name">{breakfastRecipe?.name || mealPlan.week[currentDayIndex].meals.breakfast}</p>
@@ -398,7 +398,7 @@ export default function MealPlanDetail() {
                             </div>
                           )}
                         </div>
-                      </div>
+                              </div>
                       <div className="meal-feedback">
                         <button className="feedback-button thumbs-up" onClick={e => {
                           e.stopPropagation();
@@ -414,8 +414,8 @@ export default function MealPlanDetail() {
                           👎
                           {feedbackStatus[breakfastRecipe?.id || mealPlan.week[currentDayIndex].meals.breakfast] === 'dislike' && <span className="feedback-confirm">Saved!</span>}
                         </button>
-                      </div>
-                    </div>
+                            </div>
+                                  </div>
                   )
                 })()}
                 {(() => {
@@ -435,7 +435,7 @@ export default function MealPlanDetail() {
                               e.currentTarget.src = '/images/placeholder.png'
                             }}
                           />
-                        </div>
+                                </div>
                         <div className="meal-info">
                           <h4 className="meal-type">Lunch</h4>
                           <p className="meal-name">{lunchRecipe?.name || mealPlan.week[currentDayIndex].meals.lunch}</p>
@@ -443,10 +443,10 @@ export default function MealPlanDetail() {
                             <div className="meal-tags">
                               <span className="cost-tag">£{lunchRecipe.estTotalCost.toFixed(2)}</span>
                               <span className="servings-tag">{lunchRecipe.baseServings} servings</span>
-                            </div>
+                              </div>
                           )}
-                        </div>
-                      </div>
+                              </div>
+                            </div>
                       <div className="meal-feedback">
                         <button className="feedback-button thumbs-up" onClick={e => {
                           e.stopPropagation();
@@ -454,25 +454,25 @@ export default function MealPlanDetail() {
                         }} aria-label="Thumbs up">
                           👍
                           {feedbackStatus[lunchRecipe?.id || mealPlan.week[currentDayIndex].meals.lunch] === 'like' && <span className="feedback-confirm">Saved!</span>}
-                        </button>
+                              </button>
                         <button className="feedback-button thumbs-down" onClick={e => {
                           e.stopPropagation();
                           handleRecipeFeedback(lunchRecipe?.id || mealPlan.week[currentDayIndex].meals.lunch, 'dislike');
                         }} aria-label="Thumbs down">
                           👎
                           {feedbackStatus[lunchRecipe?.id || mealPlan.week[currentDayIndex].meals.lunch] === 'dislike' && <span className="feedback-confirm">Saved!</span>}
-                        </button>
+                              </button>
+                            </div>
                       </div>
-                    </div>
-                  )
-                })()}
-                {(() => {
+                    )
+                  })()}
+                  {(() => {
                   const dinnerRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.dinner, 'dinner')
-                  return (
+                    return (
                     <div className="meal-card">
                       <div className="meal-content" onClick={() => {
                         setSelectedMeal(dinnerRecipe)
-                        setCurrentPage(0)
+                          setCurrentPage(0)
                         setCurrentInstructionStep(0)
                       }}>
                         <div className="meal-image">
@@ -494,7 +494,7 @@ export default function MealPlanDetail() {
                             </div>
                           )}
                         </div>
-                      </div>
+                              </div>
                       <div className="meal-feedback">
                         <button className="feedback-button thumbs-up" onClick={e => {
                           e.stopPropagation();
@@ -510,12 +510,12 @@ export default function MealPlanDetail() {
                           👎
                           {feedbackStatus[dinnerRecipe?.id || mealPlan.week[currentDayIndex].meals.dinner] === 'dislike' && <span className="feedback-confirm">Saved!</span>}
                         </button>
-                      </div>
-                    </div>
+                            </div>
+                                  </div>
                   )
                 })()}
-              </div>
-            </div>
+                                </div>
+                              </div>
 
             {/* Shopping List Section */}
             {showShoppingList && (
@@ -528,8 +528,8 @@ export default function MealPlanDetail() {
                       <label htmlFor={`item-${index}`}>{item}</label>
                     </div>
                   ))}
-                </div>
-              </div>
+                              </div>
+                            </div>
             )}
 
             {/* Recipe Book Modal */}
@@ -537,12 +537,12 @@ export default function MealPlanDetail() {
               <div className="recipe-modal-overlay" onClick={() => setSelectedMeal(null)}>
                 <div className="recipe-book-modal" onClick={(e) => e.stopPropagation()}>
                   <div className="recipe-modal-header">
-                    <button 
+                              <button 
                       className="close-button"
                       onClick={() => setSelectedMeal(null)}
                     >
                       ×
-                    </button>
+                              </button>
                   </div>
                   <div className="recipe-book-container">
                     {/* Book Spread */}
@@ -561,7 +561,7 @@ export default function MealPlanDetail() {
                                     e.currentTarget.src = '/images/placeholder.png'
                                   }}
                                 />
-                              </div>
+                            </div>
                               <div className="cover-content">
                                 <h1 className="recipe-title">{selectedMeal.name}</h1>
                                 <div className="recipe-meta">
@@ -572,9 +572,9 @@ export default function MealPlanDetail() {
                                       {selectedMeal.allergens.map((a: string, i: number) => (
                                         <span key={i} className="allergen-badge">{a}</span>
                                       ))}
-                                    </div>
-                                  )}
-                                </div>
+                          </div>
+                        )}
+                      </div>
                                 <div className="recipe-tags">
                                   {selectedMeal.tags.map((tag: string, index: number) => (
                                     <span key={index} className="recipe-tag">{tag}</span>
@@ -597,17 +597,17 @@ export default function MealPlanDetail() {
                             (() => {
                               const stepIndex = (currentPage - 1) * 2;
                               if (selectedMeal.steps[stepIndex]) {
-                                return (
+                    return (
                                   <div className="page-instruction">
                                     <div className="step-header">
                                       <h2>Step {stepIndex + 1}</h2>
                                       <div className="step-progress">
                                         {stepIndex + 1} of {selectedMeal.steps.length}
-                                      </div>
-                                    </div>
+                          </div>
+                        </div>
                                     <div className="step-content">
                                       <p className="step-text">{selectedMeal.steps[stepIndex]}</p>
-                                    </div>
+                            </div>
                                   </div>
                                 );
                               } else {
@@ -616,7 +616,7 @@ export default function MealPlanDetail() {
                             })()
                           )}
                         </div>
-                      </div>
+                              </div>
                       {/* Spine */}
                       <div className="book-spine"></div>
                       {/* Right Page */}
@@ -632,13 +632,13 @@ export default function MealPlanDetail() {
                                     <span className="ingredient-name">{ingredient.item}</span>
                                     <span className="ingredient-qty">{ingredient.qty}{ingredient.note ? ` (${ingredient.note})` : ''}</span>
                                     <span className="ingredient-cost">£{ingredient.estCost.toFixed(2)}</span>
+                            </div>
+                                    ))}
                                   </div>
-                                ))}
-                              </div>
                               <div className="total-cost">
                                 <strong>Total Cost: £{selectedMeal.estTotalCost.toFixed(2)}</strong>
+                                </div>
                               </div>
-                            </div>
                           ) : (
                             // Instruction Step (right)
                             (() => {
@@ -650,8 +650,8 @@ export default function MealPlanDetail() {
                                       <h2>Step {stepIndex + 1}</h2>
                                       <div className="step-progress">
                                         {stepIndex + 1} of {selectedMeal.steps.length}
-                                      </div>
-                                    </div>
+                              </div>
+                            </div>
                                     <div className="step-content">
                                       <p className="step-text">{selectedMeal.steps[stepIndex]}</p>
                                     </div>
@@ -666,30 +666,30 @@ export default function MealPlanDetail() {
                       </div>
                     </div>
                     {/* Book Navigation */}
-                    <div className="book-navigation">
-                      <button 
+                            <div className="book-navigation">
+                              <button 
                         className="page-nav-button"
                         onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
-                        disabled={currentPage === 0}
-                      >
+                                disabled={currentPage === 0}
+                              >
                         ← Previous Spread
-                      </button>
+                              </button>
                       <div className="page-indicator">
                         <span className="page-counter">
                           Spread {currentPage + 1} of {Math.ceil(selectedMeal.steps.length / 2) + 1}
                         </span>
                         <div className="page-dots">
                           {Array.from({ length: Math.ceil(selectedMeal.steps.length / 2) + 1 }, (_, i) => (
-                            <button
+                              <button 
                               key={i}
                               className={`page-dot ${currentPage === i ? 'active' : ''}`}
                               onClick={() => setCurrentPage(i)}
                             >
                               {i + 1}
-                            </button>
+                              </button>
                           ))}
-                        </div>
-                      </div>
+                            </div>
+                          </div>
                       <button 
                         className="page-nav-button"
                         onClick={() => setCurrentPage(Math.min(Math.ceil(selectedMeal.steps.length / 2), currentPage + 1))}
@@ -697,8 +697,8 @@ export default function MealPlanDetail() {
                       >
                         Next Spread →
                       </button>
-                    </div>
-                  </div>
+                      </div>
+                </div>
                 </div>
               </div>
             )}
