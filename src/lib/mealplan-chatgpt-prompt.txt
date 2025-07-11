@@ -33,6 +33,7 @@ Instructions:
 8. Only select recipes from the provided list. Do not invent new recipes.
 9. Use the tags and allergen info to match user preferences and restrictions.
 10. Output the plan as a structured list (see format below).
+11. Always analyze the meal plan for opportunities to reduce overall cost and ingredient quantities. Suggest substitutions or adjustments that can help save money or minimize waste, even if the user's main focus is not budget.
 
 Example Output Format:
 ```
@@ -58,5 +59,9 @@ User Data:
 - Dietary restrictions: [user.dietaryRestrictions]
 - Preferred cuisines: [user.cuisine]
 - Other preferences: [user.otherPreferences]
+- Weekly budget: [user.weeklyBudget]
 - Liked recipes: [user.likedRecipes]
-- Disliked recipes: [user.dislikedRecipes] 
+- Disliked recipes: [user.dislikedRecipes]
+
+Additional Instructions:
+12. You must calculate the total cost of all meals using the ingredient prices. If the total exceeds the user's weekly budget, remove or substitute meals until the plan fits within the budget. Clearly show your calculation and which meals were skipped or substituted to stay under budget. 

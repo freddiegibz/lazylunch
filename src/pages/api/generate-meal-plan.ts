@@ -48,9 +48,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // 3. Read and combine all recipes
-  const breakfast = JSON.parse(await fs.readFile(path.join(process.cwd(), 'src/lib/breakfast.json'), 'utf8'));
-  const lunch = JSON.parse(await fs.readFile(path.join(process.cwd(), 'src/lib/lunch.json'), 'utf8'));
-  const dinner = JSON.parse(await fs.readFile(path.join(process.cwd(), 'src/lib/dinner.json'), 'utf8'));
+  const breakfastRaw = JSON.parse(await fs.readFile(path.join(process.cwd(), 'src/lib/breakfast.json'), 'utf8'));
+  const lunchRaw = JSON.parse(await fs.readFile(path.join(process.cwd(), 'src/lib/lunch.json'), 'utf8'));
+  const dinnerRaw = JSON.parse(await fs.readFile(path.join(process.cwd(), 'src/lib/dinner.json'), 'utf8'));
+
+  // Add 'type' field to each recipe
+  const breakfast = breakfastRaw.map((r: any) => ({ ...r, type: 'breakfast' }));
+  const lunch = lunchRaw.map((r: any) => ({ ...r, type: 'lunch' }));
+  const dinner = dinnerRaw.map((r: any) => ({ ...r, type: 'dinner' }));
   const allRecipes = [...breakfast, ...lunch, ...dinner];
 
   // 4. Read the prompt template
@@ -61,7 +66,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // --- User Preferences ---
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('servings, focus, allergens, dietaryRestrictions, cuisine, otherPreferences')
+    .select('servings, focus, allergens, dietaryRestrictions, cuisine, otherPreferences, weeklyBudget')
     .eq('id', user.id)
     .single();
 
@@ -74,6 +79,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     dietaryRestrictions: profile?.dietaryRestrictions ?? [],
     cuisine: profile?.cuisine ?? [],
     otherPreferences: profile?.otherPreferences ?? [],
+    weeklyBudget: profile?.weeklyBudget ?? null,
   };
 
   // --- User Feedback ---
@@ -97,6 +103,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .replace('[user.dietaryRestrictions]', JSON.stringify(userData.dietaryRestrictions))
     .replace('[user.cuisine]', JSON.stringify(userData.cuisine))
     .replace('[user.otherPreferences]', JSON.stringify(userData.otherPreferences))
+    .replace('[user.weeklyBudget]', userData.weeklyBudget)
     .replace('[user.likedRecipes]', JSON.stringify(userFeedback.likes))
     .replace('[user.dislikedRecipes]', JSON.stringify(userFeedback.dislikes))
     .replace('[Insert JSON array of all available recipes here]', JSON.stringify(allRecipes, null, 2));
@@ -105,7 +112,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const openaiRes = await openai.chat.completions.create({
     model: 'gpt-4',
     messages: [{ role: 'user', content: prompt }],
-    temperature: 0.7,
+      temperature: 0.7,
   });
 
   // 8. Return the generated plan

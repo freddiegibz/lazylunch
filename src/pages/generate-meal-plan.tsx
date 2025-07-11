@@ -37,6 +37,13 @@ const DIETARY_OPTIONS = [
   'high-protein', 'low-sodium', 'diabetic-friendly'
 ]
 
+const WEEKLY_BUDGET_OPTIONS = [
+  { value: 'under30', label: 'Under £30' },
+  { value: '30-50', label: '£30-50' },
+  { value: '50-80', label: '£50-80' },
+  { value: 'none', label: 'No budget limit' },
+  { value: 'custom', label: 'Custom' },
+];
 
 
 // Function to generate a meal plan using real recipes
@@ -124,7 +131,9 @@ export default function GenerateMealPlan() {
     allergens: [] as string[],
     budget: 'medium',
     cuisine: [] as string[],
-    dietaryRestrictions: [] as string[]
+    dietaryRestrictions: [] as string[],
+    weeklyBudget: 'none',
+    customWeeklyBudget: '',
   })
   const [user, setUser] = useState<any>(null)
   const [membership, setMembership] = useState<string>('')
@@ -284,6 +293,17 @@ export default function GenerateMealPlan() {
     URL.revokeObjectURL(url)
   }
 
+  // When submitting preferences, pass the correct weekly budget value
+  const getWeeklyBudgetValue = () => {
+    if (preferences.weeklyBudget === 'custom') {
+      return preferences.customWeeklyBudget ? Number(preferences.customWeeklyBudget) : null;
+    }
+    if (preferences.weeklyBudget === 'under30') return 30;
+    if (preferences.weeklyBudget === '30-50') return 50;
+    if (preferences.weeklyBudget === '50-80') return 80;
+    if (preferences.weeklyBudget === 'none') return null;
+    return null;
+  };
 
 
   // Show paywall for free users
@@ -462,23 +482,35 @@ export default function GenerateMealPlan() {
                       </div>
                     </div>
 
-                    {/* Budget */}
+                    {/* Weekly Budget */}
                     <div className="preference-section">
-                      <label className="preference-label">What's your budget per meal?</label>
+                      <label className="preference-label">What's your weekly food budget?</label>
                       <div className="preference-options">
-                        {BUDGET_OPTIONS.map(option => (
+                        {WEEKLY_BUDGET_OPTIONS.map(option => (
                           <label key={option.value} className="preference-option">
                             <input
                               type="radio"
-                              name="budget"
+                              name="weeklyBudget"
                               value={option.value}
-                              checked={preferences.budget === option.value}
-                              onChange={(e) => setPreferences({...preferences, budget: e.target.value})}
+                              checked={preferences.weeklyBudget === option.value}
+                              onChange={(e) => setPreferences({ ...preferences, weeklyBudget: e.target.value })}
                             />
                             <span className="option-label">{option.label}</span>
                           </label>
                         ))}
                       </div>
+                      {preferences.weeklyBudget === 'custom' && (
+                        <input
+                          type="number"
+                          min="1"
+                          step="1"
+                          className="preference-input"
+                          placeholder="Enter your weekly budget (£)"
+                          value={preferences.customWeeklyBudget}
+                          onChange={e => setPreferences({ ...preferences, customWeeklyBudget: e.target.value })}
+                          style={{ marginTop: 8, width: '60%' }}
+                        />
+                      )}
                     </div>
 
                     {/* Allergens */}
