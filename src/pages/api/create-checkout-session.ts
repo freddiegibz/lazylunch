@@ -74,10 +74,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Parse priceId from request body (support both JSON and empty body for backward compatibility)
     let priceId = 'price_1RifFyB4uyQdSSUIKmYfTfRw' // Default to Premium
+    let supabaseUserId = undefined;
     if (req.headers['content-type'] === 'application/json') {
       const body = req.body && typeof req.body === 'string' ? JSON.parse(req.body) : req.body
       if (body && body.priceId && typeof body.priceId === 'string') {
         priceId = body.priceId
+      }
+      if (body && body.supabaseUserId && typeof body.supabaseUserId === 'string') {
+        supabaseUserId = body.supabaseUserId;
       }
     }
 
@@ -87,6 +91,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('🔄 Creating Stripe checkout session...')
     console.log('Price ID:', priceId)
+    console.log('Supabase User ID:', supabaseUserId)
     console.log('Success URL:', `${req.headers.origin}/dashboard?success=true`)
     console.log('Cancel URL:', `${req.headers.origin}/dashboard?canceled=true`)
 
@@ -100,6 +105,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
       ],
       allow_promotion_codes: true, // Enable promo code field
+      metadata: supabaseUserId ? { supabaseUserId } : {},
       success_url: `${req.headers.origin}/dashboard?success=true`,
       cancel_url: `${req.headers.origin}/dashboard?canceled=true`,
     })

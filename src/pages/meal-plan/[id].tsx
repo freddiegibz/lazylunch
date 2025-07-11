@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { MealPlanService, MealPlan } from '../../lib/meal-plan-service'
 import recipes from '../../lib/dinner.json'
 import { getRecipesByMealTypeWithOverrides, MealType } from '../../lib/recipe-categories'
+import { supabase } from '../../lib/supabase';
 
 export default function MealPlanDetail() {
   const [mealPlan, setMealPlan] = useState<any>(null)
@@ -13,10 +14,18 @@ export default function MealPlanDetail() {
   const [error, setError] = useState('')
   const [showShoppingList, setShowShoppingList] = useState(false)
   const [currentDayIndex, setCurrentDayIndex] = useState(0)
-  const [selectedMeal, setSelectedMeal] = useState<string | null>(null)
-  const [currentPage, setCurrentPage] = useState(0) // 0 = ingredients, 1 = instructions
+  const [selectedMeal, setSelectedMeal] = useState<any>(null)
+  const [currentPage, setCurrentPage] = useState(0) // Changed from string to number
+  const [currentInstructionStep, setCurrentInstructionStep] = useState(0)
   const router = useRouter()
   const { id } = router.query
+  const [isMobile, setIsMobile] = useState(false);
+  const [currentMobilePage, setCurrentMobilePage] = useState(0); // for mobile single-page view
+  const modalContentRef = useRef<HTMLDivElement>(null);
+  const [fadeClass, setFadeClass] = useState('');
+  const [imageLoading, setImageLoading] = useState(true);
+  const [showShareMsg, setShowShareMsg] = useState(false);
+  const [feedbackStatus, setFeedbackStatus] = useState<{[key: string]: string}>({});
 
   // Function to find recipe by name and meal type
   const findRecipeByName = (mealName: string, mealType: MealType) => {
@@ -26,6 +35,113 @@ export default function MealPlanDetail() {
       mealName.toLowerCase().includes(recipe.name.toLowerCase())
     )
   }
+
+  async function handleRecipeFeedback(recipeId: string, feedback: 'like' | 'dislike') {
+    setFeedbackStatus((prev) => ({ ...prev, [recipeId]: 'loading' }));
+    try {
+      const session = await supabase.auth.getSession();
+      const accessToken = session.data.session?.access_token;
+      const res = await fetch('/api/recipe-feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {})
+        },
+        body: JSON.stringify({ recipe_id: recipeId, feedback })
+      });
+      if (res.ok) {
+        setFeedbackStatus((prev) => ({ ...prev, [recipeId]: feedback }));
+        setTimeout(() => setFeedbackStatus((prev) => ({ ...prev, [recipeId]: '' })), 1200);
+      } else {
+        setFeedbackStatus((prev) => ({ ...prev, [recipeId]: 'error' }));
+      }
+    } catch {
+      setFeedbackStatus((prev) => ({ ...prev, [recipeId]: 'error' }));
+    }
+  }
+
+  function handlePrint() {
+    window.print();
+  }
+
+  function handleShare() {
+    navigator.clipboard.writeText(window.location.href);
+    setShowShareMsg(true);
+    setTimeout(() => setShowShareMsg(false), 2000);
+  }
+
+  function getMaxMobilePage() {
+    if (!selectedMeal) return 0;
+    // 0: cover, 1: ingredients, 2+ steps
+    return 1 + (selectedMeal.steps?.length || 0);
+  }
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 900);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Swipe gesture for mobile
+  useEffect(() => {
+    if (!isMobile || !modalContentRef.current) return;
+    const el = modalContentRef.current;
+    let startX = 0;
+    let endX = 0;
+    const onTouchStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX;
+    };
+    const onTouchEnd = (e: TouchEvent) => {
+      endX = e.changedTouches[0].clientX;
+      if (endX - startX > 50) {
+        // swipe right
+        setCurrentMobilePage((prev) => Math.max(0, prev - 1));
+      } else if (startX - endX > 50) {
+        // swipe left
+        setCurrentMobilePage((prev) => Math.min(getMaxMobilePage(), prev + 1));
+      }
+    };
+    el.addEventListener('touchstart', onTouchStart);
+    el.addEventListener('touchend', onTouchEnd);
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [isMobile, selectedMeal]);
+
+  // Keyboard navigation for modal
+  useEffect(() => {
+    if (!selectedMeal) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setSelectedMeal(null);
+      } else if (isMobile) {
+        if (e.key === 'ArrowLeft') {
+          setCurrentMobilePage((prev) => Math.max(0, prev - 1));
+        } else if (e.key === 'ArrowRight') {
+          setCurrentMobilePage((prev) => Math.min(getMaxMobilePage(), prev + 1));
+        }
+      } else {
+        if (e.key === 'ArrowLeft') {
+          setCurrentPage((prev) => Math.max(0, prev - 1));
+        } else if (e.key === 'ArrowRight') {
+          setCurrentPage((prev) => Math.min(Math.ceil(selectedMeal.steps.length / 2), prev + 1));
+        }
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedMeal, isMobile, currentMobilePage, currentPage]);
+
+  // Animate page transitions
+  useEffect(() => {
+    setFadeClass('fade-exit');
+    const timeout = setTimeout(() => setFadeClass('fade-enter'), 10);
+    return () => clearTimeout(timeout);
+  }, [isMobile ? currentMobilePage : currentPage]);
 
   useEffect(() => {
     if (id) {
@@ -98,12 +214,10 @@ export default function MealPlanDetail() {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-GB', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      day: 'numeric'
     })
   }
 
@@ -129,15 +243,9 @@ export default function MealPlanDetail() {
             </div>
           </div>
         </header>
-        
         <main className="dashboard-main">
           <div className="dashboard-content">
-            <div className="error-message">
-              {error}
-            </div>
-            <Link href="/my-meal-plans" className="auth-button" style={{ textDecoration: 'none', display: 'inline-block' }}>
-              Back to My Meal Plans
-            </Link>
+            <div className="error-message">{error}</div>
           </div>
         </main>
       </div>
@@ -145,7 +253,25 @@ export default function MealPlanDetail() {
   }
 
   if (!mealPlan) {
-    return null
+    return (
+      <div className="dashboard-container">
+        <header className="dashboard-header">
+          <div className="dashboard-header-content">
+            <div className="dashboard-logo">LazyLunch</div>
+            <div className="dashboard-nav">
+              <Link href="/my-meal-plans" className="dashboard-link">
+                ← Back to My Meal Plans
+              </Link>
+            </div>
+          </div>
+        </header>
+        <main className="dashboard-main">
+          <div className="dashboard-content">
+            <div className="error-message">Meal plan not found</div>
+          </div>
+        </main>
+      </div>
+    )
   }
 
   return (
@@ -203,368 +329,195 @@ export default function MealPlanDetail() {
               </div>
             </div>
 
-            <div className="weekly-meal-plan">
-              <div className="day-navigation">
-                {mealPlan.week.map((day: any, index: number) => (
+            {/* Day Navigation */}
+            <div className="day-navigation">
+              {mealPlan.week.map((day: any, index: number) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentDayIndex(index)}
+                  className={`day-tab ${currentDayIndex === index ? 'active' : ''}`}
+                >
+                  <span className="day-name">{day.day}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Current Day Content */}
+            <div className="current-day-content">
+              <div className="day-header">
+                <h3 className="current-day-title">
+                  {mealPlan.week[currentDayIndex].day}
+                </h3>
+                <div className="day-navigation-arrows">
                   <button
-                    key={index}
-                    onClick={() => setCurrentDayIndex(index)}
-                    className={`day-tab ${currentDayIndex === index ? 'active' : ''}`}
+                    className="nav-arrow"
+                    onClick={() => setCurrentDayIndex(Math.max(0, currentDayIndex - 1))}
+                    disabled={currentDayIndex === 0}
                   >
-                    <span className="day-name">{day.day}</span>
-                    <span className="day-number">{index + 1}</span>
+                    ←
                   </button>
-                ))}
+                  <span className="day-counter">
+                    {currentDayIndex + 1} of {mealPlan.week.length}
+                  </span>
+                  <button
+                    className="nav-arrow"
+                    onClick={() => setCurrentDayIndex(Math.min(mealPlan.week.length - 1, currentDayIndex + 1))}
+                    disabled={currentDayIndex === mealPlan.week.length - 1}
+                  >
+                    →
+                  </button>
+                </div>
               </div>
 
-              <div className="current-day-content">
-                <div className="day-header">
-                  <h3 className="current-day-title">
-                    {mealPlan.week[currentDayIndex].day}
-                  </h3>
-                  <div className="day-navigation-arrows">
-                    <button
-                      onClick={() => setCurrentDayIndex(Math.max(0, currentDayIndex - 1))}
-                      disabled={currentDayIndex === 0}
-                      className="nav-arrow"
-                    >
-                      ←
-                    </button>
-                    <span className="day-counter">
-                      {currentDayIndex + 1} of {mealPlan.week.length}
-                    </span>
-                    <button
-                      onClick={() => setCurrentDayIndex(Math.min(mealPlan.week.length - 1, currentDayIndex + 1))}
-                      disabled={currentDayIndex === mealPlan.week.length - 1}
-                      className="nav-arrow"
-                    >
-                      →
-                    </button>
-                  </div>
-                </div>
-
-                <div className="meals-container">
-                  {(() => {
-                    const breakfastRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.breakfast, 'breakfast')
-                    return (
-                      <div className="meal-card" onClick={() => {
-                        if (selectedMeal === 'breakfast') {
-                          setSelectedMeal(null)
-                          setCurrentPage(0)
-                        } else {
-                          setSelectedMeal('breakfast')
-                          setCurrentPage(0)
-                        }
-                      }} data-expanded={selectedMeal === 'breakfast'}>
-                        <div className="meal-header">
-                          <div className="meal-header-left">
-                            <span className="meal-icon">🌅</span>
-                            <h4 className="meal-title">Breakfast</h4>
-                          </div>
-                          <span className="meal-arrow">▼</span>
+              <div className="meals-container">
+                {(() => {
+                  const breakfastRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.breakfast, 'breakfast')
+                  return (
+                    <div className="meal-card">
+                      <div className="meal-content" onClick={() => {
+                        setSelectedMeal(breakfastRecipe)
+                        setCurrentPage(0)
+                        setCurrentInstructionStep(0)
+                      }}>
+                        <div className="meal-image">
+                          <img 
+                            src={breakfastRecipe?.image || '/images/placeholder.png'} 
+                            alt={breakfastRecipe?.name || 'Breakfast'}
+                            onError={(e) => {
+                              e.currentTarget.src = '/images/placeholder.png'
+                            }}
+                          />
                         </div>
-                        <div className="meal-content">
-                          <p className="meal-description">
-                            {mealPlan.week[currentDayIndex].meals.breakfast}
-                          </p>
+                        <div className="meal-info">
+                          <h4 className="meal-type">Breakfast</h4>
+                          <p className="meal-name">{breakfastRecipe?.name || mealPlan.week[currentDayIndex].meals.breakfast}</p>
                           {breakfastRecipe && (
-                            <div className="recipe-image">
-                              <Image 
-                                src={breakfastRecipe.image} 
-                                alt={breakfastRecipe.name}
-                                width={200}
-                                height={150}
-                                style={{ objectFit: 'cover' }}
-                              />
+                            <div className="meal-tags">
+                              <span className="cost-tag">£{breakfastRecipe.estTotalCost.toFixed(2)}</span>
+                              <span className="servings-tag">{breakfastRecipe.baseServings} servings</span>
                             </div>
                           )}
                         </div>
-                        {selectedMeal === 'breakfast' && breakfastRecipe && (
-                          <div className="meal-book">
-                            <div className="book-header">
-                              <h5 className="book-title">{breakfastRecipe.name}</h5>
-                              <div className="page-indicator">
-                                <span className={`page-dot ${currentPage === 0 ? 'active' : ''}`}></span>
-                                <span className={`page-dot ${currentPage === 1 ? 'active' : ''}`}></span>
-                              </div>
-                            </div>
-                            <div className="book-content">
-                              <div className={`book-page ${currentPage === 0 ? 'active' : ''}`}>
-                                <h6>Ingredients</h6>
-                                <ul>
-                                  {breakfastRecipe.ingredients.map((ingredient, index) => (
-                                    <li key={index}>
-                                      <strong>{ingredient.qty}</strong> {ingredient.item}
-                                      {ingredient.allergens.length > 0 && (
-                                        <span className="allergen-tag">
-                                          ({ingredient.allergens.join(', ')})
-                                        </span>
-                                      )}
-                                    </li>
-                                  ))}
-                                </ul>
-                                <div className="recipe-info">
-                                  <p><strong>Servings:</strong> {breakfastRecipe.baseServings}</p>
-                                  <p><strong>Total Cost:</strong> £{breakfastRecipe.estTotalCost}</p>
-                                  <div className="recipe-tags">
-                                    {breakfastRecipe.tags.map((tag, index) => (
-                                      <span key={index} className="tag">{tag}</span>
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-                              <div className={`book-page ${currentPage === 1 ? 'active' : ''}`}>
-                                <h6>Instructions</h6>
-                                <ol>
-                                  {breakfastRecipe.steps.map((step, index) => (
-                                    <li key={index}>{step}</li>
-                                  ))}
-                                </ol>
-                              </div>
-                            </div>
-                            <div className="book-navigation">
-                              <button 
-                                className="page-nav-btn" 
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setCurrentPage(Math.max(0, currentPage - 1))
-                                }}
-                                disabled={currentPage === 0}
-                              >
-                                ← Previous
-                              </button>
-                              <button 
-                                className="page-nav-btn" 
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setCurrentPage(Math.min(1, currentPage + 1))
-                                }}
-                                disabled={currentPage === 1}
-                              >
-                                Next →
-                              </button>
-                            </div>
-                          </div>
-                        )}
                       </div>
-                    )
-                  })()}
-
-                  {(() => {
-                    const lunchRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.lunch, 'lunch')
-                    return (
-                      <div className="meal-card" onClick={() => {
-                        if (selectedMeal === 'lunch') {
-                          setSelectedMeal(null)
-                          setCurrentPage(0)
-                        } else {
-                          setSelectedMeal('lunch')
-                          setCurrentPage(0)
-                        }
-                      }} data-expanded={selectedMeal === 'lunch'}>
-                        <div className="meal-header">
-                          <div className="meal-header-left">
-                            <span className="meal-icon">☀️</span>
-                            <h4 className="meal-title">Lunch</h4>
-                          </div>
-                          <span className="meal-arrow">▼</span>
+                      <div className="meal-feedback">
+                        <button className="feedback-button thumbs-up" onClick={e => {
+                          e.stopPropagation();
+                          handleRecipeFeedback(breakfastRecipe?.id || mealPlan.week[currentDayIndex].meals.breakfast, 'like');
+                        }} aria-label="Thumbs up">
+                          👍
+                          {feedbackStatus[breakfastRecipe?.id || mealPlan.week[currentDayIndex].meals.breakfast] === 'like' && <span className="feedback-confirm">Saved!</span>}
+                        </button>
+                        <button className="feedback-button thumbs-down" onClick={e => {
+                          e.stopPropagation();
+                          handleRecipeFeedback(breakfastRecipe?.id || mealPlan.week[currentDayIndex].meals.breakfast, 'dislike');
+                        }} aria-label="Thumbs down">
+                          👎
+                          {feedbackStatus[breakfastRecipe?.id || mealPlan.week[currentDayIndex].meals.breakfast] === 'dislike' && <span className="feedback-confirm">Saved!</span>}
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })()}
+                {(() => {
+                  const lunchRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.lunch, 'lunch')
+                  return (
+                    <div className="meal-card">
+                      <div className="meal-content" onClick={() => {
+                        setSelectedMeal(lunchRecipe)
+                        setCurrentPage(0)
+                        setCurrentInstructionStep(0)
+                      }}>
+                        <div className="meal-image">
+                          <img 
+                            src={lunchRecipe?.image || '/images/placeholder.png'} 
+                            alt={lunchRecipe?.name || 'Lunch'}
+                            onError={(e) => {
+                              e.currentTarget.src = '/images/placeholder.png'
+                            }}
+                          />
                         </div>
-                        <div className="meal-content">
-                          <p className="meal-description">
-                            {mealPlan.week[currentDayIndex].meals.lunch}
-                          </p>
+                        <div className="meal-info">
+                          <h4 className="meal-type">Lunch</h4>
+                          <p className="meal-name">{lunchRecipe?.name || mealPlan.week[currentDayIndex].meals.lunch}</p>
                           {lunchRecipe && (
-                            <div className="recipe-image">
-                              <Image 
-                                src={lunchRecipe.image} 
-                                alt={lunchRecipe.name}
-                                width={200}
-                                height={150}
-                                style={{ objectFit: 'cover' }}
-                              />
+                            <div className="meal-tags">
+                              <span className="cost-tag">£{lunchRecipe.estTotalCost.toFixed(2)}</span>
+                              <span className="servings-tag">{lunchRecipe.baseServings} servings</span>
                             </div>
                           )}
                         </div>
-                        {selectedMeal === 'lunch' && lunchRecipe && (
-                          <div className="meal-book">
-                            <div className="book-header">
-                              <h5 className="book-title">{lunchRecipe.name}</h5>
-                              <div className="page-indicator">
-                                <span className={`page-dot ${currentPage === 0 ? 'active' : ''}`}></span>
-                                <span className={`page-dot ${currentPage === 1 ? 'active' : ''}`}></span>
-                              </div>
-                            </div>
-                            <div className="book-content">
-                              <div className={`book-page ${currentPage === 0 ? 'active' : ''}`}>
-                                <h6>Ingredients</h6>
-                                <ul>
-                                  {lunchRecipe.ingredients.map((ingredient, index) => (
-                                    <li key={index}>
-                                      <strong>{ingredient.qty}</strong> {ingredient.item}
-                                      {ingredient.allergens.length > 0 && (
-                                        <span className="allergen-tag">
-                                          ({ingredient.allergens.join(', ')})
-                                        </span>
-                                      )}
-                                    </li>
-                                  ))}
-                                </ul>
-                                <div className="recipe-info">
-                                  <p><strong>Servings:</strong> {lunchRecipe.baseServings}</p>
-                                  <p><strong>Total Cost:</strong> £{lunchRecipe.estTotalCost}</p>
-                                  <div className="recipe-tags">
-                                    {lunchRecipe.tags.map((tag, index) => (
-                                      <span key={index} className="tag">{tag}</span>
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-                              <div className={`book-page ${currentPage === 1 ? 'active' : ''}`}>
-                                <h6>Instructions</h6>
-                                <ol>
-                                  {lunchRecipe.steps.map((step, index) => (
-                                    <li key={index}>{step}</li>
-                                  ))}
-                                </ol>
-                              </div>
-                            </div>
-                            <div className="book-navigation">
-                              <button 
-                                className="page-nav-btn" 
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setCurrentPage(Math.max(0, currentPage - 1))
-                                }}
-                                disabled={currentPage === 0}
-                              >
-                                ← Previous
-                              </button>
-                              <button 
-                                className="page-nav-btn" 
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setCurrentPage(Math.min(1, currentPage + 1))
-                                }}
-                                disabled={currentPage === 1}
-                              >
-                                Next →
-                              </button>
-                            </div>
-                          </div>
-                        )}
                       </div>
-                    )
-                  })()}
-
-                  {(() => {
-                    const dinnerRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.dinner, 'dinner')
-                    return (
-                      <div className="meal-card" onClick={() => {
-                        if (selectedMeal === 'dinner') {
-                          setSelectedMeal(null)
-                          setCurrentPage(0)
-                        } else {
-                          setSelectedMeal('dinner')
-                          setCurrentPage(0)
-                        }
-                      }} data-expanded={selectedMeal === 'dinner'}>
-                        <div className="meal-header">
-                          <div className="meal-header-left">
-                            <span className="meal-icon">🌙</span>
-                            <h4 className="meal-title">Dinner</h4>
-                          </div>
-                          <span className="meal-arrow">▼</span>
+                      <div className="meal-feedback">
+                        <button className="feedback-button thumbs-up" onClick={e => {
+                          e.stopPropagation();
+                          handleRecipeFeedback(lunchRecipe?.id || mealPlan.week[currentDayIndex].meals.lunch, 'like');
+                        }} aria-label="Thumbs up">
+                          👍
+                          {feedbackStatus[lunchRecipe?.id || mealPlan.week[currentDayIndex].meals.lunch] === 'like' && <span className="feedback-confirm">Saved!</span>}
+                        </button>
+                        <button className="feedback-button thumbs-down" onClick={e => {
+                          e.stopPropagation();
+                          handleRecipeFeedback(lunchRecipe?.id || mealPlan.week[currentDayIndex].meals.lunch, 'dislike');
+                        }} aria-label="Thumbs down">
+                          👎
+                          {feedbackStatus[lunchRecipe?.id || mealPlan.week[currentDayIndex].meals.lunch] === 'dislike' && <span className="feedback-confirm">Saved!</span>}
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })()}
+                {(() => {
+                  const dinnerRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.dinner, 'dinner')
+                  return (
+                    <div className="meal-card">
+                      <div className="meal-content" onClick={() => {
+                        setSelectedMeal(dinnerRecipe)
+                        setCurrentPage(0)
+                        setCurrentInstructionStep(0)
+                      }}>
+                        <div className="meal-image">
+                          <img 
+                            src={dinnerRecipe?.image || '/images/placeholder.png'} 
+                            alt={dinnerRecipe?.name || 'Dinner'}
+                            onError={(e) => {
+                              e.currentTarget.src = '/images/placeholder.png'
+                            }}
+                          />
                         </div>
-                        <div className="meal-content">
-                          <p className="meal-description">
-                            {mealPlan.week[currentDayIndex].meals.dinner}
-                          </p>
+                        <div className="meal-info">
+                          <h4 className="meal-type">Dinner</h4>
+                          <p className="meal-name">{dinnerRecipe?.name || mealPlan.week[currentDayIndex].meals.dinner}</p>
                           {dinnerRecipe && (
-                            <div className="recipe-image">
-                              <Image 
-                                src={dinnerRecipe.image} 
-                                alt={dinnerRecipe.name}
-                                width={200}
-                                height={150}
-                                style={{ objectFit: 'cover' }}
-                              />
+                            <div className="meal-tags">
+                              <span className="cost-tag">£{dinnerRecipe.estTotalCost.toFixed(2)}</span>
+                              <span className="servings-tag">{dinnerRecipe.baseServings} servings</span>
                             </div>
                           )}
                         </div>
-                        {selectedMeal === 'dinner' && dinnerRecipe && (
-                          <div className="meal-book">
-                            <div className="book-header">
-                              <h5 className="book-title">{dinnerRecipe.name}</h5>
-                              <div className="page-indicator">
-                                <span className={`page-dot ${currentPage === 0 ? 'active' : ''}`}></span>
-                                <span className={`page-dot ${currentPage === 1 ? 'active' : ''}`}></span>
-                              </div>
-                            </div>
-                            <div className="book-content">
-                              <div className={`book-page ${currentPage === 0 ? 'active' : ''}`}>
-                                <h6>Ingredients</h6>
-                                <ul>
-                                  {dinnerRecipe.ingredients.map((ingredient, index) => (
-                                    <li key={index}>
-                                      <strong>{ingredient.qty}</strong> {ingredient.item}
-                                      {ingredient.allergens.length > 0 && (
-                                        <span className="allergen-tag">
-                                          ({ingredient.allergens.join(', ')})
-                                        </span>
-                                      )}
-                                    </li>
-                                  ))}
-                                </ul>
-                                <div className="recipe-info">
-                                  <p><strong>Servings:</strong> {dinnerRecipe.baseServings}</p>
-                                  <p><strong>Total Cost:</strong> £{dinnerRecipe.estTotalCost}</p>
-                                  <div className="recipe-tags">
-                                    {dinnerRecipe.tags.map((tag, index) => (
-                                      <span key={index} className="tag">{tag}</span>
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-                              <div className={`book-page ${currentPage === 1 ? 'active' : ''}`}>
-                                <h6>Instructions</h6>
-                                <ol>
-                                  {dinnerRecipe.steps.map((step, index) => (
-                                    <li key={index}>{step}</li>
-                                  ))}
-                                </ol>
-                              </div>
-                            </div>
-                            <div className="book-navigation">
-                              <button 
-                                className="page-nav-btn" 
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setCurrentPage(Math.max(0, currentPage - 1))
-                                }}
-                                disabled={currentPage === 0}
-                              >
-                                ← Previous
-                              </button>
-                              <button 
-                                className="page-nav-btn" 
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setCurrentPage(Math.min(1, currentPage + 1))
-                                }}
-                                disabled={currentPage === 1}
-                              >
-                                Next →
-                              </button>
-                            </div>
-                          </div>
-                        )}
                       </div>
-                    )
-                  })()}
-                </div>
+                      <div className="meal-feedback">
+                        <button className="feedback-button thumbs-up" onClick={e => {
+                          e.stopPropagation();
+                          handleRecipeFeedback(dinnerRecipe?.id || mealPlan.week[currentDayIndex].meals.dinner, 'like');
+                        }} aria-label="Thumbs up">
+                          👍
+                          {feedbackStatus[dinnerRecipe?.id || mealPlan.week[currentDayIndex].meals.dinner] === 'like' && <span className="feedback-confirm">Saved!</span>}
+                        </button>
+                        <button className="feedback-button thumbs-down" onClick={e => {
+                          e.stopPropagation();
+                          handleRecipeFeedback(dinnerRecipe?.id || mealPlan.week[currentDayIndex].meals.dinner, 'dislike');
+                        }} aria-label="Thumbs down">
+                          👎
+                          {feedbackStatus[dinnerRecipe?.id || mealPlan.week[currentDayIndex].meals.dinner] === 'dislike' && <span className="feedback-confirm">Saved!</span>}
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })()}
               </div>
             </div>
 
+            {/* Shopping List Section */}
             {showShoppingList && (
               <div className="shopping-list-section">
                 <h3>Shopping List</h3>
@@ -575,6 +528,177 @@ export default function MealPlanDetail() {
                       <label htmlFor={`item-${index}`}>{item}</label>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recipe Book Modal */}
+            {selectedMeal && (
+              <div className="recipe-modal-overlay" onClick={() => setSelectedMeal(null)}>
+                <div className="recipe-book-modal" onClick={(e) => e.stopPropagation()}>
+                  <div className="recipe-modal-header">
+                    <button 
+                      className="close-button"
+                      onClick={() => setSelectedMeal(null)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div className="recipe-book-container">
+                    {/* Book Spread */}
+                    <div className="book-spread">
+                      {/* Left Page */}
+                      <div className="book-page left-page">
+                        <div className="page-content">
+                          {currentPage === 0 ? (
+                            // Cover Page
+                            <div className="page-cover">
+                              <div className="cover-image">
+                                <img 
+                                  src={selectedMeal.image} 
+                                  alt={selectedMeal.name}
+                                  onError={(e) => {
+                                    e.currentTarget.src = '/images/placeholder.png'
+                                  }}
+                                />
+                              </div>
+                              <div className="cover-content">
+                                <h1 className="recipe-title">{selectedMeal.name}</h1>
+                                <div className="recipe-meta">
+                                  <span className="recipe-cost">£{selectedMeal.estTotalCost.toFixed(2)}</span>
+                                  <span className="recipe-servings">{selectedMeal.baseServings} servings</span>
+                                  {selectedMeal.allergens && selectedMeal.allergens.length > 0 && (
+                                    <div className="allergen-badges">
+                                      {selectedMeal.allergens.map((a: string, i: number) => (
+                                        <span key={i} className="allergen-badge">{a}</span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="recipe-tags">
+                                  {selectedMeal.tags.map((tag: string, index: number) => (
+                                    <span key={index} className="recipe-tag">{tag}</span>
+                                  ))}
+                                </div>
+                                <div className="modal-feedback">
+                                  <button className="feedback-button thumbs-up" onClick={() => handleRecipeFeedback(selectedMeal.id || selectedMeal.name, 'like')} aria-label="Thumbs up">
+                                    👍
+                                    {feedbackStatus[selectedMeal.id || selectedMeal.name] === 'like' && <span className="feedback-confirm">Saved!</span>}
+                                  </button>
+                                  <button className="feedback-button thumbs-down" onClick={() => handleRecipeFeedback(selectedMeal.id || selectedMeal.name, 'dislike')} aria-label="Thumbs down">
+                                    👎
+                                    {feedbackStatus[selectedMeal.id || selectedMeal.name] === 'dislike' && <span className="feedback-confirm">Saved!</span>}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            // Instruction Step (left)
+                            (() => {
+                              const stepIndex = (currentPage - 1) * 2;
+                              if (selectedMeal.steps[stepIndex]) {
+                                return (
+                                  <div className="page-instruction">
+                                    <div className="step-header">
+                                      <h2>Step {stepIndex + 1}</h2>
+                                      <div className="step-progress">
+                                        {stepIndex + 1} of {selectedMeal.steps.length}
+                                      </div>
+                                    </div>
+                                    <div className="step-content">
+                                      <p className="step-text">{selectedMeal.steps[stepIndex]}</p>
+                                    </div>
+                                  </div>
+                                );
+                              } else {
+                                return null;
+                              }
+                            })()
+                          )}
+                        </div>
+                      </div>
+                      {/* Spine */}
+                      <div className="book-spine"></div>
+                      {/* Right Page */}
+                      <div className="book-page right-page">
+                        <div className="page-content">
+                          {currentPage === 0 ? (
+                            // Ingredients Page
+                            <div className="page-ingredients">
+                              <div className="ingredients-header-sticky">Ingredients</div>
+                              <div className="ingredients-list">
+                                {selectedMeal.ingredients.map((ingredient: any, index: number) => (
+                                  <div key={index} className="ingredient-row">
+                                    <span className="ingredient-name">{ingredient.item}</span>
+                                    <span className="ingredient-qty">{ingredient.qty}{ingredient.note ? ` (${ingredient.note})` : ''}</span>
+                                    <span className="ingredient-cost">£{ingredient.estCost.toFixed(2)}</span>
+                                  </div>
+                                ))}
+                              </div>
+                              <div className="total-cost">
+                                <strong>Total Cost: £{selectedMeal.estTotalCost.toFixed(2)}</strong>
+                              </div>
+                            </div>
+                          ) : (
+                            // Instruction Step (right)
+                            (() => {
+                              const stepIndex = (currentPage - 1) * 2 + 1;
+                              if (selectedMeal.steps[stepIndex]) {
+                                return (
+                                  <div className="page-instruction">
+                                    <div className="step-header">
+                                      <h2>Step {stepIndex + 1}</h2>
+                                      <div className="step-progress">
+                                        {stepIndex + 1} of {selectedMeal.steps.length}
+                                      </div>
+                                    </div>
+                                    <div className="step-content">
+                                      <p className="step-text">{selectedMeal.steps[stepIndex]}</p>
+                                    </div>
+                                  </div>
+                                );
+                              } else {
+                                return null;
+                              }
+                            })()
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    {/* Book Navigation */}
+                    <div className="book-navigation">
+                      <button 
+                        className="page-nav-button"
+                        onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                        disabled={currentPage === 0}
+                      >
+                        ← Previous Spread
+                      </button>
+                      <div className="page-indicator">
+                        <span className="page-counter">
+                          Spread {currentPage + 1} of {Math.ceil(selectedMeal.steps.length / 2) + 1}
+                        </span>
+                        <div className="page-dots">
+                          {Array.from({ length: Math.ceil(selectedMeal.steps.length / 2) + 1 }, (_, i) => (
+                            <button
+                              key={i}
+                              className={`page-dot ${currentPage === i ? 'active' : ''}`}
+                              onClick={() => setCurrentPage(i)}
+                            >
+                              {i + 1}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <button 
+                        className="page-nav-button"
+                        onClick={() => setCurrentPage(Math.min(Math.ceil(selectedMeal.steps.length / 2), currentPage + 1))}
+                        disabled={currentPage >= Math.ceil(selectedMeal.steps.length / 2)}
+                      >
+                        Next Spread →
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -728,11 +852,6 @@ export default function MealPlanDetail() {
           font-weight: 500;
         }
 
-        .day-number {
-          font-size: 1.2rem;
-          font-weight: 700;
-        }
-
         .current-day-content {
           padding: 2rem;
         }
@@ -836,16 +955,6 @@ export default function MealPlanDetail() {
           margin: 0;
         }
 
-        .meal-arrow {
-          color: var(--dark-grey);
-          font-size: 0.9rem;
-          transition: transform 0.3s;
-        }
-
-        .meal-card[data-expanded="true"] .meal-arrow {
-          transform: rotate(180deg);
-        }
-
         .meal-content {
           display: flex;
           flex-direction: column;
@@ -862,165 +971,6 @@ export default function MealPlanDetail() {
           border-radius: 8px;
           overflow: hidden;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .meal-book {
-          margin-top: 1.5rem;
-          padding: 1.5rem;
-          background: var(--light-grey);
-          border-radius: 12px;
-          border: 1px solid var(--border-grey);
-          animation: slideDown 0.3s ease-out;
-        }
-
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .book-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1.5rem;
-          padding-bottom: 1rem;
-          border-bottom: 1px solid var(--border-grey);
-        }
-
-        .book-title {
-          color: var(--navy-blue);
-          font-size: 1.2rem;
-          font-weight: 600;
-          margin: 0;
-        }
-
-        .page-indicator {
-          display: flex;
-          gap: 0.5rem;
-        }
-
-        .page-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: var(--border-grey);
-          transition: all 0.3s;
-        }
-
-        .page-dot.active {
-          background: var(--navy-blue);
-          transform: scale(1.2);
-        }
-
-        .book-content {
-          position: relative;
-          min-height: 200px;
-          margin-bottom: 1.5rem;
-        }
-
-        .book-page {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          opacity: 0;
-          transform: translateX(100%);
-          transition: all 0.4s ease-in-out;
-          pointer-events: none;
-        }
-
-        .book-page.active {
-          opacity: 1;
-          transform: translateX(0);
-          pointer-events: all;
-        }
-
-        .book-page h6 {
-          color: var(--navy-blue);
-          font-size: 1.1rem;
-          font-weight: 600;
-          margin-bottom: 1rem;
-        }
-
-        .book-page ul,
-        .book-page ol {
-          color: var(--dark-grey);
-          line-height: 1.6;
-          margin: 0;
-          padding-left: 1.5rem;
-        }
-
-        .book-page li {
-          margin-bottom: 0.5rem;
-        }
-
-        .allergen-tag {
-          color: var(--soft-coral);
-          font-size: 0.8rem;
-          font-style: italic;
-        }
-
-        .recipe-info {
-          margin-top: 1.5rem;
-          padding-top: 1rem;
-          border-top: 1px solid var(--border-grey);
-        }
-
-        .recipe-info p {
-          margin-bottom: 0.5rem;
-          color: var(--dark-grey);
-        }
-
-        .recipe-tags {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.5rem;
-          margin-top: 1rem;
-        }
-
-        .tag {
-          background: var(--pastel-green);
-          color: var(--navy-blue);
-          padding: 0.25rem 0.5rem;
-          border-radius: 4px;
-          font-size: 0.8rem;
-          font-weight: 500;
-        }
-
-        .book-navigation {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding-top: 1rem;
-          border-top: 1px solid var(--border-grey);
-        }
-
-        .page-nav-btn {
-          background: var(--pastel-green);
-          color: var(--navy-blue);
-          border: none;
-          padding: 0.5rem 1rem;
-          border-radius: 6px;
-          cursor: pointer;
-          font-size: 0.9rem;
-          font-weight: 600;
-          transition: all 0.3s;
-        }
-
-        .page-nav-btn:hover:not(:disabled) {
-          background: #9BC8AB;
-          transform: translateY(-1px);
-        }
-
-        .page-nav-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
         }
 
         .shopping-list-section {
@@ -1104,6 +1054,498 @@ export default function MealPlanDetail() {
           margin-bottom: 1rem;
         }
 
+        .recipe-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.6);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+        }
+
+        .recipe-book-modal {
+          background: var(--white);
+          border-radius: 16px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+          width: 90%;
+          max-width: 1000px;
+          height: 90%;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .recipe-modal-header {
+          display: flex;
+          justify-content: flex-end;
+          padding: 1rem;
+          border-bottom: 1px solid var(--border-grey);
+        }
+
+        .close-button {
+          background: none;
+          border: none;
+          font-size: 2rem;
+          color: var(--dark-grey);
+          cursor: pointer;
+          transition: color 0.3s;
+        }
+
+        .close-button:hover {
+          color: var(--navy-blue);
+        }
+
+        .recipe-book-container {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          overflow-y: auto;
+          padding: 2rem;
+        }
+
+        .recipe-book {
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          position: relative;
+        }
+
+        .book-spine {
+          position: absolute;
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 100px;
+          height: 100%;
+          background: var(--navy-blue);
+          border-radius: 10px;
+          z-index: 1;
+        }
+
+        .book-page {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          padding: 2rem;
+          position: relative;
+          background: var(--white);
+          border: 1px solid var(--border-grey);
+          border-radius: 12px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          overflow-y: auto;
+        }
+
+        .left-page {
+          align-items: flex-start;
+        }
+
+        .right-page {
+          align-items: flex-end;
+        }
+
+        .page-content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: 2rem;
+        }
+
+        .page-cover {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: 2rem;
+        }
+
+        .cover-image {
+          width: 200px;
+          height: 200px;
+          border-radius: 10px;
+          overflow: hidden;
+          margin-bottom: 1.5rem;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .cover-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .cover-content {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .recipe-title {
+          font-size: 2.5rem;
+          font-weight: 800;
+          color: var(--navy-blue);
+          margin-bottom: 0.5rem;
+        }
+
+        .recipe-meta {
+          display: flex;
+          gap: 1rem;
+          font-size: 1.1rem;
+          color: var(--dark-grey);
+          margin-bottom: 1rem;
+        }
+
+        .recipe-tags {
+          display: flex;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+        }
+
+        .recipe-tag {
+          background: var(--light-grey);
+          color: var(--navy-blue);
+          padding: 0.5rem 1rem;
+          border-radius: 20px;
+          font-size: 0.8rem;
+          font-weight: 600;
+        }
+
+        .modal-feedback {
+          display: flex;
+          gap: 1rem;
+          margin-top: 1.5rem;
+        }
+
+        .feedback-button {
+          background: var(--light-grey);
+          border: 1px solid var(--border-grey);
+          border-radius: 20px;
+          padding: 0.75rem 1.5rem;
+          cursor: pointer;
+          font-size: 1.2rem;
+          transition: all 0.3s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+        }
+
+        .feedback-button:hover {
+          background: var(--pastel-green);
+          border-color: var(--pastel-green);
+          transform: translateY(-2px);
+        }
+
+        .feedback-button.thumbs-up {
+          color: var(--green);
+        }
+
+        .feedback-button.thumbs-down {
+          color: var(--red);
+        }
+
+        .feedback-confirm {
+          font-size: 0.8rem;
+          color: var(--dark-grey);
+          margin-left: 0.5rem;
+        }
+
+        .page-ingredients {
+          padding: 2rem;
+        }
+
+        .page-ingredients h2 {
+          font-size: 2rem;
+          font-weight: 700;
+          color: var(--navy-blue);
+          margin-bottom: 1.5rem;
+        }
+
+        .ingredients-list-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+          gap: 1.5rem;
+          margin-bottom: 2rem;
+        }
+
+        .ingredients-list-flex {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+          margin-bottom: 2rem;
+        }
+
+        .ingredient-card {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background: var(--light-grey);
+          border: 1px solid var(--border-grey);
+          border-radius: 10px;
+          padding: 1.25rem;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .ingredient-main {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+        }
+
+        .ingredient-name {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: var(--navy-blue);
+        }
+
+        .ingredient-qty {
+          font-size: 0.9rem;
+          color: var(--dark-grey);
+          font-weight: 600;
+        }
+
+        .ingredient-note {
+          font-size: 0.9rem;
+          color: var(--dark-grey);
+        }
+
+        .ingredient-meta {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 0.5rem;
+        }
+
+        .ingredient-cost {
+          font-size: 0.9rem;
+          color: var(--navy-blue);
+          font-weight: 600;
+        }
+
+        .allergen-tags {
+          display: flex;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+        }
+
+        .allergen-badge {
+          background: var(--light-grey);
+          color: var(--navy-blue);
+          padding: 0.3rem 0.7rem;
+          border-radius: 15px;
+          font-size: 0.75rem;
+          font-weight: 600;
+        }
+
+        .total-cost {
+          text-align: right;
+          font-size: 1.2rem;
+          font-weight: 700;
+          color: var(--navy-blue);
+          margin-top: 1rem;
+        }
+
+        .page-instruction {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: 2rem;
+        }
+
+        .step-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+          margin-bottom: 1.5rem;
+        }
+
+        .step-header h2 {
+          font-size: 1.8rem;
+          font-weight: 700;
+          color: var(--navy-blue);
+          margin: 0;
+        }
+
+        .step-progress {
+          font-size: 0.9rem;
+          color: var(--dark-grey);
+          font-weight: 500;
+        }
+
+        .step-content {
+          font-size: 1.1rem;
+          color: var(--dark-grey);
+          line-height: 1.8;
+          margin-bottom: 1.5rem;
+        }
+
+        .step-number-large {
+          font-size: 4rem;
+          font-weight: 800;
+          color: var(--navy-blue);
+          opacity: 0.3;
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: -1;
+        }
+
+        .book-spread {
+          display: flex;
+          width: 100%;
+          height: 100%;
+          position: relative;
+        }
+
+        .book-navigation {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1rem 2rem;
+          border-top: 1px solid var(--border-grey);
+          background: var(--light-grey);
+        }
+
+        .page-nav-button {
+          background: var(--pastel-green);
+          color: var(--navy-blue);
+          border: none;
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 0.9rem;
+          font-weight: 600;
+          transition: all 0.3s;
+          white-space: nowrap;
+        }
+
+        .page-nav-button:hover {
+          background: #9BC8AB;
+          transform: translateY(-2px);
+        }
+
+        .page-nav-button:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          background: var(--border-grey);
+          color: var(--dark-grey);
+        }
+
+        .page-indicator {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 0.9rem;
+          color: var(--dark-grey);
+          font-weight: 500;
+        }
+
+        .page-counter {
+          font-weight: 600;
+          color: var(--navy-blue);
+        }
+
+        .page-dots {
+          display: flex;
+          gap: 0.5rem;
+        }
+
+        .page-dot {
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          background: var(--border-grey);
+          color: var(--dark-grey);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.8rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+        }
+
+        .page-dot:hover:not(.active) {
+          background: var(--light-grey);
+          transform: scale(1.1);
+        }
+
+        .page-dot.active {
+          background: var(--pastel-green);
+          color: var(--navy-blue);
+          border: 2px solid var(--navy-blue);
+        }
+
+        .ingredients-header-sticky {
+          position: sticky;
+          top: 0;
+          background: var(--white);
+          padding: 1rem 2rem;
+          border-bottom: 1px solid var(--border-grey);
+          z-index: 10;
+          font-size: 1.8rem;
+          font-weight: 700;
+          color: var(--navy-blue);
+          text-align: left;
+          width: 100%;
+          box-sizing: border-box;
+        }
+
+        .ingredient-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 1rem;
+          padding: 0.75rem 0;
+          border-bottom: 1px dashed var(--border-grey);
+        }
+
+        .ingredient-row:last-child {
+          border-bottom: none;
+        }
+
+        .ingredient-row .ingredient-name {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: var(--navy-blue);
+          flex: 1;
+        }
+
+        .ingredient-row .ingredient-qty {
+          font-size: 0.9rem;
+          color: var(--dark-grey);
+          font-weight: 600;
+          flex: 0.5;
+        }
+
+        .ingredient-row .ingredient-note {
+          font-size: 0.9rem;
+          color: var(--dark-grey);
+        }
+
+        .ingredient-row .ingredient-cost {
+          font-size: 0.9rem;
+          color: var(--navy-blue);
+          font-weight: 600;
+          flex: 0.3;
+        }
+
+        .ingredient-row .allergen-badge {
+          background: var(--light-grey);
+          color: var(--navy-blue);
+          padding: 0.3rem 0.7rem;
+          border-radius: 15px;
+          font-size: 0.75rem;
+          font-weight: 600;
+        }
+
         @media (max-width: 768px) {
           .dashboard-header-content {
             padding: 0 1rem;
@@ -1139,10 +1581,6 @@ export default function MealPlanDetail() {
             font-size: 0.8rem;
           }
 
-          .day-number {
-            font-size: 1rem;
-          }
-
           .current-day-content {
             padding: 1rem;
           }
@@ -1163,6 +1601,188 @@ export default function MealPlanDetail() {
 
           .shopping-list {
             grid-template-columns: 1fr;
+          }
+
+          .recipe-book-modal {
+            width: 95%;
+            height: 95%;
+          }
+
+          .recipe-book-container {
+            padding: 1rem;
+          }
+
+          .book-page {
+            padding: 1.5rem;
+          }
+
+          .page-content {
+            padding: 1.5rem;
+          }
+
+          .page-cover {
+            padding: 1.5rem;
+          }
+
+          .cover-image {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 1rem;
+          }
+
+          .recipe-title {
+            font-size: 2rem;
+          }
+
+          .recipe-meta {
+            font-size: 1rem;
+            gap: 0.5rem;
+          }
+
+          .recipe-tags {
+            gap: 0.5rem;
+          }
+
+          .recipe-tag {
+            padding: 0.3rem 0.7rem;
+            font-size: 0.7rem;
+          }
+
+          .modal-feedback {
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: center;
+          }
+
+          .feedback-button {
+            width: 100%;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+          }
+
+          .feedback-confirm {
+            font-size: 0.7rem;
+            margin-left: 0;
+          }
+
+          .page-ingredients {
+            padding: 1.5rem;
+          }
+
+          .page-ingredients h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+          }
+
+          .ingredients-list-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+          }
+
+          .ingredient-card {
+            padding: 1rem;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+          }
+
+          .ingredient-main {
+            width: 100%;
+            text-align: left;
+          }
+
+          .ingredient-meta {
+            width: 100%;
+            align-items: flex-start;
+            gap: 0.5rem;
+          }
+
+          .ingredient-name {
+            font-size: 1rem;
+          }
+
+          .ingredient-qty {
+            font-size: 0.8rem;
+          }
+
+          .ingredient-note {
+            font-size: 0.8rem;
+          }
+
+          .ingredient-cost {
+            font-size: 0.8rem;
+          }
+
+          .allergen-tags {
+            justify-content: flex-start;
+          }
+
+          .allergen-badge {
+            padding: 0.2rem 0.6rem;
+            font-size: 0.6rem;
+          }
+
+          .total-cost {
+            font-size: 1rem;
+            text-align: left;
+          }
+
+          .page-instruction {
+            padding: 1.5rem;
+          }
+
+          .step-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+          }
+
+          .step-header h2 {
+            font-size: 1.5rem;
+          }
+
+          .step-progress {
+            font-size: 0.8rem;
+          }
+
+          .step-content {
+            font-size: 1rem;
+            line-height: 1.6;
+          }
+
+          .step-number-large {
+            font-size: 3rem;
+            top: 40%;
+          }
+
+          .book-navigation {
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+          }
+
+          .page-nav-button {
+            width: 100%;
+            justify-content: center;
+          }
+
+          .page-indicator {
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.8rem;
+          }
+
+          .page-dots {
+            flex-wrap: wrap;
+            justify-content: center;
+          }
+
+          .page-dot {
+            width: 25px;
+            height: 25px;
+            font-size: 0.7rem;
           }
         }
       `}</style>

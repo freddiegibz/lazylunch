@@ -1,6 +1,7 @@
 import Head from 'next/head'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
+import { supabase } from '../lib/supabase';
 
 const plans = [
   {
@@ -10,7 +11,7 @@ const plans = [
     features: [
       'Weekly meal plan',
       'Grocery list',
-      '2 revisions',
+      '2 weekly meal plans',
     ],
   },
   {
@@ -21,7 +22,7 @@ const plans = [
       'Everything in Basic',
       'Dietary filters',
       'Guest plans',
-      '5 revisions',
+      '5 weekly meal plans',
     ],
   },
   {
@@ -31,7 +32,7 @@ const plans = [
     features: [
       'Everything in Standard',
       'Unlimited guest plans',
-      '10 revisions',
+      '10 weekly meal plans',
       'Priority support',
     ],
   },
@@ -39,7 +40,16 @@ const plans = [
 
 export default function UpgradeMembership() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
   const router = useRouter()
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+    };
+    fetchUser();
+  }, []);
 
   const handleUpgrade = async (priceId: string) => {
     setLoadingPlan(priceId)
@@ -47,7 +57,7 @@ export default function UpgradeMembership() {
       const res = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId }),
+        body: JSON.stringify({ priceId, supabaseUserId: userId }),
       })
       const data = await res.json()
       if (data.url) {
