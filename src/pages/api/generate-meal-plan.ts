@@ -68,12 +68,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (profileError) return res.status(500).json({ error: 'Failed to fetch user preferences' });
 
   const userData = {
-    servings: profile.servings || 2,
-    focus: profile.focus || 'variety',
-    allergens: profile.allergens || [],
-    dietaryRestrictions: profile.dietaryRestrictions || [],
-    cuisine: profile.cuisine || [],
-    otherPreferences: profile.otherPreferences || [],
+    servings: profile?.servings ?? 2,
+    focus: profile?.focus ?? 'variety',
+    allergens: profile?.allergens ?? [],
+    dietaryRestrictions: profile?.dietaryRestrictions ?? [],
+    cuisine: profile?.cuisine ?? [],
+    otherPreferences: profile?.otherPreferences ?? [],
   };
 
   // --- User Feedback ---
