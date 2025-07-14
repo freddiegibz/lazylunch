@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
 import { supabase } from '../lib/supabase'
+import { MealPlanService } from '../lib/meal-plan-service'
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null)
@@ -10,6 +11,13 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [upgradeLoading, setUpgradeLoading] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [recentMealPlans, setRecentMealPlans] = useState<any[]>([])
+  const [stats, setStats] = useState({
+    totalPlans: 0,
+    thisWeek: 0,
+    totalRecipes: 0,
+    savedMoney: 0
+  })
   const router = useRouter()
 
   // Add this effect to force a reload if returning from Stripe with ?success=true
@@ -41,6 +49,29 @@ export default function Dashboard() {
     }
   }
 
+  // Load user stats and recent meal plans
+  const loadUserData = async () => {
+    try {
+      const plans = await MealPlanService.getAllMealPlans()
+      const thisWeek = plans.filter(plan => {
+        if (!plan.created_at) return false
+        const planDate = new Date(plan.created_at)
+        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        return planDate > weekAgo
+      })
+      
+      setRecentMealPlans(plans.slice(0, 3)) // Get 3 most recent
+      setStats({
+        totalPlans: plans.length,
+        thisWeek: thisWeek.length,
+        totalRecipes: plans.reduce((acc, plan) => acc + (plan.week_data?.length || 0), 0),
+        savedMoney: Math.round(plans.length * 25) // Estimate £25 saved per plan
+      })
+    } catch (error) {
+      console.error('Error loading user data:', error)
+    }
+  }
+
   useEffect(() => {
     // Get current user session
     const getCurrentUser = async () => {
@@ -69,6 +100,9 @@ export default function Dashboard() {
           await createUserProfile(user.id)
           setMembership('free')
         }
+        
+        // Load user data after user is set
+        await loadUserData()
       } else {
         // No user found, redirect to signin
         router.push('/signin')
@@ -160,6 +194,13 @@ export default function Dashboard() {
     }
   }
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-GB', {
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -235,47 +276,166 @@ export default function Dashboard() {
         {/* Main Content */}
         <main className="dashboard-main">
           <div className="dashboard-content">
-            <h2 className="dashboard-title">
-              Welcome to your LazyLunch Dashboard!
-            </h2>
-            <p className="dashboard-subtitle">
-              Your AI-powered meal planning journey starts here.
-            </p>
-            
-            {/* Placeholder for meal planning features */}
-            <div className="dashboard-grid">
-              <div className="dashboard-card">
-                <h3>Generate Meal Plan</h3>
-                <p>Create a personalized weekly meal plan based on your preferences.</p>
-                <Link href="/generate-meal-plan" className="dashboard-card-button" style={{ textDecoration: 'none', display: 'inline-block' }}>
-                  Get Started
-                </Link>
+            {/* Welcome Section */}
+            <div className="welcome-section">
+              <h2 className="dashboard-title">
+                Welcome back! 👋
+              </h2>
+              <p className="dashboard-subtitle">
+                Ready to plan your next delicious week?
+              </p>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-icon">📊</div>
+                <div className="stat-content">
+                  <div className="stat-number">{stats.totalPlans}</div>
+                  <div className="stat-label">Total Meal Plans</div>
+                </div>
               </div>
-              
-              <div className="dashboard-card">
-                <h3>My Meal Plans</h3>
-                <p>View and manage your saved meal plans.</p>
-                <Link href="/my-meal-plans" className="dashboard-card-button" style={{ textDecoration: 'none', display: 'inline-block' }}>
-                  View Plans
-                </Link>
+              <div className="stat-card">
+                <div className="stat-icon">📅</div>
+                <div className="stat-content">
+                  <div className="stat-number">{stats.thisWeek}</div>
+                  <div className="stat-label">This Week</div>
+                </div>
               </div>
-              
-              <div className="dashboard-card">
-                <h3>Shopping Lists</h3>
-                <p>Generate and manage your grocery shopping lists.</p>
-                <button className="dashboard-card-button">
-                  Create List
-                </button>
+              <div className="stat-card">
+                <div className="stat-icon">🍽️</div>
+                <div className="stat-content">
+                  <div className="stat-number">{stats.totalRecipes}</div>
+                  <div className="stat-label">Recipes Tried</div>
+                </div>
               </div>
-              
-              <div className="dashboard-card">
-                <h3>Recipe Categories</h3>
-                <p>View recipes organized by meal type (breakfast, lunch, dinner, snack).</p>
-                <Link href="/recipe-categories" className="dashboard-card-button" style={{ textDecoration: 'none', display: 'inline-block' }}>
-                  View Categories
-                </Link>
+              <div className="stat-card">
+                <div className="stat-icon">💰</div>
+                <div className="stat-content">
+                  <div className="stat-number">£{stats.savedMoney}</div>
+                  <div className="stat-label">Money Saved</div>
+                </div>
               </div>
             </div>
+
+            {/* Quick Actions */}
+            <div className="quick-actions-section">
+              <h3 className="section-title">Quick Actions</h3>
+              <div className="quick-actions-grid">
+                <Link href="/generate-meal-plan" className="quick-action-card primary">
+                  <div className="quick-action-icon">✨</div>
+                  <div className="quick-action-content">
+                    <h4>Generate New Plan</h4>
+                    <p>Create a personalized meal plan</p>
+                  </div>
+                  <div className="quick-action-arrow">→</div>
+                </Link>
+                
+                <Link href="/my-meal-plans" className="quick-action-card">
+                  <div className="quick-action-icon">📋</div>
+                  <div className="quick-action-content">
+                    <h4>View My Plans</h4>
+                    <p>See your saved meal plans</p>
+                  </div>
+                  <div className="quick-action-arrow">→</div>
+                </Link>
+                
+                <Link href="/recipe-categories" className="quick-action-card">
+                  <div className="quick-action-icon">🍳</div>
+                  <div className="quick-action-content">
+                    <h4>Browse Recipes</h4>
+                    <p>Explore recipe categories</p>
+                  </div>
+                  <div className="quick-action-arrow">→</div>
+                </Link>
+                
+                <div className="quick-action-card">
+                  <div className="quick-action-icon">🛒</div>
+                  <div className="quick-action-content">
+                    <h4>Shopping Lists</h4>
+                    <p>Coming soon!</p>
+                  </div>
+                  <div className="quick-action-arrow">🔒</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            {recentMealPlans.length > 0 && (
+              <div className="recent-activity-section">
+                <h3 className="section-title">Recent Meal Plans</h3>
+                <div className="recent-plans-grid">
+                  {recentMealPlans.map((plan, index) => (
+                    <div key={plan.id} className="recent-plan-card">
+                      <div className="recent-plan-header">
+                        <div className="recent-plan-date">{formatDate(plan.created_at)}</div>
+                        <div className="recent-plan-days">{plan.week_data?.length || 0} days</div>
+                      </div>
+                      <div className="recent-plan-content">
+                        <div className="recent-plan-stats">
+                          <span>🍽️ {plan.week_data?.length || 0} meals</span>
+                          <span>🛒 {plan.shopping_list?.length || 0} items</span>
+                        </div>
+                        <button 
+                          onClick={() => router.push(`/meal-plan/${plan.id}`)}
+                          className="recent-plan-button"
+                        >
+                          View Details
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {stats.totalPlans > 3 && (
+                  <div className="view-all-section">
+                    <Link href="/my-meal-plans" className="view-all-button">
+                      View All Meal Plans ({stats.totalPlans})
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Getting Started (for new users) */}
+            {stats.totalPlans === 0 && (
+              <div className="getting-started-section">
+                <h3 className="section-title">Getting Started</h3>
+                <div className="getting-started-card">
+                  <div className="getting-started-icon">🎯</div>
+                  <div className="getting-started-content">
+                    <h4>Create Your First Meal Plan</h4>
+                    <p>Start by generating a personalized meal plan based on your preferences, dietary restrictions, and budget.</p>
+                    <Link href="/generate-meal-plan" className="getting-started-button">
+                      Generate My First Plan
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Membership Benefits */}
+            {membership === 'free' && (
+              <div className="membership-section">
+                <h3 className="section-title">Upgrade Your Experience</h3>
+                <div className="membership-card">
+                  <div className="membership-content">
+                    <h4>Unlock Premium Features</h4>
+                    <ul className="membership-benefits">
+                      <li>✨ Unlimited meal plans</li>
+                      <li>🎯 Advanced dietary filters</li>
+                      <li>👥 Share plans with family</li>
+                      <li>📱 Priority support</li>
+                    </ul>
+                    <button 
+                      onClick={() => router.push('/upgrade-membership')}
+                      className="membership-upgrade-button"
+                    >
+                      Upgrade Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </main>
       </div>

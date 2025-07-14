@@ -627,7 +627,7 @@ export default function MealPlanDetail() {
               <div className="recipe-modal-overlay" onClick={() => setSelectedMeal(null)}>
                 <div className="recipe-book-modal" onClick={(e) => e.stopPropagation()}>
                   <div className="recipe-modal-header">
-                    <button 
+                              <button 
                       className="close-button"
                       onClick={() => setSelectedMeal(null)}
                     >
@@ -638,19 +638,19 @@ export default function MealPlanDetail() {
                   <button
                     className="book-arrow book-arrow-left"
                     onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
-                    disabled={currentPage === 0}
+                                disabled={currentPage === 0}
                     aria-label="Previous page"
-                  >
+                              >
                     &#8592;
-                  </button>
-                  <button
+                              </button>
+                              <button 
                     className="book-arrow book-arrow-right"
                     onClick={() => setCurrentPage(Math.min(Math.ceil(selectedMeal.steps.length / 2), currentPage + 1))}
                     disabled={currentPage >= Math.ceil(selectedMeal.steps.length / 2)}
                     aria-label="Next page"
                   >
                     &#8594;
-                  </button>
+                              </button>
                   <div className="recipe-book-container">
                     {/* Book Spread */}
                     <div className="book-spread">
@@ -761,22 +761,22 @@ export default function MealPlanDetail() {
                             </div>
                                     <div className="step-content">
                                       <p className="step-text">{selectedMeal.steps[stepIndex]}</p>
-                                    </div>
-                                  </div>
+                            </div>
+                          </div>
                                 );
                               } else {
                                 return null;
                               }
                             })()
-                          )}
-                        </div>
+                        )}
                       </div>
-                    </div>
+                </div>
+              </div>
                     {/* Page X of Y indicator */}
                     <div style={{ textAlign: 'center', marginTop: '8px', fontWeight: 600, color: 'var(--navy-blue)' }}>
                       Page {currentPage + 1} of {Math.ceil(selectedMeal.steps.length / 2) + 1}
+            </div>
                     </div>
-                  </div>
                 </div>
               </div>
             )}
