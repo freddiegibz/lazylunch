@@ -1,11 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { createClient } from '@supabase/supabase-js';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { OpenAI } from 'openai';
+import { supabase } from '../../lib/supabase';
 
-const supabaseUrl = 'https://agegxqyzrvnykxfmaycq.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // (truncated for brevity)
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -13,108 +11,238 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // 1. Auth: get user from Supabase token
   const authHeader = req.headers['authorization'];
+  console.log('Auth header present:', !!authHeader);
   const token = authHeader && authHeader.startsWith('Bearer ')
     ? authHeader.replace('Bearer ', '')
     : null;
+  console.log('Token present:', !!token);
   if (!token) return res.status(401).json({ error: 'Not authenticated' });
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    global: { headers: { Authorization: `Bearer ${token}` } }
-  });
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  // Use the same supabase client as frontend
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  console.log('User data:', !!user, 'User error:', userError);
   if (!user || userError) return res.status(401).json({ error: 'Not authenticated' });
 
   // 2. Enforce 5 meal plan/week limit for standard members
-  // (Assume membership is in user.user_metadata.membership or fetch from profiles table)
-  let membership = user.user_metadata?.membership;
-  if (!membership) {
-    // Try to fetch from profiles table
-    const { data: profile } = await supabase.from('profiles').select('membership').eq('id', user.id).single();
-    membership = profile?.membership || 'free';
-  }
-  if (membership === 'standard') {
-    const { data: plans, error: plansError } = await supabase
-      .from('meal_plans')
-      .select('created_at')
-      .eq('user_id', user.id)
-      .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
-    if (plansError) return res.status(500).json({ error: 'Failed to check plan limit' });
-    if (plans.length >= 5) {
-      // Find the oldest plan in the last 7 days
-      const oldest = plans.map(p => new Date(p.created_at)).sort((a, b) => a.getTime() - b.getTime())[0];
-      const nextAllowed = new Date(oldest.getTime() + 7 * 24 * 60 * 60 * 1000);
-      const msLeft = nextAllowed.getTime() - Date.now();
-      return res.status(429).json({ error: 'Meal plan limit reached', msLeft });
+  try {
+    let membership = user.user_metadata?.membership;
+    if (!membership) {
+      // Try to fetch from profiles table
+      const { data: profile } = await supabase.from('profiles').select('membership').eq('id', user.id).single();
+      membership = profile?.membership || 'free';
     }
+    console.log('Membership check passed');
+    
+    if (membership === 'standard') {
+      const { data: plans, error: plansError } = await supabase
+        .from('meal_plans')
+        .select('created_at')
+        .eq('user_id', user.id)
+        .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+      if (plansError) return res.status(500).json({ error: 'Failed to check plan limit' });
+      if (plans.length >= 5) {
+        // Find the oldest plan in the last 7 days
+        const oldest = plans.map(p => new Date(p.created_at)).sort((a, b) => a.getTime() - b.getTime())[0];
+        const nextAllowed = new Date(oldest.getTime() + 7 * 24 * 60 * 60 * 1000);
+        const msLeft = nextAllowed.getTime() - Date.now();
+        return res.status(429).json({ error: 'Meal plan limit reached', msLeft });
+      }
+    }
+  } catch (error) {
+    console.error('Error in membership check:', error);
+    return res.status(500).json({ error: 'Error checking membership' });
   }
 
   // 3. Read and combine all recipes
-  const breakfastRaw = JSON.parse(await fs.readFile(path.join(process.cwd(), 'src/lib/breakfast.json'), 'utf8'));
-  const lunchRaw = JSON.parse(await fs.readFile(path.join(process.cwd(), 'src/lib/lunch.json'), 'utf8'));
-  const dinnerRaw = JSON.parse(await fs.readFile(path.join(process.cwd(), 'src/lib/dinner.json'), 'utf8'));
+  let allRecipes: any[] = [];
+  let fullRecipes: any[] = [];
+  try {
+    console.log('Loading recipes...');
+    const breakfastRaw = JSON.parse(await fs.readFile(path.join(process.cwd(), 'src/lib/breakfast.json'), 'utf8'));
+    const lunchRaw = JSON.parse(await fs.readFile(path.join(process.cwd(), 'src/lib/lunch.json'), 'utf8'));
+    const dinnerRaw = JSON.parse(await fs.readFile(path.join(process.cwd(), 'src/lib/dinner.json'), 'utf8'));
 
-  // Add 'type' field to each recipe
-  const breakfast = breakfastRaw.map((r: any) => ({ ...r, type: 'breakfast' }));
-  const lunch = lunchRaw.map((r: any) => ({ ...r, type: 'lunch' }));
-  const dinner = dinnerRaw.map((r: any) => ({ ...r, type: 'dinner' }));
-  const allRecipes = [...breakfast, ...lunch, ...dinner];
+    // Store full recipes for later use
+    const breakfast = breakfastRaw.map((r: any) => ({ ...r, type: 'breakfast' }));
+    const lunch = lunchRaw.map((r: any) => ({ ...r, type: 'lunch' }));
+    const dinner = dinnerRaw.map((r: any) => ({ ...r, type: 'dinner' }));
+    fullRecipes = [...breakfast, ...lunch, ...dinner];
+    
+    // Create minimal recipe list for OpenAI (just id, name, type)
+    allRecipes = fullRecipes.map((r: any) => ({ 
+      id: r.id, 
+      name: r.name, 
+      type: r.type 
+    }));
+    console.log('Recipes loaded, total count:', allRecipes.length);
+  } catch (error) {
+    console.error('Error loading recipes:', error);
+    return res.status(500).json({ error: 'Error loading recipes' });
+  }
 
   // 4. Read the prompt template
-  const promptPath = path.join(process.cwd(), 'src/lib/mealplan-chatgpt-prompt.txt');
-  let promptTemplate = await fs.readFile(promptPath, 'utf8');
+  let promptTemplate = '';
+  try {
+    console.log('Loading prompt template...');
+    const promptPath = path.join(process.cwd(), 'src/lib/mealplan-chatgpt-prompt.txt');
+    promptTemplate = await fs.readFile(promptPath, 'utf8');
+    console.log('Prompt template loaded');
+  } catch (error) {
+    console.error('Error loading prompt template:', error);
+    return res.status(500).json({ error: 'Error loading prompt template' });
+  }
 
   // 5. Gather user personalization and feedback from Supabase
-  // --- User Preferences ---
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('servings, focus, allergens, dietaryRestrictions, cuisine, otherPreferences, weeklyBudget')
-    .eq('id', user.id)
-    .single();
+  let userData: any = {};
+  let userFeedback: any = {};
+  try {
+    console.log('Processing user preferences from request...');
+    // Use preferences from request body instead of fetching from profiles
+    const { preferences } = req.body;
+    
+    userData = {
+      servings: preferences?.servings ?? 2,
+      focus: preferences?.focus ?? 'variety',
+      allergens: preferences?.allergens ?? [],
+      dietaryRestrictions: preferences?.dietaryRestrictions ?? [],
+      cuisine: preferences?.cuisine ?? [],
+      otherPreferences: preferences?.otherPreferences ?? [],
+      weeklyBudget: preferences?.weeklyBudget ?? null,
+    };
+    console.log('User preferences processed');
 
-  if (profileError) return res.status(500).json({ error: 'Failed to fetch user preferences' });
+    // --- User Feedback ---
+    console.log('Fetching user feedback...');
+    const { data: feedbackRows, error: feedbackError } = await supabase
+      .from('recipe_feedback')
+      .select('recipe_id, feedback')
+      .eq('user_id', user.id);
 
-  const userData = {
-    servings: profile?.servings ?? 2,
-    focus: profile?.focus ?? 'variety',
-    allergens: profile?.allergens ?? [],
-    dietaryRestrictions: profile?.dietaryRestrictions ?? [],
-    cuisine: profile?.cuisine ?? [],
-    otherPreferences: profile?.otherPreferences ?? [],
-    weeklyBudget: profile?.weeklyBudget ?? null,
-  };
+    if (feedbackError) {
+      console.error('Feedback error:', feedbackError);
+      return res.status(500).json({ error: 'Failed to fetch user feedback' });
+    }
+    console.log('User feedback fetched');
 
-  // --- User Feedback ---
-  const { data: feedbackRows, error: feedbackError } = await supabase
-    .from('recipe_feedback')
-    .select('recipe_id, feedback')
-    .eq('user_id', user.id);
+    userFeedback = {
+      likes: feedbackRows.filter(f => f.feedback === 'like').map(f => f.recipe_id),
+      dislikes: feedbackRows.filter(f => f.feedback === 'dislike').map(f => f.recipe_id),
+    };
+  } catch (error) {
+    console.error('Error processing user data:', error);
+    return res.status(500).json({ error: 'Error processing user data' });
+  }
 
-  if (feedbackError) return res.status(500).json({ error: 'Failed to fetch user feedback' });
+  // 6. Fill in the template and call OpenAI
+  try {
+    console.log('Preparing OpenAI prompt...');
+    let prompt = promptTemplate
+      .replace('[user.servings]', userData.servings)
+      .replace('[user.focus]', userData.focus)
+      .replace('[user.allergens]', JSON.stringify(userData.allergens))
+      .replace('[user.dietaryRestrictions]', JSON.stringify(userData.dietaryRestrictions))
+      .replace('[user.cuisine]', JSON.stringify(userData.cuisine))
+      .replace('[user.otherPreferences]', JSON.stringify(userData.otherPreferences))
+      .replace('[user.weeklyBudget]', userData.weeklyBudget)
+      .replace('[user.likedRecipes]', JSON.stringify(userFeedback.likes))
+      .replace('[user.dislikedRecipes]', JSON.stringify(userFeedback.dislikes))
+      .replace('[Insert JSON array of all available recipes here]', JSON.stringify(allRecipes, null, 2));
 
-  const userFeedback = {
-    likes: feedbackRows.filter(f => f.feedback === 'like').map(f => f.recipe_id),
-    dislikes: feedbackRows.filter(f => f.feedback === 'dislike').map(f => f.recipe_id),
-  };
-
-  // 6. Fill in the template (simple replace, you may want a real template engine)
-  let prompt = promptTemplate
-    .replace('[user.servings]', userData.servings)
-    .replace('[user.focus]', userData.focus)
-    .replace('[user.allergens]', JSON.stringify(userData.allergens))
-    .replace('[user.dietaryRestrictions]', JSON.stringify(userData.dietaryRestrictions))
-    .replace('[user.cuisine]', JSON.stringify(userData.cuisine))
-    .replace('[user.otherPreferences]', JSON.stringify(userData.otherPreferences))
-    .replace('[user.weeklyBudget]', userData.weeklyBudget)
-    .replace('[user.likedRecipes]', JSON.stringify(userFeedback.likes))
-    .replace('[user.dislikedRecipes]', JSON.stringify(userFeedback.dislikes))
-    .replace('[Insert JSON array of all available recipes here]', JSON.stringify(allRecipes, null, 2));
-
-  // 7. Send to OpenAI
-  const openaiRes = await openai.chat.completions.create({
-    model: 'gpt-4',
-    messages: [{ role: 'user', content: prompt }],
+    console.log('Calling OpenAI...');
+    // 7. Send to OpenAI
+    const openaiRes = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: prompt }],
       temperature: 0.7,
-  });
+    });
+    console.log('OpenAI response received');
+    console.log('Response content length:', openaiRes.choices[0].message.content?.length || 0);
+    console.log('Response preview:', openaiRes.choices[0].message.content?.substring(0, 200) + '...');
 
-  // 8. Return the generated plan
-  res.status(200).json({ plan: openaiRes.choices[0].message.content });
+    // 8. Parse OpenAI response and populate full recipe data
+    try {
+      const aiResponse = openaiRes.choices[0].message.content;
+      if (!aiResponse) {
+        throw new Error('No response content from OpenAI');
+      }
+      
+      console.log('Raw AI response:', aiResponse);
+      console.log('Response length:', aiResponse.length);
+      
+      // Try to clean the response if it's malformed
+      let cleanedResponse = aiResponse.trim();
+      
+      // If the response doesn't start with {, try to find the JSON
+      if (!cleanedResponse.startsWith('{')) {
+        const jsonStart = cleanedResponse.indexOf('{');
+        if (jsonStart !== -1) {
+          cleanedResponse = cleanedResponse.substring(jsonStart);
+        }
+      }
+      
+      // If the response doesn't end with }, try to find the end
+      if (!cleanedResponse.endsWith('}')) {
+        const jsonEnd = cleanedResponse.lastIndexOf('}');
+        if (jsonEnd !== -1) {
+          cleanedResponse = cleanedResponse.substring(0, jsonEnd + 1);
+        }
+      }
+      
+      console.log('Cleaned response:', cleanedResponse);
+      
+      const mealPlanData = JSON.parse(cleanedResponse);
+      
+      // Populate full recipe data for each meal
+      const populatedWeek = mealPlanData.week.map((day: any) => ({
+        ...day,
+        meals: {
+          breakfast: fullRecipes.find(r => r.id === day.meals.breakfast.recipeId) || day.meals.breakfast,
+          lunch: fullRecipes.find(r => r.id === day.meals.lunch.recipeId) || day.meals.lunch,
+          dinner: fullRecipes.find(r => r.id === day.meals.dinner.recipeId) || day.meals.dinner
+        }
+      }));
+      
+      const finalMealPlan = {
+        ...mealPlanData,
+        week: populatedWeek
+      };
+      
+      console.log('Meal plan populated with full recipe data');
+      res.status(200).json({ plan: finalMealPlan });
+    } catch (parseError: any) {
+      console.error('Error parsing OpenAI response:', parseError);
+      console.error('Raw response was:', openaiRes.choices[0].message.content);
+      return res.status(500).json({ 
+        error: 'Error processing AI response. Please try again.',
+        details: parseError.message 
+      });
+    }
+  } catch (error: any) {
+    console.error('Error in OpenAI call or response processing:', error);
+    
+    // Handle specific OpenAI errors
+    if (error.code === 'rate_limit_exceeded') {
+      return res.status(429).json({ 
+        error: 'OpenAI rate limit exceeded. Please try again in a few minutes.',
+        retryAfter: error.headers?.['x-ratelimit-reset-tokens'] || 60
+      });
+    }
+    
+    if (error.code === 'insufficient_quota') {
+      return res.status(402).json({ 
+        error: 'OpenAI quota exceeded. Please check your API billing.'
+      });
+    }
+    
+    if (error.code === 'invalid_api_key') {
+      return res.status(401).json({ 
+        error: 'OpenAI API key is invalid or missing.'
+      });
+    }
+    
+    return res.status(500).json({ 
+      error: 'Error generating meal plan with AI. Please try again.',
+      details: error.message 
+    });
+  }
 } 

@@ -3,8 +3,10 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
 import { MealPlanService } from '../lib/meal-plan-service'
-import { getRandomRecipe, MealType, getRecipesByMealTypeWithOverrides } from '../lib/recipe-categories'
-import recipes from '../lib/dinner.json'
+import { getRandomRecipe, MealType } from '../lib/recipe-categories'
+import breakfastRecipes from '../lib/breakfast.json'
+import lunchRecipes from '../lib/lunch.json'
+import dinnerRecipes from '../lib/dinner.json'
 import { supabase } from '../lib/supabase'
 
 // Preference options
@@ -184,8 +186,15 @@ export default function GenerateMealPlan() {
 
   // Function to find recipe by name and meal type
   const findRecipeByName = (mealName: string, mealType: MealType) => {
-    const categorizedRecipes = getRecipesByMealTypeWithOverrides(mealType)
-    return categorizedRecipes.find(recipe => 
+    let recipes: any[] = [];
+    if (mealType === 'breakfast') {
+      recipes = breakfastRecipes;
+    } else if (mealType === 'lunch') {
+      recipes = lunchRecipes;
+    } else if (mealType === 'dinner') {
+      recipes = dinnerRecipes;
+    }
+    return recipes.find(recipe => 
       recipe.name.toLowerCase().includes(mealName.toLowerCase()) ||
       mealName.toLowerCase().includes(recipe.name.toLowerCase())
     )
@@ -193,40 +202,127 @@ export default function GenerateMealPlan() {
 
 
 
+  // Function to populate recipe objects from IDs
+  const populateRecipeObjects = (weekData: any[]) => {
+    const getRecipeById = (id: string, mealType: MealType) => {
+      if (mealType === 'breakfast') return breakfastRecipes.find(r => r.id === id);
+      if (mealType === 'lunch') return lunchRecipes.find(r => r.id === id);
+      if (mealType === 'dinner') return dinnerRecipes.find(r => r.id === id);
+      return null;
+    };
+
+    return weekData.map((day: any) => ({
+      ...day,
+      meals: {
+        breakfast: typeof day.meals.breakfast === 'string' 
+          ? getRecipeById(day.meals.breakfast, 'breakfast') 
+          : day.meals.breakfast,
+        lunch: typeof day.meals.lunch === 'string' 
+          ? getRecipeById(day.meals.lunch, 'lunch') 
+          : day.meals.lunch,
+        dinner: typeof day.meals.dinner === 'string' 
+          ? getRecipeById(day.meals.dinner, 'dinner') 
+          : day.meals.dinner,
+      }
+    }));
+  };
+
+  // Function to generate shopping list from recipe objects
+  const generateShoppingList = (weekData: any[]) => {
+    const allIngredients = new Set<string>();
+    
+    weekData.forEach((day: any) => {
+      Object.values(day.meals).forEach((meal: any) => {
+        if (meal && typeof meal === 'object' && meal.ingredients) {
+          meal.ingredients.forEach((ingredient: any) => {
+            allIngredients.add(ingredient.item);
+          });
+        }
+      });
+    });
+    
+    return Array.from(allIngredients).sort();
+  };
+
   const generateMealPlan = async () => {
     setLoading(true)
-    
-    // Log preferences for OpenAI integration (frontend only)
-    console.log('User Preferences for OpenAI:', preferences)
-    
     try {
-      // Simulate API call delay
-      setTimeout(async () => {
-        try {
-          // Generate meal plan using real recipes (simplified for frontend)
-          const generatedMealPlan = generateMealPlanWithRecipes()
-          
-          // Save the meal plan to Supabase
-          const savedMealPlan = await MealPlanService.saveMealPlan(
-            generatedMealPlan.week,
-            generatedMealPlan.shoppingList
-          )
-          
-          if (savedMealPlan) {
-            // Redirect to the meal plan detail page
-            router.push(`/meal-plan/${savedMealPlan.id}`)
-          } else {
-            console.error('Failed to save meal plan')
-            setLoading(false)
-          }
-        } catch (error) {
-          console.error('Error saving meal plan:', error)
-          setLoading(false)
+      // Get the current Supabase session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      console.log('Session present:', !!session, 'Session error:', sessionError);
+      console.log('Access token present:', !!session?.access_token);
+      if (sessionError || !session) {
+        alert('Authentication error. Please sign in again.');
+        setLoading(false);
+        return;
+      }
+      // POST preferences to the API route
+      const res = await fetch('/api/generate-meal-plan', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ preferences })
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        if (res.status === 429) {
+          alert(`Rate limit exceeded. Please try again in ${errorData.retryAfter || 60} seconds.`);
+        } else if (res.status === 402) {
+          alert('OpenAI quota exceeded. Please check your API billing.');
+        } else if (res.status === 401) {
+          alert('Authentication error. Please sign in again.');
+        } else {
+          alert(errorData.error || 'Failed to generate meal plan.');
         }
-      }, 2000)
+        setLoading(false);
+        return;
+      }
+      const data = await res.json();
+      // Parse the plan from OpenAI (assume it's JSON or parse as needed)
+      let plan;
+      try {
+        plan = typeof data.plan === 'string' ? JSON.parse(data.plan) : data.plan;
+      } catch (e) {
+        plan = data.plan;
+      }
+      console.log('AI raw plan:', plan);
+
+      // Create a version with only recipe IDs for saving to Supabase
+      const planWithIds = {
+        ...plan,
+        week: plan.week.map((day: any) => ({
+          ...day,
+          meals: {
+            breakfast: day.meals.breakfast.recipeId || day.meals.breakfast,
+            lunch: day.meals.lunch.recipeId || day.meals.lunch,
+            dinner: day.meals.dinner.recipeId || day.meals.dinner,
+          }
+        }))
+      };
+      console.log('Plan with IDs for saving:', planWithIds);
+
+      // Generate shopping list from the populated recipe objects
+      const populatedWeek = populateRecipeObjects(planWithIds.week);
+      const generatedShoppingList = generateShoppingList(populatedWeek);
+      console.log('Generated shopping list:', generatedShoppingList);
+
+      // Save the meal plan to Supabase (with IDs only)
+      const savedMealPlan = await MealPlanService.saveMealPlan(
+        planWithIds.week,
+        generatedShoppingList
+      );
+      console.log('Saved meal plan:', savedMealPlan);
+      if (savedMealPlan) {
+        router.push(`/meal-plan/${savedMealPlan.id}`);
+      } else {
+        alert('Failed to save meal plan.');
+        setLoading(false);
+      }
     } catch (error) {
-      console.error('Error generating meal plan:', error)
-      setLoading(false)
+      alert('Error generating meal plan.');
+      setLoading(false);
     }
   }
 
@@ -239,7 +335,12 @@ export default function GenerateMealPlan() {
     try {
       setLoadingSavedPlans(true)
       const plans = await MealPlanService.getAllMealPlans()
-      setSavedMealPlans(plans)
+      // Populate recipe objects for each plan
+      const populatedPlans = plans.map(plan => ({
+        ...plan,
+        week_data: populateRecipeObjects(plan.week_data)
+      }));
+      setSavedMealPlans(populatedPlans)
     } catch (error) {
       console.error('Error loading saved meal plans:', error)
     } finally {
@@ -274,9 +375,9 @@ export default function GenerateMealPlan() {
     
     mealPlan.week.forEach((day: any) => {
       content += `${day.day}:\n`
-      content += `  Breakfast: ${day.meals.breakfast}\n`
-      content += `  Lunch: ${day.meals.lunch}\n`
-      content += `  Dinner: ${day.meals.dinner}\n\n`
+      content += `  Breakfast: ${typeof day.meals.breakfast === 'string' ? day.meals.breakfast : day.meals.breakfast?.name || 'No breakfast recipe available'}\n`
+      content += `  Lunch: ${typeof day.meals.lunch === 'string' ? day.meals.lunch : day.meals.lunch?.name || 'No lunch recipe available'}\n`
+      content += `  Dinner: ${typeof day.meals.dinner === 'string' ? day.meals.dinner : day.meals.dinner?.name || 'No dinner recipe available'}\n\n`
     })
     
     content += 'Shopping List:\n'
@@ -542,35 +643,6 @@ export default function GenerateMealPlan() {
                       </div>
                     </div>
 
-                    {/* Cuisine Preferences */}
-                    <div className="preference-section">
-                      <label className="preference-label">What cuisines do you enjoy? (Select multiple)</label>
-                      <div className="preference-checkboxes">
-                        {CUISINE_OPTIONS.map(cuisine => (
-                          <label key={cuisine} className="preference-checkbox">
-                            <input
-                              type="checkbox"
-                              checked={preferences.cuisine.includes(cuisine)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setPreferences({
-                                    ...preferences, 
-                                    cuisine: [...preferences.cuisine, cuisine]
-                                  })
-                                } else {
-                                  setPreferences({
-                                    ...preferences, 
-                                    cuisine: preferences.cuisine.filter(c => c !== cuisine)
-                                  })
-                                }
-                              }}
-                            />
-                            <span className="checkbox-label">{cuisine.charAt(0).toUpperCase() + cuisine.slice(1)}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-
                     {/* Dietary Restrictions */}
                     <div className="preference-section">
                       <label className="preference-label">Any dietary preferences?</label>
@@ -709,7 +781,7 @@ export default function GenerateMealPlan() {
                   
                   <div className="meals-container">
                     {(() => {
-                      const breakfastRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.breakfast, 'breakfast')
+                      const breakfastRecipe = mealPlan.week[currentDayIndex].meals.breakfast
                       return (
                         <div className="meal-card">
                           <div className="meal-content">
@@ -739,7 +811,7 @@ export default function GenerateMealPlan() {
                     })()}
 
                     {(() => {
-                      const lunchRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.lunch, 'lunch')
+                      const lunchRecipe = mealPlan.week[currentDayIndex].meals.lunch
                       return (
                         <div className="meal-card">
                           <div className="meal-content">
@@ -769,7 +841,7 @@ export default function GenerateMealPlan() {
                     })()}
 
                     {(() => {
-                      const dinnerRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.dinner, 'dinner')
+                      const dinnerRecipe = mealPlan.week[currentDayIndex].meals.dinner
                       return (
                         <div className="meal-card">
                           <div className="meal-content">
