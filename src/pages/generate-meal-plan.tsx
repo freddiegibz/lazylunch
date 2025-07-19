@@ -8,6 +8,7 @@ import breakfastRecipes from '../lib/breakfast.json'
 import lunchRecipes from '../lib/lunch.json'
 import dinnerRecipes from '../lib/dinner.json'
 import { supabase } from '../lib/supabase'
+import DashboardNavbar from '../components/DashboardNavbar'
 
 // Preference options
 const FOCUS_OPTIONS = [
@@ -142,8 +143,6 @@ export default function GenerateMealPlan() {
   const [loadingUser, setLoadingUser] = useState(true)
   const router = useRouter()
 
-
-
   // Check user authentication and membership
   useEffect(() => {
     const checkUser = async () => {
@@ -160,13 +159,11 @@ export default function GenerateMealPlan() {
               .single()
             
             if (error) {
-              console.error('Error fetching profile:', error)
               setMembership('free')
             } else {
               setMembership(profile?.membership || 'free')
             }
           } catch (error) {
-            console.error('Error in profile fetch:', error)
             setMembership('free')
           }
         } else {
@@ -174,7 +171,6 @@ export default function GenerateMealPlan() {
           router.push('/signin')
         }
       } catch (error) {
-        console.error('Error checking user:', error)
         router.push('/signin')
       } finally {
         setLoadingUser(false)
@@ -205,27 +201,27 @@ export default function GenerateMealPlan() {
   // Function to populate recipe objects from IDs
   const populateRecipeObjects = (weekData: any[]) => {
     const getRecipeById = (id: string, mealType: MealType) => {
-      if (mealType === 'breakfast') return breakfastRecipes.find(r => r.id === id);
-      if (mealType === 'lunch') return lunchRecipes.find(r => r.id === id);
-      if (mealType === 'dinner') return dinnerRecipes.find(r => r.id === id);
+      if (mealType === 'breakfast') return breakfastRecipes.find((r: any) => r.id === id);
+      if (mealType === 'lunch') return lunchRecipes.find((r: any) => r.id === id);
+      if (mealType === 'dinner') return dinnerRecipes.find((r: any) => r.id === id);
       return null;
     };
 
     return weekData.map((day: any) => ({
       ...day,
       meals: {
-        breakfast: typeof day.meals.breakfast === 'string' 
-          ? getRecipeById(day.meals.breakfast, 'breakfast') 
-          : day.meals.breakfast,
-        lunch: typeof day.meals.lunch === 'string' 
-          ? getRecipeById(day.meals.lunch, 'lunch') 
-          : day.meals.lunch,
-        dinner: typeof day.meals.dinner === 'string' 
-          ? getRecipeById(day.meals.dinner, 'dinner') 
-          : day.meals.dinner,
+        breakfast: typeof day.meals?.breakfast === 'string'
+          ? (getRecipeById(day.meals.breakfast, 'breakfast') || null)
+          : (day.meals?.breakfast || null),
+        lunch: typeof day.meals?.lunch === 'string'
+          ? (getRecipeById(day.meals.lunch, 'lunch') || null)
+          : (day.meals?.lunch || null),
+        dinner: typeof day.meals?.dinner === 'string'
+          ? (getRecipeById(day.meals.dinner, 'dinner') || null)
+          : (day.meals?.dinner || null),
       }
-    }));
-  };
+    }))
+  }
 
   // Function to generate shopping list from recipe objects
   const generateShoppingList = (weekData: any[]) => {
@@ -249,8 +245,6 @@ export default function GenerateMealPlan() {
     try {
       // Get the current Supabase session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      console.log('Session present:', !!session, 'Session error:', sessionError);
-      console.log('Access token present:', !!session?.access_token);
       if (sessionError || !session) {
         alert('Authentication error. Please sign in again.');
         setLoading(false);
@@ -287,7 +281,6 @@ export default function GenerateMealPlan() {
       } catch (e) {
         plan = data.plan;
       }
-      console.log('AI raw plan:', plan);
 
       // Create a version with only recipe IDs for saving to Supabase
       const planWithIds = {
@@ -301,26 +294,23 @@ export default function GenerateMealPlan() {
           }
         }))
       };
-      console.log('Plan with IDs for saving:', planWithIds);
 
       // Generate shopping list from the populated recipe objects
       const populatedWeek = populateRecipeObjects(planWithIds.week);
       const generatedShoppingList = generateShoppingList(populatedWeek);
-      console.log('Generated shopping list:', generatedShoppingList);
 
       // Save the meal plan to Supabase (with IDs only)
       const savedMealPlan = await MealPlanService.saveMealPlan(
         planWithIds.week,
         generatedShoppingList
       );
-      console.log('Saved meal plan:', savedMealPlan);
-      if (savedMealPlan) {
+          if (savedMealPlan) {
         router.push(`/meal-plan/${savedMealPlan.id}`);
       } else {
         alert('Failed to save meal plan.');
         setLoading(false);
-      }
-    } catch (error) {
+          }
+        } catch (error) {
       alert('Error generating meal plan.');
       setLoading(false);
     }
@@ -425,19 +415,13 @@ export default function GenerateMealPlan() {
           <meta name="description" content="Upgrade your membership to generate meal plans" />
         </Head>
         
-        <div className="dashboard-container">
-          {/* Header */}
-          <header className="dashboard-header">
-            <div className="dashboard-header-content">
-              <div className="dashboard-logo">LazyLunch</div>
-              <div className="dashboard-nav">
-                <Link href="/dashboard" className="dashboard-link">
-                  ← Back to Dashboard
-                </Link>
-              </div>
-            </div>
-          </header>
+        <DashboardNavbar 
+          user={user} 
+          membership={membership}
+          showBackButton={true}
+        />
 
+        <div className="dashboard-container">
           {/* Main Content */}
           <main className="dashboard-main">
             <div className="dashboard-content">
@@ -515,17 +499,11 @@ export default function GenerateMealPlan() {
       </Head>
       
       <div className="dashboard-container">
-        {/* Header */}
-        <header className="dashboard-header">
-          <div className="dashboard-header-content">
-            <div className="dashboard-logo">LazyLunch</div>
-            <div className="dashboard-nav">
-              <Link href="/dashboard" className="dashboard-link">
-                ← Back to Dashboard
-              </Link>
-            </div>
-          </div>
-        </header>
+        <DashboardNavbar 
+          user={user} 
+          membership={membership}
+          showBackButton={true}
+        />
 
         {/* Main Content */}
         <main className="dashboard-main">
@@ -786,12 +764,10 @@ export default function GenerateMealPlan() {
                         <div className="meal-card">
                           <div className="meal-content">
                             <div className="meal-image">
-                              <img 
-                                src={breakfastRecipe?.image || '/images/placeholder.png'} 
+                              <img
+                                src={breakfastRecipe?.image}
                                 alt={breakfastRecipe?.name || 'Breakfast'}
-                                onError={(e) => {
-                                  e.currentTarget.src = '/images/placeholder.png'
-                                }}
+                                style={{width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8}}
                               />
                             </div>
                             <div className="meal-info">
@@ -817,11 +793,9 @@ export default function GenerateMealPlan() {
                           <div className="meal-content">
                             <div className="meal-image">
                               <img 
-                                src={lunchRecipe?.image || '/images/placeholder.png'} 
+                                src={lunchRecipe?.image}
                                 alt={lunchRecipe?.name || 'Lunch'}
-                                onError={(e) => {
-                                  e.currentTarget.src = '/images/placeholder.png'
-                                }}
+                                style={{width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8}}
                               />
                             </div>
                             <div className="meal-info">
@@ -847,11 +821,9 @@ export default function GenerateMealPlan() {
                           <div className="meal-content">
                             <div className="meal-image">
                               <img 
-                                src={dinnerRecipe?.image || '/images/placeholder.png'} 
+                                src={dinnerRecipe?.image} 
                                 alt={dinnerRecipe?.name || 'Dinner'}
-                                onError={(e) => {
-                                  e.currentTarget.src = '/images/placeholder.png'
-                                }}
+                                style={{width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8}}
                               />
                             </div>
                             <div className="meal-info">

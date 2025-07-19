@@ -4,11 +4,42 @@
     "name": "Chicken Caesar Wrap",
     "baseServings": 1,
     "ingredients": [
-      { "item": "Tortilla wrap", "qty": "1", "estCost": 0.25, "allergens": ["gluten"] },
-      { "item": "Cooked chicken breast", "qty": "100 g", "estCost": 0.95, "allergens": [] },
-      { "item": "Caesar dressing", "qty": "2 Tbsp", "estCost": 0.22, "allergens": ["dairy"] },
-      { "item": "Lettuce leaves", "qty": "handful", "estCost": 0.09, "allergens": [] },
-      { "item": "Grated parmesan cheese", "qty": "10 g", "estCost": 0.20, "allergens": ["dairy"] }
+      {
+        "item": "Tortilla wrap",
+        "qty": "1",
+        "estCost": 0.25,
+        "allergens": [
+          "gluten"
+        ]
+      },
+      {
+        "item": "Cooked chicken breast",
+        "qty": "100 g",
+        "estCost": 0.95,
+        "allergens": []
+      },
+      {
+        "item": "Caesar dressing",
+        "qty": "2 Tbsp",
+        "estCost": 0.22,
+        "allergens": [
+          "dairy"
+        ]
+      },
+      {
+        "item": "Lettuce leaves",
+        "qty": "handful",
+        "estCost": 0.09,
+        "allergens": []
+      },
+      {
+        "item": "Grated parmesan cheese",
+        "qty": "10 g",
+        "estCost": 0.2,
+        "allergens": [
+          "dairy"
+        ]
+      }
     ],
     "steps": [
       "Gather all ingredients: tortilla wrap, cooked chicken breast, Caesar dressing, lettuce, and grated parmesan.",
@@ -23,8 +54,12 @@
       "Slice the wrap in half diagonally for easier eating.",
       "Serve immediately with optional extra salad on the side."
     ],
-    "image": "/foodimages/chickenceasarwrap.png",
-    "tags": ["chicken", "wrap", "quick"],
+    "image": "/foodimageswebp/chickenceasarwrap.webp",
+    "tags": [
+      "chicken",
+      "wrap",
+      "quick"
+    ],
     "estTotalCost": 1.71
   },
   {
@@ -32,11 +67,42 @@
     "name": "Tuna Salad Sandwich",
     "baseServings": 1,
     "ingredients": [
-      { "item": "Canned tuna", "qty": "120 g drained", "estCost": 0.62, "allergens": ["fish"] },
-      { "item": "Mayonnaise", "qty": "2 Tbsp", "estCost": 0.15, "allergens": ["eggs"] },
-      { "item": "Bread", "qty": "2 slices", "estCost": 0.40, "allergens": ["gluten"] },
-      { "item": "Lettuce leaves", "qty": "handful", "estCost": 0.09, "allergens": [] },
-      { "item": "Tomato", "qty": "1", "estCost": 0.43, "allergens": [] }
+      {
+        "item": "Canned tuna",
+        "qty": "120 g drained",
+        "estCost": 0.62,
+        "allergens": [
+          "fish"
+        ]
+      },
+      {
+        "item": "Mayonnaise",
+        "qty": "2 Tbsp",
+        "estCost": 0.15,
+        "allergens": [
+          "eggs"
+        ]
+      },
+      {
+        "item": "Bread",
+        "qty": "2 slices",
+        "estCost": 0.4,
+        "allergens": [
+          "gluten"
+        ]
+      },
+      {
+        "item": "Lettuce leaves",
+        "qty": "handful",
+        "estCost": 0.09,
+        "allergens": []
+      },
+      {
+        "item": "Tomato",
+        "qty": "1",
+        "estCost": 0.43,
+        "allergens": []
+      }
     ],
     "steps": [
       "Gather all ingredients: canned tuna, mayonnaise, bread slices, lettuce, and tomato.",
@@ -54,8 +120,12 @@
       "Cut the sandwich in half diagonally if desired.",
       "Serve immediately."
     ],
-    "image": "/foodimages/Tunacrunchsandwich.png",
-    "tags": ["fish", "sandwich", "quick"],
+    "image": "/foodimageswebp/Tunacrunchsandwich.webp",
+    "tags": [
+      "fish",
+      "sandwich",
+      "quick"
+    ],
     "estTotalCost": 2.35
   },
   {
@@ -63,11 +133,36 @@
     "name": "Chickpea Salad Bowl",
     "baseServings": 1,
     "ingredients": [
-      { "item": "Canned chickpeas", "qty": "240 g drained", "estCost": 0.34, "allergens": [] },
-      { "item": "Cucumber", "qty": "1", "estCost": 0.50, "allergens": [] },
-      { "item": "Tomatoes", "qty": "2", "estCost": 0.86, "allergens": [] },
-      { "item": "Red onion", "qty": "½", "estCost": 0.10, "allergens": [] },
-      { "item": "Olive oil", "qty": "2 Tbsp", "estCost": 0.25, "allergens": [] }
+      {
+        "item": "Canned chickpeas",
+        "qty": "240 g drained",
+        "estCost": 0.34,
+        "allergens": []
+      },
+      {
+        "item": "Cucumber",
+        "qty": "1",
+        "estCost": 0.5,
+        "allergens": []
+      },
+      {
+        "item": "Tomatoes",
+        "qty": "2",
+        "estCost": 0.86,
+        "allergens": []
+      },
+      {
+        "item": "Red onion",
+        "qty": "½",
+        "estCost": 0.1,
+        "allergens": []
+      },
+      {
+        "item": "Olive oil",
+        "qty": "2 Tbsp",
+        "estCost": 0.25,
+        "allergens": []
+      }
     ],
     "steps": [
       "Gather all ingredients: canned chickpeas, cucumber, tomatoes, red onion, and olive oil.",
@@ -83,8 +178,12 @@
       "Optional: season with salt, pepper, or a squeeze of lemon juice.",
       "Transfer to a serving bowl and serve immediately."
     ],
-    "image": "/foodimages/chickpeasalad.png",
-    "tags": ["vegetarian", "salad", "healthy"],
+    "image": "/foodimageswebp/chickpeasalad.webp",
+    "tags": [
+      "vegetarian",
+      "salad",
+      "healthy"
+    ],
     "estTotalCost": 2.05
   },
   {
@@ -92,10 +191,32 @@
     "name": "Turkey & Hummus Wrap",
     "baseServings": 1,
     "ingredients": [
-      { "item": "Tortilla wrap", "qty": "1", "estCost": 0.25, "allergens": ["gluten"] },
-      { "item": "Turkey breast slices", "qty": "3", "estCost": 0.75, "allergens": [] },
-      { "item": "Hummus", "qty": "2 Tbsp", "estCost": 0.40, "allergens": [] },
-      { "item": "Fresh spinach", "qty": "handful", "estCost": 0.20, "allergens": [] }
+      {
+        "item": "Tortilla wrap",
+        "qty": "1",
+        "estCost": 0.25,
+        "allergens": [
+          "gluten"
+        ]
+      },
+      {
+        "item": "Turkey breast slices",
+        "qty": "3",
+        "estCost": 0.75,
+        "allergens": []
+      },
+      {
+        "item": "Hummus",
+        "qty": "2 Tbsp",
+        "estCost": 0.4,
+        "allergens": []
+      },
+      {
+        "item": "Fresh spinach",
+        "qty": "handful",
+        "estCost": 0.2,
+        "allergens": []
+      }
     ],
     "steps": [
       "Gather all ingredients: tortilla wrap, turkey breast slices, hummus, and spinach.",
@@ -109,8 +230,12 @@
       "Slice the wrap in half diagonally for easier eating if desired.",
       "Serve immediately as a light, protein-rich lunch."
     ],
-    "image": "/foodimages/turkeyhummuswrap.png",
-    "tags": ["turkey", "wrap", "protein"],
+    "image": "/foodimageswebp/turkeyhummuswrap.webp",
+    "tags": [
+      "turkey",
+      "wrap",
+      "protein"
+    ],
     "estTotalCost": 1.99
   },
   {
@@ -118,11 +243,40 @@
     "name": "Egg Fried Rice",
     "baseServings": 1,
     "ingredients": [
-      { "item": "Cooked rice", "qty": "200 g", "estCost": 0.20, "allergens": [] },
-      { "item": "Eggs", "qty": "2", "estCost": 0.76, "allergens": ["eggs"] },
-      { "item": "Mixed frozen vegetables", "qty": "100 g", "estCost": 0.09, "allergens": [] },
-      { "item": "Soy sauce", "qty": "2 Tbsp", "estCost": 0.15, "allergens": ["soy"] },
-      { "item": "Oil", "qty": "1 tsp", "estCost": 0.01, "allergens": [] }
+      {
+        "item": "Cooked rice",
+        "qty": "200 g",
+        "estCost": 0.2,
+        "allergens": []
+      },
+      {
+        "item": "Eggs",
+        "qty": "2",
+        "estCost": 0.76,
+        "allergens": [
+          "eggs"
+        ]
+      },
+      {
+        "item": "Mixed frozen vegetables",
+        "qty": "100 g",
+        "estCost": 0.09,
+        "allergens": []
+      },
+      {
+        "item": "Soy sauce",
+        "qty": "2 Tbsp",
+        "estCost": 0.15,
+        "allergens": [
+          "soy"
+        ]
+      },
+      {
+        "item": "Oil",
+        "qty": "1 tsp",
+        "estCost": 0.01,
+        "allergens": []
+      }
     ],
     "steps": [
       "Gather all ingredients: cooked rice, eggs, mixed frozen vegetables, and soy sauce.",
@@ -141,8 +295,12 @@
       "Cook for an additional 2 minutes, stirring occasionally.",
       "Transfer to a bowl or plate and serve hot."
     ],
-    "image": "/foodimages/eggfriedrice.png",
-    "tags": ["vegetarian", "asian", "quick"],
+    "image": "/foodimageswebp/eggfriedrice.webp",
+    "tags": [
+      "vegetarian",
+      "asian",
+      "quick"
+    ],
     "estTotalCost": 1.38
   }
-] 
+]

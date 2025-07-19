@@ -35,7 +35,6 @@ export class MealPlanService {
 
       return data
     } catch (error) {
-      console.error('Error saving meal plan:', error)
       throw error
     }
   }
@@ -63,7 +62,6 @@ export class MealPlanService {
 
       return data
     } catch (error) {
-      console.error('Error getting latest meal plan:', error)
       throw error
     }
   }
@@ -89,7 +87,6 @@ export class MealPlanService {
 
       return data || []
     } catch (error) {
-      console.error('Error getting all meal plans:', error)
       throw error
     }
   }
@@ -121,7 +118,6 @@ export class MealPlanService {
 
       return data
     } catch (error) {
-      console.error('Error updating meal plan:', error)
       throw error
     }
   }
@@ -145,7 +141,6 @@ export class MealPlanService {
         throw error
       }
     } catch (error) {
-      console.error('Error deleting meal plan:', error)
       throw error
     }
   }

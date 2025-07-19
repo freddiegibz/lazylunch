@@ -4,10 +4,34 @@
     "name": "Greek Yogurt Berry Bowl",
     "baseServings": 1,
     "ingredients": [
-      { "item": "Greek yogurt", "qty": "200 g", "estCost": 1.20, "allergens": ["dairy"] },
-      { "item": "Mixed berries", "qty": "100 g", "estCost": 0.80, "allergens": [] },
-      { "item": "Honey", "qty": "1 Tbsp", "estCost": 0.15, "allergens": [] },
-      { "item": "Granola or seeds", "qty": "optional", "estCost": 0.47, "allergens": ["nuts"] }
+      {
+        "item": "Greek yogurt",
+        "qty": "200 g",
+        "estCost": 1.2,
+        "allergens": [
+          "dairy"
+        ]
+      },
+      {
+        "item": "Mixed berries",
+        "qty": "100 g",
+        "estCost": 0.8,
+        "allergens": []
+      },
+      {
+        "item": "Honey",
+        "qty": "1 Tbsp",
+        "estCost": 0.15,
+        "allergens": []
+      },
+      {
+        "item": "Granola or seeds",
+        "qty": "optional",
+        "estCost": 0.47,
+        "allergens": [
+          "nuts"
+        ]
+      }
     ],
     "steps": [
       "Rinse & drain berries.",
@@ -16,8 +40,12 @@
       "Drizzle honey (add crunch if desired).",
       "Serve at once."
     ],
-    "image": "/foodimages/greekyoghurtberrybowl.png",
-    "tags": ["vegetarian", "quick", "healthy"],
+    "image": "/foodimageswebp/greekyoghurtberrybowl.webp",
+    "tags": [
+      "vegetarian",
+      "quick",
+      "healthy"
+    ],
     "estTotalCost": 2.62
   },
   {
@@ -25,11 +53,40 @@
     "name": "Avocado Toast with Egg",
     "baseServings": 1,
     "ingredients": [
-      { "item": "Whole-grain bread", "qty": "2 slices", "estCost": 0.40, "allergens": ["gluten"] },
-      { "item": "Ripe avocado", "qty": "1", "estCost": 1.20, "allergens": [] },
-      { "item": "Eggs", "qty": "2", "estCost": 0.76, "allergens": ["eggs"] },
-      { "item": "Salt", "qty": "pinch", "estCost": 0.01, "allergens": [] },
-      { "item": "Pepper or chili flakes", "qty": "to taste", "estCost": 0.01, "allergens": [] }
+      {
+        "item": "Whole-grain bread",
+        "qty": "2 slices",
+        "estCost": 0.4,
+        "allergens": [
+          "gluten"
+        ]
+      },
+      {
+        "item": "Ripe avocado",
+        "qty": "1",
+        "estCost": 1.2,
+        "allergens": []
+      },
+      {
+        "item": "Eggs",
+        "qty": "2",
+        "estCost": 0.76,
+        "allergens": [
+          "eggs"
+        ]
+      },
+      {
+        "item": "Salt",
+        "qty": "pinch",
+        "estCost": 0.01,
+        "allergens": []
+      },
+      {
+        "item": "Pepper or chili flakes",
+        "qty": "to taste",
+        "estCost": 0.01,
+        "allergens": []
+      }
     ],
     "steps": [
       "Toast bread.",
@@ -38,8 +95,12 @@
       "Spread avocado over toast; crown each slice with an egg.",
       "Season & serve hot."
     ],
-    "image": "/foodimages/avocadoontoast.png",
-    "tags": ["vegetarian", "protein", "quick"],
+    "image": "/foodimageswebp/avocadoontoast.webp",
+    "tags": [
+      "vegetarian",
+      "protein",
+      "quick"
+    ],
     "estTotalCost": 2.98
   },
   {
@@ -47,10 +108,36 @@
     "name": "Banana Oat Pancakes",
     "baseServings": 1,
     "ingredients": [
-      { "item": "Ripe banana", "qty": "1", "estCost": 0.25, "allergens": [] },
-      { "item": "Rolled oats", "qty": "100 g", "estCost": 0.20, "allergens": ["gluten"] },
-      { "item": "Eggs", "qty": "2", "estCost": 0.76, "allergens": ["eggs"] },
-      { "item": "Fruit, yogurt or honey", "qty": "optional", "estCost": 0.15, "allergens": ["dairy"] }
+      {
+        "item": "Ripe banana",
+        "qty": "1",
+        "estCost": 0.25,
+        "allergens": []
+      },
+      {
+        "item": "Rolled oats",
+        "qty": "100 g",
+        "estCost": 0.2,
+        "allergens": [
+          "gluten"
+        ]
+      },
+      {
+        "item": "Eggs",
+        "qty": "2",
+        "estCost": 0.76,
+        "allergens": [
+          "eggs"
+        ]
+      },
+      {
+        "item": "Fruit, yogurt or honey",
+        "qty": "optional",
+        "estCost": 0.15,
+        "allergens": [
+          "dairy"
+        ]
+      }
     ],
     "steps": [
       "Blend banana, oats & eggs until smooth.",
@@ -58,8 +145,12 @@
       "Repeat until batter is finished.",
       "Optional: fruit, yogurt or honey toppings."
     ],
-    "image": "/foodimages/bananaoatpancake.png",
-    "tags": ["vegetarian", "gluten-free", "quick"],
+    "image": "/foodimageswebp/bananaoatpancake.webp",
+    "tags": [
+      "vegetarian",
+      "gluten-free",
+      "quick"
+    ],
     "estTotalCost": 1.36
   },
   {
@@ -67,11 +158,42 @@
     "name": "Overnight Oats",
     "baseServings": 1,
     "ingredients": [
-      { "item": "Rolled oats", "qty": "50 g", "estCost": 0.10, "allergens": ["gluten"] },
-      { "item": "Milk", "qty": "150 ml", "estCost": 0.15, "allergens": ["dairy"] },
-      { "item": "Chia seeds", "qty": "1 Tbsp", "estCost": 0.20, "allergens": [] },
-      { "item": "Fresh berries", "qty": "handful", "estCost": 0.30, "allergens": [] },
-      { "item": "Honey or nut butter", "qty": "optional", "estCost": 0.14, "allergens": ["nuts"] }
+      {
+        "item": "Rolled oats",
+        "qty": "50 g",
+        "estCost": 0.1,
+        "allergens": [
+          "gluten"
+        ]
+      },
+      {
+        "item": "Milk",
+        "qty": "150 ml",
+        "estCost": 0.15,
+        "allergens": [
+          "dairy"
+        ]
+      },
+      {
+        "item": "Chia seeds",
+        "qty": "1 Tbsp",
+        "estCost": 0.2,
+        "allergens": []
+      },
+      {
+        "item": "Fresh berries",
+        "qty": "handful",
+        "estCost": 0.3,
+        "allergens": []
+      },
+      {
+        "item": "Honey or nut butter",
+        "qty": "optional",
+        "estCost": 0.14,
+        "allergens": [
+          "nuts"
+        ]
+      }
     ],
     "steps": [
       "Combine oats, chia & milk in a jar; stir.",
@@ -79,8 +201,12 @@
       "In the morning, loosen & top with berries (plus optional drizzle).",
       "Enjoy cold."
     ],
-    "image": "/foodimages/overnightoats.png",
-    "tags": ["vegetarian", "make-ahead", "healthy"],
+    "image": "/foodimageswebp/overnightoats.webp",
+    "tags": [
+      "vegetarian",
+      "make-ahead",
+      "healthy"
+    ],
     "estTotalCost": 0.89
   },
   {
@@ -88,11 +214,42 @@
     "name": "Smoked Salmon & Cream Cheese Bagel",
     "baseServings": 1,
     "ingredients": [
-      { "item": "Plain bagel", "qty": "1", "estCost": 0.75, "allergens": ["gluten"] },
-      { "item": "Cream cheese", "qty": "50 g", "estCost": 0.40, "allergens": ["dairy"] },
-      { "item": "Cold-smoked salmon", "qty": "70 g", "estCost": 4.50, "allergens": ["fish"] },
-      { "item": "Lemon wedge", "qty": "1", "estCost": 0.10, "allergens": [] },
-      { "item": "Dill or pepper", "qty": "to taste", "estCost": 0.01, "allergens": [] }
+      {
+        "item": "Plain bagel",
+        "qty": "1",
+        "estCost": 0.75,
+        "allergens": [
+          "gluten"
+        ]
+      },
+      {
+        "item": "Cream cheese",
+        "qty": "50 g",
+        "estCost": 0.4,
+        "allergens": [
+          "dairy"
+        ]
+      },
+      {
+        "item": "Cold-smoked salmon",
+        "qty": "70 g",
+        "estCost": 4.5,
+        "allergens": [
+          "fish"
+        ]
+      },
+      {
+        "item": "Lemon wedge",
+        "qty": "1",
+        "estCost": 0.1,
+        "allergens": []
+      },
+      {
+        "item": "Dill or pepper",
+        "qty": "to taste",
+        "estCost": 0.01,
+        "allergens": []
+      }
     ],
     "steps": [
       "Split & toast bagel.",
@@ -101,8 +258,12 @@
       "Squeeze lemon, add herbs/pepper.",
       "Serve immediately."
     ],
-    "image": "/foodimages/smokedsalmoncreamcheesebagel.png",
-    "tags": ["fish", "protein", "quick"],
+    "image": "/foodimageswebp/smokedsalmoncreamcheesebagel.webp",
+    "tags": [
+      "fish",
+      "protein",
+      "quick"
+    ],
     "estTotalCost": 6.26
   }
-] 
+]

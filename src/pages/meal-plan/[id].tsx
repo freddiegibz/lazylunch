@@ -43,9 +43,6 @@ export default function MealPlanDetail() {
     // Handle new format where mealData is an object with recipeId
     if (mealData && typeof mealData === 'object' && mealData.recipeId) {
       const found = recipes.find(recipe => recipe.id === mealData.recipeId);
-      if (!found) {
-        console.warn('Recipe not found for ID:', mealData.recipeId, 'Available:', recipes.map(r => r.id));
-      }
       return found;
     }
 
@@ -238,7 +235,6 @@ export default function MealPlanDetail() {
         setError('Meal plan not found')
       }
     } catch (error) {
-      console.error('Error loading meal plan:', error)
       setError('Failed to load meal plan')
     } finally {
       setLoading(false)
@@ -280,7 +276,6 @@ export default function MealPlanDetail() {
       await MealPlanService.deleteMealPlan(mealPlan.id)
       router.push('/my-meal-plans')
     } catch (error) {
-      console.error('Error deleting meal plan:', error)
       setError('Failed to delete meal plan')
     }
   }
@@ -458,14 +453,12 @@ export default function MealPlanDetail() {
                         setCurrentInstructionStep(0)
                       }}>
                         <div className="meal-image">
-                          <img 
-                            src={breakfastRecipe?.image || '/images/greekchickengyros.png'} 
+                          <img
+                            src={breakfastRecipe?.image}
                             alt={breakfastRecipe?.name || 'Breakfast'}
-                            onError={(e) => {
-                              e.currentTarget.src = '/images/greekchickengyros.png'
-                            }}
+                            style={{width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8}}
                           />
-                          </div>
+                        </div>
                         <div className="meal-info">
                           <h4 className="meal-type">Breakfast</h4>
                           <p className="meal-name">{breakfastName}</p>
@@ -513,11 +506,8 @@ export default function MealPlanDetail() {
                       }}>
                         <div className="meal-image">
                           <img 
-                            src={lunchRecipe?.image || '/images/greekchickengyros.png'} 
+                            src={lunchRecipe?.image} 
                             alt={lunchRecipe?.name || 'Lunch'}
-                            onError={(e) => {
-                              e.currentTarget.src = '/images/greekchickengyros.png'
-                            }}
                           />
                                 </div>
                         <div className="meal-info">
@@ -567,11 +557,8 @@ export default function MealPlanDetail() {
                       }}>
                         <div className="meal-image">
                           <img 
-                            src={dinnerRecipe?.image || '/images/greekchickengyros.png'} 
+                            src={dinnerRecipe?.image} 
                             alt={dinnerRecipe?.name || 'Dinner'}
-                            onError={(e) => {
-                              e.currentTarget.src = '/images/greekchickengyros.png'
-                            }}
                           />
                         </div>
                         <div className="meal-info">
@@ -664,9 +651,6 @@ export default function MealPlanDetail() {
                                 <img 
                                   src={selectedMeal.image} 
                                   alt={selectedMeal.name}
-                                  onError={(e) => {
-                                    e.currentTarget.src = '/images/greekchickengyros.png'
-                                  }}
                                 />
                             </div>
                               <div className="cover-content">
@@ -1121,7 +1105,7 @@ export default function MealPlanDetail() {
         .loading-text {
           font-size: 1.1rem;
           color: var(--dark-grey);
-        }
+          }
 
         .error-message {
           background: rgba(242, 140, 140, 0.1);

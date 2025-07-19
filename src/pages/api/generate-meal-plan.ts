@@ -2,7 +2,12 @@ import fs from 'fs/promises';
 import path from 'path';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { OpenAI } from 'openai';
-import { supabase } from '../../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -11,16 +16,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // 1. Auth: get user from Supabase token
   const authHeader = req.headers['authorization'];
-  console.log('Auth header present:', !!authHeader);
   const token = authHeader && authHeader.startsWith('Bearer ')
     ? authHeader.replace('Bearer ', '')
     : null;
-  console.log('Token present:', !!token);
   if (!token) return res.status(401).json({ error: 'Not authenticated' });
   
   // Use the same supabase client as frontend
   const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-  console.log('User data:', !!user, 'User error:', userError);
   if (!user || userError) return res.status(401).json({ error: 'Not authenticated' });
 
   // 2. Enforce 5 meal plan/week limit for standard members
@@ -31,7 +33,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { data: profile } = await supabase.from('profiles').select('membership').eq('id', user.id).single();
       membership = profile?.membership || 'free';
     }
-    console.log('Membership check passed');
     
     if (membership === 'standard') {
       const { data: plans, error: plansError } = await supabase
@@ -49,7 +50,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
   } catch (error) {
-    console.error('Error in membership check:', error);
     return res.status(500).json({ error: 'Error checking membership' });
   }
 
@@ -57,7 +57,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   let allRecipes: any[] = [];
   let fullRecipes: any[] = [];
   try {
-    console.log('Loading recipes...');
     const breakfastRaw = JSON.parse(await fs.readFile(path.join(process.cwd(), 'src/lib/breakfast.json'), 'utf8'));
     const lunchRaw = JSON.parse(await fs.readFile(path.join(process.cwd(), 'src/lib/lunch.json'), 'utf8'));
     const dinnerRaw = JSON.parse(await fs.readFile(path.join(process.cwd(), 'src/lib/dinner.json'), 'utf8'));
@@ -74,21 +73,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       name: r.name, 
       type: r.type 
     }));
-    console.log('Recipes loaded, total count:', allRecipes.length);
   } catch (error) {
-    console.error('Error loading recipes:', error);
     return res.status(500).json({ error: 'Error loading recipes' });
   }
 
   // 4. Read the prompt template
   let promptTemplate = '';
   try {
-    console.log('Loading prompt template...');
     const promptPath = path.join(process.cwd(), 'src/lib/mealplan-chatgpt-prompt.txt');
     promptTemplate = await fs.readFile(promptPath, 'utf8');
-    console.log('Prompt template loaded');
   } catch (error) {
-    console.error('Error loading prompt template:', error);
     return res.status(500).json({ error: 'Error loading prompt template' });
   }
 
@@ -96,7 +90,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   let userData: any = {};
   let userFeedback: any = {};
   try {
-    console.log('Processing user preferences from request...');
     // Use preferences from request body instead of fetching from profiles
     const { preferences } = req.body;
     
@@ -109,33 +102,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       otherPreferences: preferences?.otherPreferences ?? [],
       weeklyBudget: preferences?.weeklyBudget ?? null,
     };
-    console.log('User preferences processed');
 
     // --- User Feedback ---
-    console.log('Fetching user feedback...');
     const { data: feedbackRows, error: feedbackError } = await supabase
       .from('recipe_feedback')
       .select('recipe_id, feedback')
       .eq('user_id', user.id);
 
     if (feedbackError) {
-      console.error('Feedback error:', feedbackError);
       return res.status(500).json({ error: 'Failed to fetch user feedback' });
     }
-    console.log('User feedback fetched');
 
     userFeedback = {
       likes: feedbackRows.filter(f => f.feedback === 'like').map(f => f.recipe_id),
       dislikes: feedbackRows.filter(f => f.feedback === 'dislike').map(f => f.recipe_id),
     };
   } catch (error) {
-    console.error('Error processing user data:', error);
     return res.status(500).json({ error: 'Error processing user data' });
   }
 
   // 6. Fill in the template and call OpenAI
   try {
-    console.log('Preparing OpenAI prompt...');
     let prompt = promptTemplate
       .replace('[user.servings]', userData.servings)
       .replace('[user.focus]', userData.focus)
@@ -148,16 +135,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .replace('[user.dislikedRecipes]', JSON.stringify(userFeedback.dislikes))
       .replace('[Insert JSON array of all available recipes here]', JSON.stringify(allRecipes, null, 2));
 
-    console.log('Calling OpenAI...');
     // 7. Send to OpenAI
     const openaiRes = await openai.chat.completions.create({
       model: 'gpt-4',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.7,
     });
-    console.log('OpenAI response received');
-    console.log('Response content length:', openaiRes.choices[0].message.content?.length || 0);
-    console.log('Response preview:', openaiRes.choices[0].message.content?.substring(0, 200) + '...');
 
     // 8. Parse OpenAI response and populate full recipe data
     try {
@@ -165,9 +148,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (!aiResponse) {
         throw new Error('No response content from OpenAI');
       }
-      
-      console.log('Raw AI response:', aiResponse);
-      console.log('Response length:', aiResponse.length);
       
       // Try to clean the response if it's malformed
       let cleanedResponse = aiResponse.trim();
@@ -188,8 +168,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       }
       
-      console.log('Cleaned response:', cleanedResponse);
-      
       const mealPlanData = JSON.parse(cleanedResponse);
       
       // Populate full recipe data for each meal
@@ -207,18 +185,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         week: populatedWeek
       };
       
-      console.log('Meal plan populated with full recipe data');
       res.status(200).json({ plan: finalMealPlan });
     } catch (parseError: any) {
-      console.error('Error parsing OpenAI response:', parseError);
-      console.error('Raw response was:', openaiRes.choices[0].message.content);
       return res.status(500).json({ 
         error: 'Error processing AI response. Please try again.',
         details: parseError.message 
       });
     }
   } catch (error: any) {
-    console.error('Error in OpenAI call or response processing:', error);
     
     // Handle specific OpenAI errors
     if (error.code === 'rate_limit_exceeded') {

@@ -41,18 +41,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       try {
         const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
         priceId = subscription.items.data[0].price.id;
-        console.log('🔍 Webhook Debug - Price ID:', priceId);
       } catch (e) {
-        console.error('Failed to fetch subscription for priceId:', e);
       }
     }
     // Map priceId to membership
     const membership = PRICE_ID_TO_MEMBERSHIP[priceId as string];
-    console.log('🔍 Webhook Debug - Mapped membership:', membership);
     if (supabaseUserId && membership) {
-      console.log('🔍 Webhook Debug - Attempting to update Supabase profile');
-      console.log('🔍 Webhook Debug - Supabase User ID:', supabaseUserId);
-      console.log('🔍 Webhook Debug - Membership:', membership);
       // Update Supabase profile using user ID
       const { data, error } = await supabase
         .from('profiles')
@@ -60,17 +54,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .eq('id', supabaseUserId)
         .select();
       if (error) {
-        console.error('❌ Supabase update error:', error);
-        console.error('❌ Error code:', error.code);
-        console.error('❌ Error message:', error.message);
-        console.error('❌ Error details:', error.details);
-        console.error('❌ Error hint:', error.hint);
         return res.status(500).json({ error: 'Failed to update membership in Supabase', details: error });
-      } else {
-        console.log('✅ Supabase update successful:', data);
       }
-    } else {
-      console.log('⚠️ Webhook Debug - Missing supabaseUserId or membership:', { supabaseUserId, membership });
     }
   }
 

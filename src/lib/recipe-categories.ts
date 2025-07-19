@@ -169,17 +169,4 @@ export function getRandomRecipe(mealType: MealType): CategorizedRecipe | null {
   const recipes = getRecipesByMealTypeWithOverrides(mealType)
   if (recipes.length === 0) return null
   return recipes[Math.floor(Math.random() * recipes.length)]
-}
-
-// Debug function to show categorization results
-export function debugCategorization(): void {
-  const categorized = getCategorizedRecipesWithOverrides()
-  
-  console.log('=== Recipe Categorization Results ===')
-  Object.entries(categorized).forEach(([mealType, recipes]) => {
-    console.log(`\n${mealType.toUpperCase()} (${recipes.length} recipes):`)
-    recipes.forEach(recipe => {
-      console.log(`  - ${recipe.name}`)
-    })
-  })
 } 
