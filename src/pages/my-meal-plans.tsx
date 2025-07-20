@@ -13,17 +13,24 @@ import { Session } from '@supabase/auth-helpers-nextjs'
 import DashboardNavbar from '../components/DashboardNavbar'
 import { supabase } from '../lib/supabase'
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  // Debug: Log cookies received by the server
-  console.log('DEBUG: Cookies received:', ctx.req.headers.cookie);
+// Build lookup maps outside the function for O(1) access
+const breakfastMap = Object.fromEntries(breakfastRecipes.map((r: any) => [r.id, r]))
+const lunchMap = Object.fromEntries(lunchRecipes.map((r: any) => [r.id, r]))
+const dinnerMap = Object.fromEntries(dinnerRecipes.map((r: any) => [r.id, r]))
 
+function getRecipeById(id: string, mealType: string) {
+  if (mealType === 'breakfast') return breakfastMap[id] || null
+  if (mealType === 'lunch') return lunchMap[id] || null
+  if (mealType === 'dinner') return dinnerMap[id] || null
+  return null
+}
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const start = Date.now();
   const supabase = createPagesServerClient(ctx)
   const {
     data: { session },
   } = await supabase.auth.getSession()
-
-  // Debug: Log the session object returned by Supabase
-  console.log('DEBUG: Supabase session:', session);
 
   if (!session) {
     return {
@@ -34,24 +41,14 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     }
   }
 
-  // Fetch meal plans for the logged-in user
+  // Fetch meal plans for the logged-in user, only needed fields
   const { data: mealPlansRaw, error } = await supabase
     .from('meal_plans')
-    .select('*')
+    .select('id, week_data, created_at')
     .eq('user_id', session.user.id)
     .order('created_at', { ascending: false })
 
-  // Import recipe data
-  const { default: breakfastRecipes } = await import('../lib/breakfast.json')
-  const { default: lunchRecipes } = await import('../lib/lunch.json')
-  const { default: dinnerRecipes } = await import('../lib/dinner.json')
-
-  const getRecipeById = (id: string, mealType: string) => {
-    if (mealType === 'breakfast') return breakfastRecipes.find((r: any) => r.id === id)
-    if (mealType === 'lunch') return lunchRecipes.find((r: any) => r.id === id)
-    if (mealType === 'dinner') return dinnerRecipes.find((r: any) => r.id === id)
-    return null
-  }
+  const afterSupabase = Date.now();
 
   const populateRecipeObjects = (weekData: any[]) => {
     return weekData.map((day: any) => ({
@@ -98,6 +95,11 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       }
     })
   }
+
+  const afterMapping = Date.now();
+  console.log('Supabase fetch:', afterSupabase - start, 'ms');
+  console.log('Mapping:', afterMapping - afterSupabase, 'ms');
+  console.log('Total:', afterMapping - start, 'ms');
 
   return {
     props: {
