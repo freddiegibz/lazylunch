@@ -54,18 +54,16 @@ export default function SignUp() {
             })
           
           if (profileError) {
-            console.error('Error creating profile:', profileError)
             // Don't throw here, user can still sign up
           }
         } catch (profileError) {
-          console.error('Error creating profile:', profileError)
           // Don't throw here, user can still sign up
         }
 
         setSuccess(true)
         // Show success message and redirect after a delay
         setTimeout(() => {
-          router.push('/dashboard')
+          window.location.href = '/dashboard'
         }, 2000)
       }
     } catch (err: any) {

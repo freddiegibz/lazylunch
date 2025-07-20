@@ -38,13 +38,10 @@ export default function RecipeCategories() {
                 <div style={{display: 'flex', flexDirection: 'column', gap: 12}}>
                   {recipes.map((recipe) => (
                     <div key={recipe.id} style={{display: 'flex', alignItems: 'center', gap: 12, background: 'var(--light-grey)', borderRadius: 8, padding: 8}}>
-                      <img 
-                        src={recipe.image} 
+                      <img
+                        src={recipe.image}
                         alt={recipe.name}
                         style={{width: 48, height: 48, objectFit: 'cover', borderRadius: 6}}
-                        onError={(e) => {
-                          e.currentTarget.src = '/images/placeholder.png'
-                        }}
                       />
                       <div style={{flex: 1, minWidth: 0}}>
                         <h3 style={{fontSize: '1rem', fontWeight: 500, color: 'var(--navy-blue)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>

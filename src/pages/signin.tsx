@@ -28,7 +28,8 @@ export default function SignIn() {
       }
 
       if (data.user) {
-        router.push('/dashboard')
+        // Force a page reload to ensure cookies are set
+        window.location.href = '/dashboard'
       }
     } catch (err: any) {
       setError(err.message || 'Failed to sign in. Please check your credentials.')

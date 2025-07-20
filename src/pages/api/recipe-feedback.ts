@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-const supabaseUrl = 'https://agegxqyzrvnykxfmaycq.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFnZWd4cXl6cnZueWt4Zm1heWNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2NTU1MjQsImV4cCI6MjA2NzIzMTUyNH0.SisaTROwc4-lGljFql28OoWXCVeeYc2aEQJ9-8jcJx0';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });

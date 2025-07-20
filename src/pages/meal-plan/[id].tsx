@@ -3,9 +3,11 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
-import { MealPlanService, MealPlan } from '../../lib/meal-plan-service'
-import recipes from '../../lib/dinner.json'
-import { getRecipesByMealTypeWithOverrides, MealType } from '../../lib/recipe-categories'
+import { MealPlanService } from '../../lib/meal-plan-service'
+import { getRandomRecipe, MealType } from '../../lib/recipe-categories'
+import breakfastRecipes from '../../lib/breakfast.json'
+import lunchRecipes from '../../lib/lunch.json'
+import dinnerRecipes from '../../lib/dinner.json'
 import { supabase } from '../../lib/supabase';
 
 export default function MealPlanDetail() {
@@ -28,13 +30,32 @@ export default function MealPlanDetail() {
   const [feedbackStatus, setFeedbackStatus] = useState<{[key: string]: string}>({});
 
   // Function to find recipe by name and meal type
-  const findRecipeByName = (mealName: string, mealType: MealType) => {
-    const categorizedRecipes = getRecipesByMealTypeWithOverrides(mealType)
-    return categorizedRecipes.find(recipe => 
-      recipe.name.toLowerCase().includes(mealName.toLowerCase()) ||
-      mealName.toLowerCase().includes(recipe.name.toLowerCase())
-    )
-  }
+  const findRecipeByName = (mealData: any, mealType: MealType) => {
+    let recipes: any[] = [];
+    if (mealType === 'breakfast') {
+      recipes = breakfastRecipes;
+    } else if (mealType === 'lunch') {
+      recipes = lunchRecipes;
+    } else if (mealType === 'dinner') {
+      recipes = dinnerRecipes;
+    }
+
+    // Handle new format where mealData is an object with recipeId
+    if (mealData && typeof mealData === 'object' && mealData.recipeId) {
+      const found = recipes.find(recipe => recipe.id === mealData.recipeId);
+      return found;
+    }
+
+    // Handle old format where mealData is a string (recipe name)
+    if (typeof mealData === 'string') {
+      return recipes.find(recipe =>
+        recipe.name.toLowerCase().includes(mealData.toLowerCase()) ||
+        mealData.toLowerCase().includes(recipe.name.toLowerCase())
+      );
+    }
+
+    return null;
+  };
 
   async function handleRecipeFeedback(recipeId: string, feedback: 'like' | 'dislike') {
     setFeedbackStatus((prev) => ({ ...prev, [recipeId]: 'loading' }));
@@ -149,6 +170,48 @@ export default function MealPlanDetail() {
     }
   }, [id])
 
+  // Function to populate recipe objects from IDs
+  const populateRecipeObjects = (weekData: any[]) => {
+    const getRecipeById = (id: string, mealType: MealType) => {
+      if (mealType === 'breakfast') return breakfastRecipes.find(r => r.id === id);
+      if (mealType === 'lunch') return lunchRecipes.find(r => r.id === id);
+      if (mealType === 'dinner') return dinnerRecipes.find(r => r.id === id);
+      return null;
+    };
+
+    return weekData.map((day: any) => ({
+      ...day,
+      meals: {
+        breakfast: typeof day.meals.breakfast === 'string' 
+          ? getRecipeById(day.meals.breakfast, 'breakfast') 
+          : day.meals.breakfast,
+        lunch: typeof day.meals.lunch === 'string' 
+          ? getRecipeById(day.meals.lunch, 'lunch') 
+          : day.meals.lunch,
+        dinner: typeof day.meals.dinner === 'string' 
+          ? getRecipeById(day.meals.dinner, 'dinner') 
+          : day.meals.dinner,
+      }
+    }));
+  };
+
+  // Function to generate shopping list from recipe objects
+  const generateShoppingList = (weekData: any[]) => {
+    const allIngredients = new Set<string>();
+    
+    weekData.forEach((day: any) => {
+      Object.values(day.meals).forEach((meal: any) => {
+        if (meal && typeof meal === 'object' && meal.ingredients) {
+          meal.ingredients.forEach((ingredient: any) => {
+            allIngredients.add(ingredient.item);
+          });
+        }
+      });
+    });
+    
+    return Array.from(allIngredients).sort();
+  };
+
   const loadMealPlan = async (planId: string) => {
     try {
       setLoading(true)
@@ -156,9 +219,15 @@ export default function MealPlanDetail() {
       const plan = plans.find(p => p.id === planId)
       
       if (plan) {
+        // Populate recipe objects from IDs
+        const populatedWeekData = populateRecipeObjects(plan.week_data);
+        
+        // Generate shopping list from populated recipe objects
+        const generatedShoppingList = generateShoppingList(populatedWeekData);
+        
         setMealPlan({
-          week: plan.week_data,
-          shoppingList: plan.shopping_list,
+          week: populatedWeekData,
+          shoppingList: generatedShoppingList,
           id: plan.id,
           created_at: plan.created_at
         })
@@ -166,7 +235,6 @@ export default function MealPlanDetail() {
         setError('Meal plan not found')
       }
     } catch (error) {
-      console.error('Error loading meal plan:', error)
       setError('Failed to load meal plan')
     } finally {
       setLoading(false)
@@ -180,9 +248,9 @@ export default function MealPlanDetail() {
     
     mealPlan.week.forEach((day: any) => {
       content += `${day.day}:\n`
-      content += `  Breakfast: ${day.meals.breakfast}\n`
-      content += `  Lunch: ${day.meals.lunch}\n`
-      content += `  Dinner: ${day.meals.dinner}\n\n`
+      content += `  Breakfast: ${typeof day.meals.breakfast === 'string' ? day.meals.breakfast : day.meals.breakfast?.name || 'No breakfast recipe available'}\n`
+      content += `  Lunch: ${typeof day.meals.lunch === 'string' ? day.meals.lunch : day.meals.lunch?.name || 'No lunch recipe available'}\n`
+      content += `  Dinner: ${typeof day.meals.dinner === 'string' ? day.meals.dinner : day.meals.dinner?.name || 'No dinner recipe available'}\n\n`
     })
     
     content += 'Shopping List:\n'
@@ -208,7 +276,6 @@ export default function MealPlanDetail() {
       await MealPlanService.deleteMealPlan(mealPlan.id)
       router.push('/my-meal-plans')
     } catch (error) {
-      console.error('Error deleting meal plan:', error)
       setError('Failed to delete meal plan')
     }
   }
@@ -371,7 +438,13 @@ export default function MealPlanDetail() {
 
                 <div className="meals-container">
                   {(() => {
-                    const breakfastRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.breakfast, 'breakfast')
+                    const breakfastRecipe = mealPlan.week[currentDayIndex].meals.breakfast
+                    const breakfastName = typeof breakfastRecipe === 'string' 
+                      ? breakfastRecipe 
+                      : breakfastRecipe?.name || 'Breakfast'
+                    const breakfastId = typeof breakfastRecipe === 'string' 
+                      ? breakfastRecipe 
+                      : breakfastRecipe?.id || ''
                     return (
                     <div className="meal-card">
                       <div className="meal-content" onClick={() => {
@@ -380,18 +453,16 @@ export default function MealPlanDetail() {
                         setCurrentInstructionStep(0)
                       }}>
                         <div className="meal-image">
-                          <img 
-                            src={breakfastRecipe?.image || '/images/placeholder.png'} 
+                          <img
+                            src={breakfastRecipe?.image}
                             alt={breakfastRecipe?.name || 'Breakfast'}
-                            onError={(e) => {
-                              e.currentTarget.src = '/images/placeholder.png'
-                            }}
+                            style={{width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8}}
                           />
-                          </div>
+                        </div>
                         <div className="meal-info">
                           <h4 className="meal-type">Breakfast</h4>
-                          <p className="meal-name">{breakfastRecipe?.name || mealPlan.week[currentDayIndex].meals.breakfast}</p>
-                          {breakfastRecipe && (
+                          <p className="meal-name">{breakfastName}</p>
+                          {breakfastRecipe && typeof breakfastRecipe === 'object' && (
                             <div className="meal-tags">
                               <span className="cost-tag">£{breakfastRecipe.estTotalCost.toFixed(2)}</span>
                               <span className="servings-tag">{breakfastRecipe.baseServings} servings</span>
@@ -402,24 +473,30 @@ export default function MealPlanDetail() {
                       <div className="meal-feedback">
                         <button className="feedback-button thumbs-up" onClick={e => {
                           e.stopPropagation();
-                          handleRecipeFeedback(breakfastRecipe?.id || mealPlan.week[currentDayIndex].meals.breakfast, 'like');
+                          handleRecipeFeedback(breakfastId, 'like');
                         }} aria-label="Thumbs up">
                           👍
-                          {feedbackStatus[breakfastRecipe?.id || mealPlan.week[currentDayIndex].meals.breakfast] === 'like' && <span className="feedback-confirm">Saved!</span>}
+                          {feedbackStatus[breakfastId] === 'like' && <span className="feedback-confirm">Saved!</span>}
                         </button>
                         <button className="feedback-button thumbs-down" onClick={e => {
                           e.stopPropagation();
-                          handleRecipeFeedback(breakfastRecipe?.id || mealPlan.week[currentDayIndex].meals.breakfast, 'dislike');
+                          handleRecipeFeedback(breakfastId, 'dislike');
                         }} aria-label="Thumbs down">
                           👎
-                          {feedbackStatus[breakfastRecipe?.id || mealPlan.week[currentDayIndex].meals.breakfast] === 'dislike' && <span className="feedback-confirm">Saved!</span>}
+                          {feedbackStatus[breakfastId] === 'dislike' && <span className="feedback-confirm">Saved!</span>}
                         </button>
                             </div>
                                   </div>
                   )
                 })()}
                 {(() => {
-                  const lunchRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.lunch, 'lunch')
+                  const lunchRecipe = mealPlan.week[currentDayIndex].meals.lunch
+                  const lunchName = typeof lunchRecipe === 'string' 
+                    ? lunchRecipe 
+                    : lunchRecipe?.name || 'Lunch'
+                  const lunchId = typeof lunchRecipe === 'string' 
+                    ? lunchRecipe 
+                    : lunchRecipe?.id || ''
                   return (
                     <div className="meal-card">
                       <div className="meal-content" onClick={() => {
@@ -429,17 +506,14 @@ export default function MealPlanDetail() {
                       }}>
                         <div className="meal-image">
                           <img 
-                            src={lunchRecipe?.image || '/images/placeholder.png'} 
+                            src={lunchRecipe?.image} 
                             alt={lunchRecipe?.name || 'Lunch'}
-                            onError={(e) => {
-                              e.currentTarget.src = '/images/placeholder.png'
-                            }}
                           />
                                 </div>
                         <div className="meal-info">
                           <h4 className="meal-type">Lunch</h4>
-                          <p className="meal-name">{lunchRecipe?.name || mealPlan.week[currentDayIndex].meals.lunch}</p>
-                          {lunchRecipe && (
+                          <p className="meal-name">{lunchName}</p>
+                          {lunchRecipe && typeof lunchRecipe === 'object' && (
                             <div className="meal-tags">
                               <span className="cost-tag">£{lunchRecipe.estTotalCost.toFixed(2)}</span>
                               <span className="servings-tag">{lunchRecipe.baseServings} servings</span>
@@ -450,24 +524,30 @@ export default function MealPlanDetail() {
                       <div className="meal-feedback">
                         <button className="feedback-button thumbs-up" onClick={e => {
                           e.stopPropagation();
-                          handleRecipeFeedback(lunchRecipe?.id || mealPlan.week[currentDayIndex].meals.lunch, 'like');
+                          handleRecipeFeedback(lunchId, 'like');
                         }} aria-label="Thumbs up">
                           👍
-                          {feedbackStatus[lunchRecipe?.id || mealPlan.week[currentDayIndex].meals.lunch] === 'like' && <span className="feedback-confirm">Saved!</span>}
+                          {feedbackStatus[lunchId] === 'like' && <span className="feedback-confirm">Saved!</span>}
                               </button>
                         <button className="feedback-button thumbs-down" onClick={e => {
                           e.stopPropagation();
-                          handleRecipeFeedback(lunchRecipe?.id || mealPlan.week[currentDayIndex].meals.lunch, 'dislike');
+                          handleRecipeFeedback(lunchId, 'dislike');
                         }} aria-label="Thumbs down">
                           👎
-                          {feedbackStatus[lunchRecipe?.id || mealPlan.week[currentDayIndex].meals.lunch] === 'dislike' && <span className="feedback-confirm">Saved!</span>}
+                          {feedbackStatus[lunchId] === 'dislike' && <span className="feedback-confirm">Saved!</span>}
                               </button>
                             </div>
                       </div>
                     )
                   })()}
                   {(() => {
-                  const dinnerRecipe = findRecipeByName(mealPlan.week[currentDayIndex].meals.dinner, 'dinner')
+                  const dinnerRecipe = mealPlan.week[currentDayIndex].meals.dinner
+                  const dinnerName = typeof dinnerRecipe === 'string' 
+                    ? dinnerRecipe 
+                    : dinnerRecipe?.name || 'Dinner'
+                  const dinnerId = typeof dinnerRecipe === 'string' 
+                    ? dinnerRecipe 
+                    : dinnerRecipe?.id || ''
                     return (
                     <div className="meal-card">
                       <div className="meal-content" onClick={() => {
@@ -477,17 +557,14 @@ export default function MealPlanDetail() {
                       }}>
                         <div className="meal-image">
                           <img 
-                            src={dinnerRecipe?.image || '/images/placeholder.png'} 
+                            src={dinnerRecipe?.image} 
                             alt={dinnerRecipe?.name || 'Dinner'}
-                            onError={(e) => {
-                              e.currentTarget.src = '/images/placeholder.png'
-                            }}
                           />
                         </div>
                         <div className="meal-info">
                           <h4 className="meal-type">Dinner</h4>
-                          <p className="meal-name">{dinnerRecipe?.name || mealPlan.week[currentDayIndex].meals.dinner}</p>
-                          {dinnerRecipe && (
+                          <p className="meal-name">{dinnerName}</p>
+                          {dinnerRecipe && typeof dinnerRecipe === 'object' && (
                             <div className="meal-tags">
                               <span className="cost-tag">£{dinnerRecipe.estTotalCost.toFixed(2)}</span>
                               <span className="servings-tag">{dinnerRecipe.baseServings} servings</span>
@@ -498,17 +575,17 @@ export default function MealPlanDetail() {
                       <div className="meal-feedback">
                         <button className="feedback-button thumbs-up" onClick={e => {
                           e.stopPropagation();
-                          handleRecipeFeedback(dinnerRecipe?.id || mealPlan.week[currentDayIndex].meals.dinner, 'like');
+                          handleRecipeFeedback(dinnerId, 'like');
                         }} aria-label="Thumbs up">
                           👍
-                          {feedbackStatus[dinnerRecipe?.id || mealPlan.week[currentDayIndex].meals.dinner] === 'like' && <span className="feedback-confirm">Saved!</span>}
+                          {feedbackStatus[dinnerId] === 'like' && <span className="feedback-confirm">Saved!</span>}
                         </button>
                         <button className="feedback-button thumbs-down" onClick={e => {
                           e.stopPropagation();
-                          handleRecipeFeedback(dinnerRecipe?.id || mealPlan.week[currentDayIndex].meals.dinner, 'dislike');
+                          handleRecipeFeedback(dinnerId, 'dislike');
                         }} aria-label="Thumbs down">
                           👎
-                          {feedbackStatus[dinnerRecipe?.id || mealPlan.week[currentDayIndex].meals.dinner] === 'dislike' && <span className="feedback-confirm">Saved!</span>}
+                          {feedbackStatus[dinnerId] === 'dislike' && <span className="feedback-confirm">Saved!</span>}
                         </button>
                             </div>
                                   </div>
@@ -542,8 +619,25 @@ export default function MealPlanDetail() {
                       onClick={() => setSelectedMeal(null)}
                     >
                       ×
-                              </button>
+                    </button>
                   </div>
+                  {/* Navigation Arrows Overlay */}
+                  <button
+                    className="book-arrow book-arrow-left"
+                    onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                                disabled={currentPage === 0}
+                    aria-label="Previous page"
+                              >
+                    &#8592;
+                              </button>
+                              <button 
+                    className="book-arrow book-arrow-right"
+                    onClick={() => setCurrentPage(Math.min(Math.ceil(selectedMeal.steps.length / 2), currentPage + 1))}
+                    disabled={currentPage >= Math.ceil(selectedMeal.steps.length / 2)}
+                    aria-label="Next page"
+                  >
+                    &#8594;
+                              </button>
                   <div className="recipe-book-container">
                     {/* Book Spread */}
                     <div className="book-spread">
@@ -557,9 +651,6 @@ export default function MealPlanDetail() {
                                 <img 
                                   src={selectedMeal.image} 
                                   alt={selectedMeal.name}
-                                  onError={(e) => {
-                                    e.currentTarget.src = '/images/placeholder.png'
-                                  }}
                                 />
                             </div>
                               <div className="cover-content">
@@ -654,51 +745,22 @@ export default function MealPlanDetail() {
                             </div>
                                     <div className="step-content">
                                       <p className="step-text">{selectedMeal.steps[stepIndex]}</p>
-                                    </div>
-                                  </div>
+                            </div>
+                          </div>
                                 );
                               } else {
                                 return null;
                               }
                             })()
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    {/* Book Navigation */}
-                            <div className="book-navigation">
-                              <button 
-                        className="page-nav-button"
-                        onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
-                                disabled={currentPage === 0}
-                              >
-                        ← Previous Spread
-                              </button>
-                      <div className="page-indicator">
-                        <span className="page-counter">
-                          Spread {currentPage + 1} of {Math.ceil(selectedMeal.steps.length / 2) + 1}
-                        </span>
-                        <div className="page-dots">
-                          {Array.from({ length: Math.ceil(selectedMeal.steps.length / 2) + 1 }, (_, i) => (
-                              <button 
-                              key={i}
-                              className={`page-dot ${currentPage === i ? 'active' : ''}`}
-                              onClick={() => setCurrentPage(i)}
-                            >
-                              {i + 1}
-                              </button>
-                          ))}
-                            </div>
-                          </div>
-                      <button 
-                        className="page-nav-button"
-                        onClick={() => setCurrentPage(Math.min(Math.ceil(selectedMeal.steps.length / 2), currentPage + 1))}
-                        disabled={currentPage >= Math.ceil(selectedMeal.steps.length / 2)}
-                      >
-                        Next Spread →
-                      </button>
+                        )}
                       </div>
                 </div>
+              </div>
+                    {/* Page X of Y indicator */}
+                    <div style={{ textAlign: 'center', marginTop: '8px', fontWeight: 600, color: 'var(--navy-blue)' }}>
+                      Page {currentPage + 1} of {Math.ceil(selectedMeal.steps.length / 2) + 1}
+            </div>
+                    </div>
                 </div>
               </div>
             )}
@@ -1043,7 +1105,7 @@ export default function MealPlanDetail() {
         .loading-text {
           font-size: 1.1rem;
           color: var(--dark-grey);
-        }
+          }
 
         .error-message {
           background: rgba(242, 140, 140, 0.1);
@@ -1546,6 +1608,44 @@ export default function MealPlanDetail() {
           font-weight: 600;
         }
 
+        .book-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          background: var(--pastel-green);
+          border: none;
+          color: var(--navy-blue);
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          cursor: pointer;
+          font-size: 1.2rem;
+          transition: all 0.3s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .book-arrow-left {
+          left: 1rem;
+        }
+
+        .book-arrow-right {
+          right: 1rem;
+        }
+
+        .book-arrow:hover:not(:disabled) {
+          background: #9BC8AB;
+          transform: translateY(-50%) scale(1.1);
+        }
+
+        .book-arrow:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
         @media (max-width: 768px) {
           .dashboard-header-content {
             padding: 0 1rem;
@@ -1783,6 +1883,20 @@ export default function MealPlanDetail() {
             width: 25px;
             height: 25px;
             font-size: 0.7rem;
+          }
+
+          .book-arrow {
+            width: 30px;
+            height: 30px;
+            font-size: 1rem;
+          }
+
+          .book-arrow-left {
+            left: 0.5rem;
+          }
+
+          .book-arrow-right {
+            right: 0.5rem;
           }
         }
       `}</style>
