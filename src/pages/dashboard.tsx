@@ -70,45 +70,67 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
+    console.log('🔍 DEBUG: dashboard.tsx - useEffect started');
+    
     // Get current user session
     const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        setUser(user)
-        // Fetch membership from profiles table
-        try {
-          const { data: profile, error } = await supabase
-            .from('profiles')
-            .select('membership')
-            .eq('id', user.id)
-            .single()
+      try {
+        console.log('🔍 DEBUG: dashboard.tsx - Getting user...');
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (user) {
+          console.log('🔍 DEBUG: dashboard.tsx - User found, setting user state');
+          setUser(user)
           
-          if (error) {
-            // If profile doesn't exist, create one with default membership
+          // Fetch membership from profiles table
+          try {
+            console.log('🔍 DEBUG: dashboard.tsx - Fetching profile...');
+            const { data: profile, error } = await supabase
+              .from('profiles')
+              .select('membership')
+              .eq('id', user.id)
+              .single()
+            
+            if (error) {
+              console.log('🔍 DEBUG: dashboard.tsx - Profile not found, creating new profile');
+              // If profile doesn't exist, create one with default membership
+              await createUserProfile(user.id)
+              setMembership('free')
+            } else {
+              console.log('🔍 DEBUG: dashboard.tsx - Profile found, setting membership');
+              setMembership(profile?.membership || 'free')
+            }
+          } catch (error) {
+            console.log('🔍 DEBUG: dashboard.tsx - Profile fetch error, creating profile');
+            // Try to create profile for new users
             await createUserProfile(user.id)
             setMembership('free')
-          } else {
-            setMembership(profile?.membership || 'free')
           }
-        } catch (error) {
-          // Try to create profile for new users
-          await createUserProfile(user.id)
-          setMembership('free')
+          
+          // Load user data after user is set
+          console.log('🔍 DEBUG: dashboard.tsx - Loading user data...');
+          await loadUserData()
+        } else {
+          console.log('🔍 DEBUG: dashboard.tsx - No user found, redirecting to signin');
+          // No user found, redirect to signin
+          router.push('/signin')
         }
-        
-        // Load user data after user is set
-        await loadUserData()
-      } else {
-        // No user found, redirect to signin
+      } catch (error) {
+        console.log('🔍 DEBUG: dashboard.tsx - Error in getCurrentUser:', error);
+        // Ensure loading is set to false even on error
         router.push('/signin')
+      } finally {
+        console.log('🔍 DEBUG: dashboard.tsx - Setting loading to false');
+        setLoading(false)
       }
-      setLoading(false)
     }
 
     getCurrentUser()
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔍 DEBUG: dashboard.tsx - Auth state change:', event);
+      
       if (event === 'SIGNED_OUT') {
         setUser(null)
         router.push('/signin')
