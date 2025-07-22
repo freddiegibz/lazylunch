@@ -4,10 +4,13 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 export default function Home() {
+  console.log('🔍 DEBUG: index.tsx - Home component rendering');
+  
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null)
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
+    console.log('🔍 DEBUG: index.tsx - useEffect running, setting isVisible to true');
     setIsVisible(true)
   }, [])
 
