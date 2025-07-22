@@ -26,13 +26,22 @@ function getRecipeById(id: string, mealType: string) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  console.log('🔍 DEBUG: getServerSideProps started');
   const start = Date.now();
+  
+  console.log('🔍 DEBUG: Creating Supabase client...');
   const supabase = createPagesServerClient(ctx)
+  const clientStart = Date.now();
+  
+  console.log('🔍 DEBUG: Getting session...');
   const {
     data: { session },
   } = await supabase.auth.getSession()
+  const sessionEnd = Date.now();
+  console.log('🔍 DEBUG: Session fetch took:', sessionEnd - clientStart, 'ms');
 
   if (!session) {
+    console.log('🔍 DEBUG: No session, redirecting to signin');
     return {
       redirect: {
         destination: '/signin',
@@ -40,7 +49,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       },
     }
   }
-
+  
+  console.log('🔍 DEBUG: User authenticated, fetching meal plans...');
+  const mealPlansStart = Date.now();
+  
   // Fetch meal plans for the logged-in user, only needed fields
   const { data: mealPlansRaw, error } = await supabase
     .from('meal_plans')
@@ -48,28 +60,45 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     .eq('user_id', session.user.id)
     .order('created_at', { ascending: false })
 
+  const mealPlansEnd = Date.now();
+  console.log('🔍 DEBUG: Supabase meal plans query took:', mealPlansEnd - mealPlansStart, 'ms');
+  console.log('🔍 DEBUG: Found', mealPlansRaw?.length || 0, 'meal plans');
+  
+  if (error) {
+    console.log('🔍 DEBUG: Supabase error:', error);
+  }
+
   const afterSupabase = Date.now();
 
+  console.log('🔍 DEBUG: Starting recipe mapping...');
+  const mappingStart = Date.now();
+
   const populateRecipeObjects = (weekData: any[]) => {
-    return weekData.map((day: any) => ({
-      ...day,
-      meals: {
-        breakfast: typeof day.meals?.breakfast === 'string'
-          ? (getRecipeById(day.meals.breakfast, 'breakfast') || null)
-          : (day.meals?.breakfast || null),
-        lunch: typeof day.meals?.lunch === 'string'
-          ? (getRecipeById(day.meals.lunch, 'lunch') || null)
-          : (day.meals?.lunch || null),
-        dinner: typeof day.meals?.dinner === 'string'
-          ? (getRecipeById(day.meals.dinner, 'dinner') || null)
-          : (day.meals?.dinner || null),
-      }
-    }))
+    console.log('🔍 DEBUG: Processing week data with', weekData.length, 'days');
+    return weekData.map((day: any, dayIndex: number) => {
+      console.log(`🔍 DEBUG: Processing day ${dayIndex + 1}`);
+      return {
+        ...day,
+        meals: {
+          breakfast: typeof day.meals?.breakfast === 'string'
+            ? (getRecipeById(day.meals.breakfast, 'breakfast') || null)
+            : (day.meals?.breakfast || null),
+          lunch: typeof day.meals?.lunch === 'string'
+            ? (getRecipeById(day.meals.lunch, 'lunch') || null)
+            : (day.meals?.lunch || null),
+          dinner: typeof day.meals?.dinner === 'string'
+            ? (getRecipeById(day.meals.dinner, 'dinner') || null)
+            : (day.meals?.dinner || null),
+        }
+      };
+    });
   }
 
   const generateShoppingList = (weekData: any[]) => {
+    console.log('🔍 DEBUG: Generating shopping list for', weekData.length, 'days');
     const allIngredients = new Set<string>()
-    weekData.forEach((day: any) => {
+    weekData.forEach((day: any, dayIndex: number) => {
+      console.log(`🔍 DEBUG: Processing ingredients for day ${dayIndex + 1}`);
       Object.values(day.meals).forEach((meal: any) => {
         if (meal && typeof meal === 'object' && meal.ingredients) {
           meal.ingredients.forEach((ingredient: any) => {
@@ -78,14 +107,19 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         }
       })
     })
-    return Array.from(allIngredients).sort()
+    const shoppingList = Array.from(allIngredients).sort()
+    console.log('🔍 DEBUG: Shopping list has', shoppingList.length, 'items');
+    return shoppingList
   }
 
   let mealPlans: any[] = []
   if (mealPlansRaw && Array.isArray(mealPlansRaw)) {
-    mealPlans = mealPlansRaw.map((plan: any) => {
+    console.log('🔍 DEBUG: Processing', mealPlansRaw.length, 'meal plans');
+    mealPlans = mealPlansRaw.map((plan: any, planIndex: number) => {
+      console.log(`🔍 DEBUG: Processing meal plan ${planIndex + 1}/${mealPlansRaw.length}`);
       // Ensure week_data exists and is an array
       const weekData = Array.isArray(plan.week_data) ? plan.week_data : []
+      console.log(`🔍 DEBUG: Plan ${planIndex + 1} has`, weekData.length, 'days');
       const populatedWeekData = populateRecipeObjects(weekData)
       const generatedShoppingList = generateShoppingList(populatedWeekData)
       return {
@@ -97,9 +131,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   }
 
   const afterMapping = Date.now();
-  console.log('Supabase fetch:', afterSupabase - start, 'ms');
-  console.log('Mapping:', afterMapping - afterSupabase, 'ms');
-  console.log('Total:', afterMapping - start, 'ms');
+  console.log('🔍 DEBUG: Supabase fetch:', afterSupabase - start, 'ms');
+  console.log('🔍 DEBUG: Mapping:', afterMapping - afterSupabase, 'ms');
+  console.log('🔍 DEBUG: Total getServerSideProps time:', afterMapping - start, 'ms');
+  console.log('🔍 DEBUG: getServerSideProps completed successfully');
 
   return {
     props: {
@@ -110,6 +145,8 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 }
 
 function MyMealPlans({ mealPlans = [] }: { mealPlans: any[] }) {
+  console.log('🔍 DEBUG: MyMealPlans component rendered with', mealPlans.length, 'meal plans');
+  
   const [error, setError] = useState('')
   const [user, setUser] = useState<any>(null)
   const [membership, setMembership] = useState<string>('')
@@ -118,13 +155,17 @@ function MyMealPlans({ mealPlans = [] }: { mealPlans: any[] }) {
 
   // Load user data
   useEffect(() => {
+    console.log('🔍 DEBUG: MyMealPlans useEffect started');
     const loadUser = async () => {
       try {
+        console.log('🔍 DEBUG: Getting user from Supabase...');
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
+          console.log('🔍 DEBUG: User found, setting user state');
           setUser(user)
           // Fetch membership from profiles table
           try {
+            console.log('🔍 DEBUG: Fetching user profile...');
             const { data: profile, error } = await supabase
               .from('profiles')
               .select('membership')
@@ -132,19 +173,25 @@ function MyMealPlans({ mealPlans = [] }: { mealPlans: any[] }) {
               .single()
             
             if (error) {
+              console.log('🔍 DEBUG: Profile fetch error, setting membership to free');
               setMembership('free')
             } else {
+              console.log('🔍 DEBUG: Profile fetched successfully');
               setMembership(profile?.membership || 'free')
             }
           } catch (error) {
+            console.log('🔍 DEBUG: Profile fetch exception, setting membership to free');
             setMembership('free')
           }
         } else {
+          console.log('🔍 DEBUG: No user found, redirecting to signin');
           router.push('/signin')
         }
       } catch (error) {
+        console.log('🔍 DEBUG: User fetch exception, redirecting to signin');
         router.push('/signin')
       } finally {
+        console.log('🔍 DEBUG: Setting loading to false');
         setLoading(false)
       }
     }
