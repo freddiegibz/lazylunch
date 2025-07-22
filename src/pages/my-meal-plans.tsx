@@ -13,7 +13,7 @@ import { Session } from '@supabase/auth-helpers-nextjs'
 import DashboardNavbar from '../components/DashboardNavbar'
 import { supabase } from '../lib/supabase'
 
-// Build lookup maps outside the function for O(1) access
+// Build lookup maps outside the function for O(1) access - moved to module level
 const breakfastMap = Object.fromEntries(breakfastRecipes.map((r: any) => [r.id, r]))
 const lunchMap = Object.fromEntries(lunchRecipes.map((r: any) => [r.id, r]))
 const dinnerMap = Object.fromEntries(dinnerRecipes.map((r: any) => [r.id, r]))
@@ -29,118 +29,107 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   console.log('🔍 DEBUG: getServerSideProps started');
   const start = Date.now();
   
-  console.log('🔍 DEBUG: Creating Supabase client...');
-  const supabase = createPagesServerClient(ctx)
-  const clientStart = Date.now();
-  
-  console.log('🔍 DEBUG: Getting session...');
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  const sessionEnd = Date.now();
-  console.log('🔍 DEBUG: Session fetch took:', sessionEnd - clientStart, 'ms');
+  try {
+    console.log('🔍 DEBUG: Creating Supabase client...');
+    const supabase = createPagesServerClient(ctx)
+    
+    console.log('🔍 DEBUG: Getting session...');
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
 
-  if (!session) {
-    console.log('🔍 DEBUG: No session, redirecting to signin');
-    return {
-      redirect: {
-        destination: '/signin',
-        permanent: false,
-      },
-    }
-  }
-  
-  console.log('🔍 DEBUG: User authenticated, fetching meal plans...');
-  const mealPlansStart = Date.now();
-  
-  // Fetch meal plans for the logged-in user, only needed fields
-  const { data: mealPlansRaw, error } = await supabase
-    .from('meal_plans')
-    .select('id, week_data, created_at')
-    .eq('user_id', session.user.id)
-    .order('created_at', { ascending: false })
-
-  const mealPlansEnd = Date.now();
-  console.log('🔍 DEBUG: Supabase meal plans query took:', mealPlansEnd - mealPlansStart, 'ms');
-  console.log('🔍 DEBUG: Found', mealPlansRaw?.length || 0, 'meal plans');
-  
-  if (error) {
-    console.log('🔍 DEBUG: Supabase error:', error);
-  }
-
-  const afterSupabase = Date.now();
-
-  console.log('🔍 DEBUG: Starting recipe mapping...');
-  const mappingStart = Date.now();
-
-  const populateRecipeObjects = (weekData: any[]) => {
-    console.log('🔍 DEBUG: Processing week data with', weekData.length, 'days');
-    return weekData.map((day: any, dayIndex: number) => {
-      console.log(`🔍 DEBUG: Processing day ${dayIndex + 1}`);
+    if (!session) {
+      console.log('🔍 DEBUG: No session, redirecting to signin');
       return {
-        ...day,
-        meals: {
-          breakfast: typeof day.meals?.breakfast === 'string'
-            ? (getRecipeById(day.meals.breakfast, 'breakfast') || null)
-            : (day.meals?.breakfast || null),
-          lunch: typeof day.meals?.lunch === 'string'
-            ? (getRecipeById(day.meals.lunch, 'lunch') || null)
-            : (day.meals?.lunch || null),
-          dinner: typeof day.meals?.dinner === 'string'
-            ? (getRecipeById(day.meals.dinner, 'dinner') || null)
-            : (day.meals?.dinner || null),
-        }
-      };
-    });
-  }
+        redirect: {
+          destination: '/signin',
+          permanent: false,
+        },
+      }
+    }
+    
+    console.log('🔍 DEBUG: User authenticated, fetching meal plans...');
+    
+    // Fetch meal plans for the logged-in user, only needed fields
+    const { data: mealPlansRaw, error } = await supabase
+      .from('meal_plans')
+      .select('id, week_data, created_at')
+      .eq('user_id', session.user.id)
+      .order('created_at', { ascending: false })
 
-  const generateShoppingList = (weekData: any[]) => {
-    console.log('🔍 DEBUG: Generating shopping list for', weekData.length, 'days');
-    const allIngredients = new Set<string>()
-    weekData.forEach((day: any, dayIndex: number) => {
-      console.log(`🔍 DEBUG: Processing ingredients for day ${dayIndex + 1}`);
-      Object.values(day.meals).forEach((meal: any) => {
-        if (meal && typeof meal === 'object' && meal.ingredients) {
-          meal.ingredients.forEach((ingredient: any) => {
-            allIngredients.add(ingredient.item)
+    if (error) {
+      console.log('🔍 DEBUG: Supabase error:', error);
+      return {
+        props: {
+          mealPlans: [],
+          session,
+          error: 'Failed to fetch meal plans'
+        },
+      }
+    }
+
+    console.log('🔍 DEBUG: Found', mealPlansRaw?.length || 0, 'meal plans');
+
+    // Simplified processing - only process if we have data
+    let mealPlans: any[] = []
+    if (mealPlansRaw && Array.isArray(mealPlansRaw)) {
+      mealPlans = mealPlansRaw.map((plan: any) => {
+        const weekData = Array.isArray(plan.week_data) ? plan.week_data : []
+        
+        // Simplified recipe population
+        const populatedWeekData = weekData.map((day: any) => ({
+          ...day,
+          meals: {
+            breakfast: typeof day.meals?.breakfast === 'string'
+              ? getRecipeById(day.meals.breakfast, 'breakfast')
+              : day.meals?.breakfast || null,
+            lunch: typeof day.meals?.lunch === 'string'
+              ? getRecipeById(day.meals.lunch, 'lunch')
+              : day.meals?.lunch || null,
+            dinner: typeof day.meals?.dinner === 'string'
+              ? getRecipeById(day.meals.dinner, 'dinner')
+              : day.meals?.dinner || null,
+          }
+        }))
+
+        // Simplified shopping list generation
+        const allIngredients = new Set<string>()
+        populatedWeekData.forEach((day: any) => {
+          Object.values(day.meals).forEach((meal: any) => {
+            if (meal && typeof meal === 'object' && meal.ingredients) {
+              meal.ingredients.forEach((ingredient: any) => {
+                allIngredients.add(ingredient.item)
+              })
+            }
           })
+        })
+
+        return {
+          ...plan,
+          week_data: populatedWeekData,
+          shopping_list: Array.from(allIngredients).sort()
         }
       })
-    })
-    const shoppingList = Array.from(allIngredients).sort()
-    console.log('🔍 DEBUG: Shopping list has', shoppingList.length, 'items');
-    return shoppingList
-  }
+    }
 
-  let mealPlans: any[] = []
-  if (mealPlansRaw && Array.isArray(mealPlansRaw)) {
-    console.log('🔍 DEBUG: Processing', mealPlansRaw.length, 'meal plans');
-    mealPlans = mealPlansRaw.map((plan: any, planIndex: number) => {
-      console.log(`🔍 DEBUG: Processing meal plan ${planIndex + 1}/${mealPlansRaw.length}`);
-      // Ensure week_data exists and is an array
-      const weekData = Array.isArray(plan.week_data) ? plan.week_data : []
-      console.log(`🔍 DEBUG: Plan ${planIndex + 1} has`, weekData.length, 'days');
-      const populatedWeekData = populateRecipeObjects(weekData)
-      const generatedShoppingList = generateShoppingList(populatedWeekData)
-      return {
-        ...plan,
-        week_data: populatedWeekData,
-        shopping_list: generatedShoppingList
-      }
-    })
-  }
+    const totalTime = Date.now() - start;
+    console.log('🔍 DEBUG: getServerSideProps completed in', totalTime, 'ms');
 
-  const afterMapping = Date.now();
-  console.log('🔍 DEBUG: Supabase fetch:', afterSupabase - start, 'ms');
-  console.log('🔍 DEBUG: Mapping:', afterMapping - afterSupabase, 'ms');
-  console.log('🔍 DEBUG: Total getServerSideProps time:', afterMapping - start, 'ms');
-  console.log('🔍 DEBUG: getServerSideProps completed successfully');
-
-  return {
-    props: {
-      mealPlans,
-      session,
-    },
+    return {
+      props: {
+        mealPlans,
+        session,
+      },
+    }
+  } catch (error) {
+    console.log('🔍 DEBUG: getServerSideProps error:', error);
+    return {
+      props: {
+        mealPlans: [],
+        session: null,
+        error: 'An error occurred while loading meal plans'
+      },
+    }
   }
 }
 
