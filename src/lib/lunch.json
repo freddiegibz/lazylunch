@@ -302,5 +302,1008 @@
       "quick"
     ],
     "estTotalCost": 1.38
-  }
+  },
+  {
+  "id": "beef-burrito-bowl",
+  "name": "Beef Burrito Bowl",
+  "baseServings": 1,
+  "ingredients": [{
+          "item": "Cooked rice",
+          "qty": "150 g",
+          "estCost": 0.15,
+          "allergens": []
+      },
+      {
+          "item": "Ground beef",
+          "qty": "100 g",
+          "estCost": 1.2,
+          "allergens": []
+      },
+      {
+          "item": "Black beans",
+          "qty": "80 g",
+          "estCost": 0.25,
+          "allergens": []
+      },
+      {
+          "item": "Corn kernels",
+          "qty": "50 g",
+          "estCost": 0.1,
+          "allergens": []
+      },
+      {
+          "item": "Sour cream",
+          "qty": "1 Tbsp",
+          "estCost": 0.15,
+          "allergens": ["dairy"]
+      }
+  ],
+  "steps": [
+      "Gather all ingredients: cooked rice, ground beef, black beans, corn kernels, and sour cream.",
+      "Heat a pan over medium heat and cook the ground beef until browned.",
+      "Add black beans and corn kernels to the pan, stirring to combine.",
+      "Warm the cooked rice in a microwave or on the stove.",
+      "Place the rice in a bowl as the base.",
+      "Top with the beef, beans, and corn mixture.",
+      "Dollop sour cream on top.",
+      "Serve immediately."
+  ],
+  "image": "/foodimages/beefburritobowl.png",
+  "tags": ["beef", "bowl", "quick"],
+  "estTotalCost": 1.85
+},
+{
+  "id": "avocado-toast",
+  "name": "Avocado Toast",
+  "baseServings": 1,
+  "ingredients": [{
+          "item": "Bread",
+          "qty": "1 slice",
+          "estCost": 0.2,
+          "allergens": ["gluten"]
+      },
+      { "item": "Avocado", "qty": "½", "estCost": 0.5, "allergens": [] },
+      {
+          "item": "Lemon juice",
+          "qty": "1 tsp",
+          "estCost": 0.05,
+          "allergens": []
+      },
+      { "item": "Salt", "qty": "pinch", "estCost": 0.01, "allergens": [] }
+  ],
+  "steps": [
+      "Gather all ingredients: bread, avocado, lemon juice, and salt.",
+      "Toast the bread until golden brown.",
+      "Cut the avocado in half, remove the pit, and scoop the flesh into a bowl.",
+      "Mash the avocado with a fork and mix in lemon juice and salt.",
+      "Spread the mashed avocado evenly on the toasted bread.",
+      "Serve immediately."
+  ],
+  "image": "/foodimages/avocadotoast.png",
+  "tags": ["vegetarian", "quick", "healthy"],
+  "estTotalCost": 0.76
+},
+{
+  "id": "vegetable-stir-fry",
+  "name": "Vegetable Stir Fry",
+  "baseServings": 1,
+  "ingredients": [
+      { "item": "Broccoli", "qty": "100 g", "estCost": 0.3, "allergens": [] },
+      { "item": "Bell pepper", "qty": "1", "estCost": 0.4, "allergens": [] },
+      { "item": "Carrot", "qty": "1", "estCost": 0.2, "allergens": [] },
+      {
+          "item": "Soy sauce",
+          "qty": "1 Tbsp",
+          "estCost": 0.08,
+          "allergens": ["soy"]
+      },
+      { "item": "Oil", "qty": "1 tsp", "estCost": 0.01, "allergens": [] }
+  ],
+  "steps": [
+      "Gather all ingredients: broccoli, bell pepper, carrot, soy sauce, and oil.",
+      "Chop the broccoli, bell pepper, and carrot into bite-sized pieces.",
+      "Heat oil in a pan over medium-high heat.",
+      "Add the chopped vegetables to the pan and stir-fry for 5-7 minutes until tender.",
+      "Add soy sauce and stir to coat the vegetables evenly.",
+      "Serve hot."
+  ],
+  "image": "/foodimages/vegetablestirfry.png",
+  "tags": ["vegetarian", "asian", "healthy"],
+  "estTotalCost": 0.99
+},
+{
+  "id": "grilled-cheese-sandwich",
+  "name": "Grilled Cheese Sandwich",
+  "baseServings": 1,
+  "ingredients": [{
+          "item": "Bread",
+          "qty": "2 slices",
+          "estCost": 0.4,
+          "allergens": ["gluten"]
+      },
+      {
+          "item": "Cheddar cheese",
+          "qty": "50 g",
+          "estCost": 0.5,
+          "allergens": ["dairy"]
+      },
+      {
+          "item": "Butter",
+          "qty": "1 tsp",
+          "estCost": 0.05,
+          "allergens": ["dairy"]
+      }
+  ],
+  "steps": [
+      "Gather all ingredients: bread, cheddar cheese, and butter.",
+      "Butter one side of each bread slice.",
+      "Place the cheese between the unbuttered sides of the bread.",
+      "Heat a pan over medium heat and place the sandwich in the pan.",
+      "Cook for 2-3 minutes on each side until the bread is golden and the cheese is melted.",
+      "Serve hot."
+  ],
+  "image": "/foodimages/grilledcheese.png",
+  "tags": ["vegetarian", "sandwich", "quick"],
+  "estTotalCost": 0.95
+},
+{
+  "id": "pasta-salad",
+  "name": "Pasta Salad",
+  "baseServings": 1,
+  "ingredients": [{
+          "item": "Pasta",
+          "qty": "100 g",
+          "estCost": 0.3,
+          "allergens": ["gluten"]
+      },
+      {
+          "item": "Cherry tomatoes",
+          "qty": "5",
+          "estCost": 0.25,
+          "allergens": []
+      },
+      { "item": "Cucumber", "qty": "½", "estCost": 0.25, "allergens": [] },
+      { "item": "Olive oil", "qty": "1 Tbsp", "estCost": 0.13, "allergens": [] }
+  ],
+  "steps": [
+      "Gather all ingredients: pasta, cherry tomatoes, cucumber, and olive oil.",
+      "Cook the pasta according to package instructions, then drain and let cool.",
+      "Halve the cherry tomatoes and dice the cucumber.",
+      "Combine the cooled pasta, tomatoes, and cucumber in a bowl.",
+      "Drizzle with olive oil and toss to combine.",
+      "Serve chilled."
+  ],
+  "image": "/foodimages/pastasalad.png",
+  "tags": ["vegetarian", "salad", "healthy"],
+  "estTotalCost": 0.93
+},
+{
+  "id": "peanut-butter-banana-sandwich",
+  "name": "Peanut Butter Banana Sandwich",
+  "baseServings": 1,
+  "ingredients": [{
+          "item": "Bread",
+          "qty": "2 slices",
+          "estCost": 0.4,
+          "allergens": ["gluten"]
+      },
+      {
+          "item": "Peanut butter",
+          "qty": "2 Tbsp",
+          "estCost": 0.2,
+          "allergens": ["peanuts"]
+      },
+      { "item": "Banana", "qty": "1", "estCost": 0.3, "allergens": [] }
+  ],
+  "steps": [
+      "Gather all ingredients: bread, peanut butter, and banana.",
+      "Spread peanut butter on one side of each bread slice.",
+      "Slice the banana and place the slices on one peanut butter-covered bread slice.",
+      "Top with the other bread slice, peanut butter side down.",
+      "Cut in half if desired and serve."
+  ],
+  "image": "/foodimages/peanutbutterbanana.png",
+  "tags": ["vegetarian", "sandwich", "quick"],
+  "estTotalCost": 0.9
+},
+{
+  "id": "quinoa-bowl",
+  "name": "Quinoa Bowl",
+  "baseServings": 1,
+  "ingredients": [
+      { "item": "Quinoa", "qty": "100 g", "estCost": 0.5, "allergens": [] },
+      { "item": "Avocado", "qty": "½", "estCost": 0.5, "allergens": [] },
+      {
+          "item": "Cherry tomatoes",
+          "qty": "5",
+          "estCost": 0.25,
+          "allergens": []
+      },
+      {
+          "item": "Lemon juice",
+          "qty": "1 tsp",
+          "estCost": 0.05,
+          "allergens": []
+      }
+  ],
+  "steps": [
+      "Gather all ingredients: quinoa, avocado, cherry tomatoes, and lemon juice.",
+      "Cook quinoa according to package instructions, then let cool slightly.",
+      "Halve the cherry tomatoes and dice the avocado.",
+      "Combine the quinoa, tomatoes, and avocado in a bowl.",
+      "Drizzle with lemon juice and toss gently.",
+      "Serve immediately."
+  ],
+  "image": "/foodimages/quinoabowl.png",
+  "tags": ["vegetarian", "bowl", "healthy"],
+  "estTotalCost": 1.3
+},
+{
+  "id": "ham-cheese-panini",
+  "name": "Ham & Cheese Panini",
+  "baseServings": 1,
+  "ingredients": [{
+          "item": "Bread",
+          "qty": "2 slices",
+          "estCost": 0.4,
+          "allergens": ["gluten"]
+      },
+      { "item": "Ham", "qty": "2 slices", "estCost": 0.6, "allergens": [] },
+      {
+          "item": "Swiss cheese",
+          "qty": "1 slice",
+          "estCost": 0.4,
+          "allergens": ["dairy"]
+      },
+      {
+          "item": "Butter",
+          "qty": "1 tsp",
+          "estCost": 0.05,
+          "allergens": ["dairy"]
+      }
+  ],
+  "steps": [
+      "Gather all ingredients: bread, ham, Swiss cheese, and butter.",
+      "Butter one side of each bread slice.",
+      "Place the ham and cheese between the unbuttered sides of the bread.",
+      "Heat a panini press or pan over medium heat.",
+      "Cook the sandwich for 2-3 minutes on each side until the bread is crispy and the cheese is melted.",
+      "Serve hot."
+  ],
+  "image": "/foodimages/hamcheesepanini.png",
+  "tags": ["sandwich", "quick", "protein"],
+  "estTotalCost": 1.45
+},
+{
+  "id": "greek-yogurt-parfait",
+  "name": "Greek Yogurt Parfait",
+  "baseServings": 1,
+  "ingredients": [{
+          "item": "Greek yogurt",
+          "qty": "150 g",
+          "estCost": 0.75,
+          "allergens": ["dairy"]
+      },
+      {
+          "item": "Granola",
+          "qty": "30 g",
+          "estCost": 0.3,
+          "allergens": ["gluten"]
+      },
+      { "item": "Honey", "qty": "1 tsp", "estCost": 0.1, "allergens": [] }
+  ],
+  "steps": [
+      "Gather all ingredients: Greek yogurt, granola, and honey.",
+      "Layer half of the yogurt in a bowl or glass.",
+      "Sprinkle half of the granola on top.",
+      "Repeat the layers with the remaining yogurt and granola.",
+      "Drizzle honey on top.",
+      "Serve immediately."
+  ],
+  "image": "/foodimages/greekyogurtparfait.png",
+  "tags": ["vegetarian", "healthy", "quick"],
+  "estTotalCost": 1.15
+},
+{
+  "id": "caprese-salad",
+  "name": "Caprese Salad",
+  "baseServings": 1,
+  "ingredients": [
+      { "item": "Tomato", "qty": "1", "estCost": 0.43, "allergens": [] },
+      {
+          "item": "Fresh mozzarella",
+          "qty": "50 g",
+          "estCost": 0.8,
+          "allergens": ["dairy"]
+      },
+      {
+          "item": "Fresh basil",
+          "qty": "5 leaves",
+          "estCost": 0.15,
+          "allergens": []
+      },
+      { "item": "Olive oil", "qty": "1 Tbsp", "estCost": 0.13, "allergens": [] }
+  ],
+  "steps": [
+      "Gather all ingredients: tomato, fresh mozzarella, fresh basil, and olive oil.",
+      "Slice the tomato and mozzarella into even slices.",
+      "Arrange the tomato and mozzarella slices on a plate, alternating them.",
+      "Tuck fresh basil leaves between the slices.",
+      "Drizzle with olive oil.",
+      "Serve immediately."
+  ],
+  "image": "/foodimages/capresesalad.png",
+  "tags": ["vegetarian", "salad", "healthy"],
+  "estTotalCost": 1.51
+},
+{
+  "id": "vegetable-soup",
+  "name": "Vegetable Soup",
+  "baseServings": 1,
+  "ingredients": [
+      { "item": "Carrot", "qty": "1", "estCost": 0.2, "allergens": [] },
+      { "item": "Celery", "qty": "1 stalk", "estCost": 0.15, "allergens": [] },
+      { "item": "Onion", "qty": "½", "estCost": 0.1, "allergens": [] },
+      {
+          "item": "Vegetable broth",
+          "qty": "250 ml",
+          "estCost": 0.3,
+          "allergens": []
+      }
+  ],
+  "steps": [
+      "Gather all ingredients: carrot, celery, onion, and vegetable broth.",
+      "Dice the carrot, celery, and onion.",
+      "Heat a pot over medium heat and add the diced vegetables.",
+      "Sauté for 5 minutes until softened.",
+      "Add the vegetable broth and bring to a boil.",
+      "Reduce heat and simmer for 15 minutes.",
+      "Serve hot."
+  ],
+  "image": "/foodimages/vegetablesoup.png",
+  "tags": ["vegetarian", "soup", "healthy"],
+  "estTotalCost": 0.75
+},
+{
+  "id": "salmon-rice-bowl",
+  "name": "Salmon Rice Bowl",
+  "baseServings": 1,
+  "ingredients": [{
+          "item": "Cooked rice",
+          "qty": "150 g",
+          "estCost": 0.15,
+          "allergens": []
+      },
+      {
+          "item": "Salmon fillet",
+          "qty": "100 g",
+          "estCost": 1.5,
+          "allergens": ["fish"]
+      },
+      { "item": "Avocado", "qty": "½", "estCost": 0.5, "allergens": [] },
+      {
+          "item": "Soy sauce",
+          "qty": "1 Tbsp",
+          "estCost": 0.08,
+          "allergens": ["soy"]
+      }
+  ],
+  "steps": [
+      "Gather all ingredients: cooked rice, salmon fillet, avocado, and soy sauce.",
+      "Cook the salmon fillet in a pan over medium heat for 4-5 minutes per side.",
+      "Slice the avocado.",
+      "Place the cooked rice in a bowl.",
+      "Top with the cooked salmon and sliced avocado.",
+      "Drizzle with soy sauce.",
+      "Serve immediately."
+  ],
+  "image": "/foodimages/salmonricebowl.png",
+  "tags": ["fish", "bowl", "protein"],
+  "estTotalCost": 2.23
+},
+{
+  "id": "spinach-feta-omelette",
+  "name": "Spinach & Feta Omelette",
+  "baseServings": 1,
+  "ingredients": [
+      { "item": "Eggs", "qty": "2", "estCost": 0.76, "allergens": ["eggs"] },
+      { "item": "Spinach", "qty": "handful", "estCost": 0.2, "allergens": [] },
+      {
+          "item": "Feta cheese",
+          "qty": "30 g",
+          "estCost": 0.45,
+          "allergens": ["dairy"]
+      },
+      { "item": "Oil", "qty": "1 tsp", "estCost": 0.01, "allergens": [] }
+  ],
+  "steps": [
+      "Gather all ingredients: eggs, spinach, feta cheese, and oil.",
+      "Heat oil in a pan over medium heat.",
+      "Whisk the eggs in a bowl and pour into the pan.",
+      "Add spinach and crumbled feta cheese to one half of the omelette.",
+      "Fold the other half over the filling and cook for another minute.",
+      "Serve hot."
+  ],
+  "image": "/foodimages/spinachfetaomelette.png",
+  "tags": ["vegetarian", "protein", "quick"],
+  "estTotalCost": 1.42
+},
+{
+  "id": "chicken-pasta-salad",
+  "name": "Chicken Pasta Salad",
+  "baseServings": 1,
+  "ingredients": [{
+          "item": "Pasta",
+          "qty": "100 g",
+          "estCost": 0.3,
+          "allergens": ["gluten"]
+      },
+      {
+          "item": "Cooked chicken breast",
+          "qty": "100 g",
+          "estCost": 0.95,
+          "allergens": []
+      },
+      {
+          "item": "Cherry tomatoes",
+          "qty": "5",
+          "estCost": 0.25,
+          "allergens": []
+      },
+      {
+          "item": "Mayonnaise",
+          "qty": "1 Tbsp",
+          "estCost": 0.08,
+          "allergens": ["eggs"]
+      }
+  ],
+  "steps": [
+      "Gather all ingredients: pasta, cooked chicken breast, cherry tomatoes, and mayonnaise.",
+      "Cook the pasta according to package instructions, then drain and let cool.",
+      "Dice the cooked chicken breast and halve the cherry tomatoes.",
+      "Combine the pasta, chicken, and tomatoes in a bowl.",
+      "Add mayonnaise and toss to combine.",
+      "Serve chilled."
+  ],
+  "image": "/foodimages/chickenpastasalad.png",
+  "tags": ["chicken", "salad", "protein"],
+  "estTotalCost": 1.58
+},
+{
+  "id": "mushroom-risotto",
+  "name": "Mushroom Risotto",
+  "baseServings": 1,
+  "ingredients": [{
+          "item": "Arborio rice",
+          "qty": "100 g",
+          "estCost": 0.4,
+          "allergens": []
+      },
+      { "item": "Mushrooms", "qty": "100 g", "estCost": 0.6, "allergens": [] },
+      {
+          "item": "Vegetable broth",
+          "qty": "250 ml",
+          "estCost": 0.3,
+          "allergens": []
+      },
+      {
+          "item": "Parmesan cheese",
+          "qty": "20 g",
+          "estCost": 0.4,
+          "allergens": ["dairy"]
+      }
+  ],
+  "steps": [
+      "Gather all ingredients: Arborio rice, mushrooms, vegetable broth, and Parmesan cheese.",
+      "Slice the mushrooms and sauté in a pan until softened.",
+      "Add the Arborio rice and stir to coat with the mushrooms.",
+      "Gradually add the vegetable broth, stirring frequently, until the rice is cooked and creamy.",
+      "Stir in the grated Parmesan cheese.",
+      "Serve hot."
+  ],
+  "image": "/foodimages/mushroomrisotto.png",
+  "tags": ["vegetarian", "healthy", "protein"],
+  "estTotalCost": 1.7
+},
+{
+  "id": "beef-taco",
+  "name": "Beef Taco",
+  "baseServings": 1,
+  "ingredients": [{
+          "item": "Taco shell",
+          "qty": "2",
+          "estCost": 0.3,
+          "allergens": ["gluten"]
+      },
+      {
+          "item": "Ground beef",
+          "qty": "100 g",
+          "estCost": 1.2,
+          "allergens": []
+      },
+      { "item": "Lettuce", "qty": "handful", "estCost": 0.09, "allergens": [] },
+      { "item": "Tomato", "qty": "1", "estCost": 0.43, "allergens": [] }
+  ],
+  "steps": [
+      "Gather all ingredients: taco shells, ground beef, lettuce, and tomato.",
+      "Cook the ground beef in a pan until browned.",
+      "Dice the tomato and shred the lettuce.",
+      "Fill each taco shell with ground beef, lettuce, and tomato.",
+      "Serve immediately."
+  ],
+  "image": "/foodimages/beeftaco.png",
+  "tags": ["beef", "quick", "protein"],
+  "estTotalCost": 2.02
+},
+{
+  "id": "fruit-salad",
+  "name": "Fruit Salad",
+  "baseServings": 1,
+  "ingredients": [
+      { "item": "Apple", "qty": "1", "estCost": 0.4, "allergens": [] },
+      { "item": "Banana", "qty": "1", "estCost": 0.3, "allergens": [] },
+      { "item": "Orange", "qty": "1", "estCost": 0.5, "allergens": [] }
+  ],
+  "steps": [
+      "Gather all ingredients: apple, banana, and orange.",
+      "Dice the apple and banana.",
+      "Peel and segment the orange.",
+      "Combine all fruits in a bowl.",
+      "Serve immediately."
+  ],
+  "image": "/foodimages/fruitsalad.png",
+  "tags": ["vegetarian", "healthy", "quick"],
+  "estTotalCost": 1.2
+},
+{
+  "id": "shrimp-stir-fry",
+  "name": "Shrimp Stir Fry",
+  "baseServings": 1,
+  "ingredients": [{
+          "item": "Shrimp",
+          "qty": "100 g",
+          "estCost": 1.5,
+          "allergens": ["shellfish"]
+      },
+      { "item": "Bell pepper", "qty": "1", "estCost": 0.4, "allergens": [] },
+      {
+          "item": "Soy sauce",
+          "qty": "1 Tbsp",
+          "estCost": 0.08,
+          "allergens": ["soy"]
+      },
+      { "item": "Oil", "qty": "1 tsp", "estCost": 0.01, "allergens": [] }
+  ],
+  "steps": [
+      "Gather all ingredients: shrimp, bell pepper, soy sauce, and oil.",
+      "Slice the bell pepper into strips.",
+      "Heat oil in a pan over medium-high heat.",
+      "Add the shrimp and bell pepper to the pan and stir-fry for 3-4 minutes.",
+      "Add soy sauce and stir to coat.",
+      "Serve hot."
+  ],
+  "image": "/foodimages/shrimpstirfry.png",
+  "tags": ["shellfish", "asian", "protein"],
+  "estTotalCost": 1.99
+},
+{
+  "id": "chicken-quesadilla",
+  "name": "Chicken Quesadilla",
+  "baseServings": 1,
+  "ingredients": [{
+          "item": "Tortilla",
+          "qty": "1",
+          "estCost": 0.25,
+          "allergens": ["gluten"]
+      },
+      {
+          "item": "Cooked chicken breast",
+          "qty": "100 g",
+          "estCost": 0.95,
+          "allergens": []
+      },
+      {
+          "item": "Cheddar cheese",
+          "qty": "50 g",
+          "estCost": 0.5,
+          "allergens": ["dairy"]
+      },
+      {
+          "item": "Sour cream",
+          "qty": "1 Tbsp",
+          "estCost": 0.15,
+          "allergens": ["dairy"]
+      }
+  ],
+  "steps": [
+      "Gather all ingredients: tortilla, cooked chicken breast, cheddar cheese, and sour cream.",
+      "Shred the cooked chicken breast.",
+      "Place the tortilla on a pan over medium heat.",
+      "Sprinkle half of the cheese on one half of the tortilla.",
+      "Add the shredded chicken and remaining cheese.",
+      "Fold the tortilla in half and cook until the cheese is melted and the tortilla is crispy.",
+      "Serve with sour cream."
+  ],
+  "image": "/foodimages/chickenquesadilla.png",
+  "tags": ["chicken", "quick", "protein"],
+  "estTotalCost": 1.85
+},
+{
+  "id": "lentil-soup",
+  "name": "Lentil Soup",
+  "baseServings": 1,
+  "ingredients": [
+      { "item": "Lentils", "qty": "100 g", "estCost": 0.3, "allergens": [] },
+      { "item": "Carrot", "qty": "1", "estCost": 0.2, "allergens": [] },
+      { "item": "Onion", "qty": "½", "estCost": 0.1, "allergens": [] },
+      {
+          "item": "Vegetable broth",
+          "qty": "250 ml",
+          "estCost": 0.3,
+          "allergens": []
+      }
+  ],
+  "steps": [
+      "Gather all ingredients: lentils, carrot, onion, and vegetable broth.",
+      "Dice the carrot and onion.",
+      "Rinse the lentils under cold water.",
+      "Combine all ingredients in a pot and bring to a boil.",
+      "Reduce heat and simmer for 20-25 minutes until the lentils are tender.",
+      "Serve hot."
+  ],
+  "image": "/foodimages/lentilsoup.png",
+  "tags": ["vegetarian", "soup", "healthy"],
+  "estTotalCost": 0.9
+},
+{
+  "id": "pesto-pasta",
+  "name": "Pesto Pasta",
+  "baseServings": 1,
+  "ingredients": [{
+          "item": "Pasta",
+          "qty": "100 g",
+          "estCost": 0.3,
+          "allergens": ["gluten"]
+      },
+      {
+          "item": "Pesto",
+          "qty": "2 Tbsp",
+          "estCost": 0.5,
+          "allergens": ["nuts"]
+      },
+      {
+          "item": "Parmesan cheese",
+          "qty": "10 g",
+          "estCost": 0.2,
+          "allergens": ["dairy"]
+      }
+  ],
+  "steps": [
+      "Gather all ingredients: pasta, pesto, and Parmesan cheese.",
+      "Cook the pasta according to package instructions, then drain.",
+      "Toss the cooked pasta with pesto until evenly coated.",
+      "Sprinkle with grated Parmesan cheese.",
+      "Serve immediately."
+  ],
+  "image": "/foodimages/pestopasta.png",
+  "tags": ["vegetarian", "quick", "healthy"],
+  "estTotalCost": 1.0
+},
+{
+  "id": "chicken-noodle-soup",
+  "name": "Chicken Noodle Soup",
+  "baseServings": 1,
+  "ingredients": [{
+          "item": "Chicken breast",
+          "qty": "100 g",
+          "estCost": 0.95,
+          "allergens": []
+      },
+      {
+          "item": "Noodles",
+          "qty": "50 g",
+          "estCost": 0.25,
+          "allergens": ["gluten"]
+      },
+      { "item": "Carrot", "qty": "1", "estCost": 0.2, "allergens": [] },
+      {
+          "item": "Chicken broth",
+          "qty": "250 ml",
+          "estCost": 0.35,
+          "allergens": []
+      }
+  ],
+  "steps": [
+      "Gather all ingredients: chicken breast, noodles, carrot, and chicken broth.",
+      "Dice the chicken breast and carrot.",
+      "Bring the chicken broth to a boil in a pot.",
+      "Add the chicken, noodles, and carrot to the pot.",
+      "Simmer for 10-12 minutes until the chicken is cooked and the noodles are tender.",
+      "Serve hot."
+  ],
+  "image": "/foodimages/chickennoodlesoup.png",
+  "tags": ["chicken", "soup", "protein"],
+  "estTotalCost": 1.75
+},
+{
+  "id": "veggie-burger",
+  "name": "Veggie Burger",
+  "baseServings": 1,
+  "ingredients": [
+      { "item": "Veggie patty", "qty": "1", "estCost": 1.0, "allergens": [] },
+      {
+          "item": "Burger bun",
+          "qty": "1",
+          "estCost": 0.3,
+          "allergens": ["gluten"]
+      },
+      { "item": "Lettuce", "qty": "handful", "estCost": 0.09, "allergens": [] },
+      { "item": "Tomato", "qty": "1 slice", "estCost": 0.1, "allergens": [] }
+  ],
+  "steps": [
+      "Gather all ingredients: veggie patty, burger bun, lettuce, and tomato.",
+      "Cook the veggie patty according to package instructions.",
+      "Toast the burger bun lightly.",
+      "Place the cooked patty on the bun.",
+      "Top with lettuce and tomato slice.",
+      "Serve immediately."
+  ],
+  "image": "/foodimages/veggieburger.png",
+  "tags": ["vegetarian", "healthy", "quick"],
+  "estTotalCost": 1.49
+},
+{
+  "id": "baked-potato",
+  "name": "Baked Potato",
+  "baseServings": 1,
+  "ingredients": [
+      { "item": "Potato", "qty": "1 large", "estCost": 0.5, "allergens": [] },
+      {
+          "item": "Butter",
+          "qty": "1 Tbsp",
+          "estCost": 0.1,
+          "allergens": ["dairy"]
+      },
+      {
+          "item": "Sour cream",
+          "qty": "1 Tbsp",
+          "estCost": 0.15,
+          "allergens": ["dairy"]
+      }
+  ],
+  "steps": [
+      "Gather all ingredients: potato, butter, and sour cream.",
+      "Preheat the oven to 200°C (400°F).",
+      "Wash the potato and pierce it with a fork several times.",
+      "Bake for 45-60 minutes until tender.",
+      "Slice open the potato and add butter and sour cream.",
+      "Serve hot."
+  ],
+  "image": "/foodimages/bakedpotato.png",
+  "tags": ["vegetarian", "healthy", "quick"],
+  "estTotalCost": 0.75
+},
+{
+  "id": "chicken-avocado-salad",
+  "name": "Chicken Avocado Salad",
+  "baseServings": 1,
+  "ingredients": [{
+          "item": "Cooked chicken breast",
+          "qty": "100 g",
+          "estCost": 0.95,
+          "allergens": []
+      },
+      { "item": "Avocado", "qty": "½", "estCost": 0.5, "allergens": [] },
+      { "item": "Lettuce", "qty": "handful", "estCost": 0.09, "allergens": [] },
+      {
+          "item": "Lemon juice",
+          "qty": "1 tsp",
+          "estCost": 0.05,
+          "allergens": []
+      }
+  ],
+  "steps": [
+      "Gather all ingredients: cooked chicken breast, avocado, lettuce, and lemon juice.",
+      "Dice the chicken breast and avocado.",
+      "Tear the lettuce into bite-sized pieces.",
+      "Combine all ingredients in a bowl.",
+      "Drizzle with lemon juice and toss gently.",
+      "Serve immediately."
+  ],
+  "image": "/foodimages/chickenavocadosalad.png",
+  "tags": ["chicken", "salad", "healthy"],
+  "estTotalCost": 1.59
+},
+{
+  "id": "egg-salad-sandwich",
+  "name": "Egg Salad Sandwich",
+  "baseServings": 1,
+  "ingredients": [
+      { "item": "Eggs", "qty": "2", "estCost": 0.76, "allergens": ["eggs"] },
+      {
+          "item": "Mayonnaise",
+          "qty": "1 Tbsp",
+          "estCost": 0.08,
+          "allergens": ["eggs"]
+      },
+      {
+          "item": "Bread",
+          "qty": "2 slices",
+          "estCost": 0.4,
+          "allergens": ["gluten"]
+      },
+      { "item": "Lettuce", "qty": "handful", "estCost": 0.09, "allergens": [] }
+  ],
+  "steps": [
+      "Gather all ingredients: eggs, mayonnaise, bread, and lettuce.",
+      "Hard-boil the eggs, then peel and chop them.",
+      "Mix the chopped eggs with mayonnaise.",
+      "Place lettuce on one slice of bread.",
+      "Spread the egg mixture on top of the lettuce.",
+      "Top with the second slice of bread.",
+      "Serve immediately."
+  ],
+  "image": "/foodimages/eggsaladsandwich.png",
+  "tags": ["vegetarian", "sandwich", "protein"],
+  "estTotalCost": 1.33
+},
+{
+  "id": "stuffed-pepper",
+  "name": "Stuffed Pepper",
+  "baseServings": 1,
+  "ingredients": [
+      { "item": "Bell pepper", "qty": "1", "estCost": 0.4, "allergens": [] },
+      {
+          "item": "Ground beef",
+          "qty": "100 g",
+          "estCost": 1.2,
+          "allergens": []
+      },
+      { "item": "Cooked rice", "qty": "50 g", "estCost": 0.1, "allergens": [] },
+      {
+          "item": "Tomato sauce",
+          "qty": "2 Tbsp",
+          "estCost": 0.15,
+          "allergens": []
+      }
+  ],
+  "steps": [
+      "Gather all ingredients: bell pepper, ground beef, cooked rice, and tomato sauce.",
+      "Preheat the oven to 180°C (350°F).",
+      "Cut the top off the bell pepper and remove the seeds.",
+      "Cook the ground beef in a pan until browned, then mix with the cooked rice and tomato sauce.",
+      "Stuff the bell pepper with the beef mixture.",
+      "Bake for 25-30 minutes until the pepper is tender.",
+      "Serve hot."
+  ],
+  "image": "/foodimages/stuffedpepper.png",
+  "tags": ["beef", "healthy", "protein"],
+  "estTotalCost": 1.85
+},
+{
+  "id": "cucumber-tomato-salad",
+  "name": "Cucumber Tomato Salad",
+  "baseServings": 1,
+  "ingredients": [
+      { "item": "Cucumber", "qty": "1", "estCost": 0.5, "allergens": [] },
+      { "item": "Tomato", "qty": "1", "estCost": 0.43, "allergens": [] },
+      {
+          "item": "Olive oil",
+          "qty": "1 Tbsp",
+          "estCost": 0.13,
+          "allergens": []
+      },
+      {
+          "item": "Lemon juice",
+          "qty": "1 tsp",
+          "estCost": 0.05,
+          "allergens": []
+      }
+  ],
+  "steps": [
+      "Gather all ingredients: cucumber, tomato, olive oil, and lemon juice.",
+      "Dice the cucumber and tomato.",
+      "Combine in a bowl and drizzle with olive oil and lemon juice.",
+      "Toss gently to combine.",
+      "Serve immediately."
+  ],
+  "image": "/foodimages/cucumbertomatosalad.png",
+  "tags": ["vegetarian", "salad", "healthy"],
+  "estTotalCost": 1.11
+},
+{
+  "id": "beef-stir-fry",
+  "name": "Beef Stir Fry",
+  "baseServings": 1,
+  "ingredients": [{
+          "item": "Beef strips",
+          "qty": "100 g",
+          "estCost": 1.5,
+          "allergens": []
+      },
+      { "item": "Broccoli", "qty": "100 g", "estCost": 0.3, "allergens": [] },
+      {
+          "item": "Soy sauce",
+          "qty": "1 Tbsp",
+          "estCost": 0.08,
+          "allergens": ["soy"]
+      },
+      { "item": "Oil", "qty": "1 tsp", "estCost": 0.01, "allergens": [] }
+  ],
+  "steps": [
+      "Gather all ingredients: beef strips, broccoli, soy sauce, and oil.",
+      "Heat oil in a pan over medium-high heat.",
+      "Add the beef strips and stir-fry for 3-4 minutes.",
+      "Add the broccoli and continue to stir-fry for another 3-4 minutes.",
+      "Add soy sauce and stir to coat.",
+      "Serve hot."
+  ],
+  "image": "/foodimages/beefstirfry.png",
+  "tags": ["beef", "asian", "protein"],
+  "estTotalCost": 1.89
+},
+{
+  "id": "cheese-omelette",
+  "name": "Cheese Omelette",
+  "baseServings": 1,
+  "ingredients": [
+      { "item": "Eggs", "qty": "2", "estCost": 0.76, "allergens": ["eggs"] },
+      {
+          "item": "Cheddar cheese",
+          "qty": "30 g",
+          "estCost": 0.3,
+          "allergens": ["dairy"]
+      },
+      {
+          "item": "Butter",
+          "qty": "1 tsp",
+          "estCost": 0.05,
+          "allergens": ["dairy"]
+      }
+  ],
+  "steps": [
+      "Gather all ingredients: eggs, cheddar cheese, and butter.",
+      "Whisk the eggs in a bowl.",
+      "Heat butter in a pan over medium heat.",
+      "Pour the eggs into the pan and cook until set.",
+      "Sprinkle cheese on one half of the omelette.",
+      "Fold the other half over the cheese and cook for another minute.",
+      "Serve hot."
+  ],
+  "image": "/foodimages/cheeseomelette.png",
+  "tags": ["vegetarian", "protein", "quick"],
+  "estTotalCost": 1.11
+},
+{
+  "id": "tomato-soup",
+  "name": "Tomato Soup",
+  "baseServings": 1,
+  "ingredients": [
+      { "item": "Tomatoes", "qty": "3", "estCost": 1.29, "allergens": [] },
+      { "item": "Onion", "qty": "½", "estCost": 0.1, "allergens": [] },
+      {
+          "item": "Vegetable broth",
+          "qty": "250 ml",
+          "estCost": 0.3,
+          "allergens": []
+      },
+      {
+          "item": "Cream",
+          "qty": "2 Tbsp",
+          "estCost": 0.2,
+          "allergens": ["dairy"]
+      }
+  ],
+  "steps": [
+      "Gather all ingredients: tomatoes, onion, vegetable broth, and cream.",
+      "Dice the tomatoes and onion.",
+      "Combine in a pot with the vegetable broth and bring to a boil.",
+      "Simmer for 15 minutes, then blend until smooth.",
+      "Stir in the cream and heat through.",
+      "Serve hot."
+  ],
+  "image": "/foodimages/tomatosoup.png",
+  "tags": ["vegetarian", "soup", "healthy"],
+  "estTotalCost": 1.89
+}
 ]
