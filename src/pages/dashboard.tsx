@@ -77,15 +77,18 @@ export default function Dashboard() {
 
   useEffect(() => {
     console.log('🔍 DEBUG: dashboard.tsx - useEffect started');
+    const startTime = Date.now();
     
-    // Add timeout to prevent infinite loading
+    // Add timeout to prevent infinite loading - increased to 30 seconds
     const timeoutId = setTimeout(() => {
-      console.log('🔍 DEBUG: dashboard.tsx - TIMEOUT: Loading taking too long, forcing loading to false');
+      const elapsed = Date.now() - startTime;
+      console.log('🔍 DEBUG: dashboard.tsx - TIMEOUT: Loading taking too long, forcing loading to false. Elapsed:', elapsed, 'ms');
       setLoading(false);
-    }, 10000); // 10 second timeout
+    }, 30000); // 30 second timeout
     
-    // Get current user session
+    // Get current user session - run immediately
     const getCurrentUser = async () => {
+      console.log('🔍 DEBUG: dashboard.tsx - getCurrentUser function started');
       try {
         console.log('🔍 DEBUG: dashboard.tsx - Getting user...');
         const { data: { user } } = await supabase.auth.getUser()
@@ -111,13 +114,19 @@ export default function Dashboard() {
         // Ensure loading is set to false even on error
         router.push('/signin')
       } finally {
-        console.log('🔍 DEBUG: dashboard.tsx - Setting loading to false');
+        const elapsed = Date.now() - startTime;
+        console.log('🔍 DEBUG: dashboard.tsx - Setting loading to false. Total time:', elapsed, 'ms');
         setLoading(false)
         clearTimeout(timeoutId); // Clear timeout since we completed
       }
     }
 
-    getCurrentUser()
+    // Run the function immediately
+    getCurrentUser().catch(error => {
+      console.log('🔍 DEBUG: dashboard.tsx - Unhandled error in getCurrentUser:', error);
+      setLoading(false);
+      clearTimeout(timeoutId);
+    });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
