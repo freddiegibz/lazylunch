@@ -94,37 +94,13 @@ export default function Dashboard() {
           console.log('🔍 DEBUG: dashboard.tsx - User found, setting user state');
           setUser(user)
           
-          // Fetch membership from profiles table
-          try {
-            console.log('🔍 DEBUG: dashboard.tsx - Fetching profile...');
-            const { data: profile, error } = await supabase
-              .from('profiles')
-              .select('membership')
-              .eq('id', user.id)
-              .single()
-            
-            console.log('🔍 DEBUG: dashboard.tsx - Profile query completed, error:', error);
-            
-            if (error) {
-              console.log('🔍 DEBUG: dashboard.tsx - Profile not found, creating new profile');
-              // If profile doesn't exist, create one with default membership
-              await createUserProfile(user.id)
-              setMembership('free')
-            } else {
-              console.log('🔍 DEBUG: dashboard.tsx - Profile found, setting membership');
-              setMembership(profile?.membership || 'free')
-            }
-          } catch (error) {
-            console.log('🔍 DEBUG: dashboard.tsx - Profile fetch error, creating profile:', error);
-            // Try to create profile for new users
-            await createUserProfile(user.id)
-            setMembership('free')
-          }
+          // Skip profile fetching for now to isolate the issue
+          console.log('🔍 DEBUG: dashboard.tsx - SKIPPING profile fetch for debugging');
+          setMembership('free')
           
-          // Load user data after user is set
-          console.log('🔍 DEBUG: dashboard.tsx - Loading user data...');
-          await loadUserData()
-          console.log('🔍 DEBUG: dashboard.tsx - User data loaded successfully');
+          // Skip meal plan loading for now
+          console.log('🔍 DEBUG: dashboard.tsx - SKIPPING meal plan loading for debugging');
+          
         } else {
           console.log('🔍 DEBUG: dashboard.tsx - No user found, redirecting to signin');
           // No user found, redirect to signin
@@ -152,25 +128,8 @@ export default function Dashboard() {
         router.push('/signin')
       } else if (event === 'SIGNED_IN' && session?.user) {
         setUser(session.user)
-        // For new users (including Google OAuth), ensure profile exists
-        try {
-          const { data: profile, error } = await supabase
-            .from('profiles')
-            .select('membership')
-            .eq('id', session.user.id)
-            .single()
-          
-          if (error) {
-            // Profile doesn't exist, create it
-            await createUserProfile(session.user.id)
-            setMembership('free')
-          } else {
-            setMembership(profile?.membership || 'free')
-          }
-        } catch (error) {
-          await createUserProfile(session.user.id)
-          setMembership('free')
-        }
+        // Skip profile creation for now
+        setMembership('free')
       }
     })
 
