@@ -49,7 +49,10 @@ export default function Dashboard() {
   // Load user stats and recent meal plans
   const loadUserData = async () => {
     try {
+      console.log('🔍 DEBUG: dashboard.tsx - loadUserData - Starting...');
       const plans = await MealPlanService.getAllMealPlans()
+      console.log('🔍 DEBUG: dashboard.tsx - loadUserData - Got plans, processing...');
+      
       const thisWeek = plans.filter(plan => {
         if (!plan.created_at) return false
         const planDate = new Date(plan.created_at)
@@ -57,6 +60,7 @@ export default function Dashboard() {
         return planDate > weekAgo
       })
       
+      console.log('🔍 DEBUG: dashboard.tsx - loadUserData - Setting state...');
       setRecentMealPlans(plans.slice(0, 3)) // Get 3 most recent
       setStats({
         totalPlans: plans.length,
@@ -64,13 +68,21 @@ export default function Dashboard() {
         totalRecipes: plans.reduce((acc, plan) => acc + (plan.week_data?.length || 0), 0),
         savedMoney: Math.round(plans.length * 25) // Estimate £25 saved per plan
       })
+      console.log('🔍 DEBUG: dashboard.tsx - loadUserData - Completed successfully');
     } catch (error) {
+      console.log('🔍 DEBUG: dashboard.tsx - loadUserData - Error:', error);
       console.error('Error loading user data:', error)
     }
   }
 
   useEffect(() => {
     console.log('🔍 DEBUG: dashboard.tsx - useEffect started');
+    
+    // Add timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      console.log('🔍 DEBUG: dashboard.tsx - TIMEOUT: Loading taking too long, forcing loading to false');
+      setLoading(false);
+    }, 10000); // 10 second timeout
     
     // Get current user session
     const getCurrentUser = async () => {
@@ -91,6 +103,8 @@ export default function Dashboard() {
               .eq('id', user.id)
               .single()
             
+            console.log('🔍 DEBUG: dashboard.tsx - Profile query completed, error:', error);
+            
             if (error) {
               console.log('🔍 DEBUG: dashboard.tsx - Profile not found, creating new profile');
               // If profile doesn't exist, create one with default membership
@@ -101,7 +115,7 @@ export default function Dashboard() {
               setMembership(profile?.membership || 'free')
             }
           } catch (error) {
-            console.log('🔍 DEBUG: dashboard.tsx - Profile fetch error, creating profile');
+            console.log('🔍 DEBUG: dashboard.tsx - Profile fetch error, creating profile:', error);
             // Try to create profile for new users
             await createUserProfile(user.id)
             setMembership('free')
@@ -110,6 +124,7 @@ export default function Dashboard() {
           // Load user data after user is set
           console.log('🔍 DEBUG: dashboard.tsx - Loading user data...');
           await loadUserData()
+          console.log('🔍 DEBUG: dashboard.tsx - User data loaded successfully');
         } else {
           console.log('🔍 DEBUG: dashboard.tsx - No user found, redirecting to signin');
           // No user found, redirect to signin
@@ -122,6 +137,7 @@ export default function Dashboard() {
       } finally {
         console.log('🔍 DEBUG: dashboard.tsx - Setting loading to false');
         setLoading(false)
+        clearTimeout(timeoutId); // Clear timeout since we completed
       }
     }
 
@@ -158,7 +174,10 @@ export default function Dashboard() {
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(timeoutId); // Clean up timeout
+    }
   }, [router])
 
   const formatDate = (dateString: string) => {
