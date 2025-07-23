@@ -67,6 +67,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const dinner = dinnerRaw.map((r: any) => ({ ...r, type: 'dinner' }));
     fullRecipes = [...breakfast, ...lunch, ...dinner];
     
+    // Debug: Log recipe counts and some sample recipes
+    console.log(`🔍 DEBUG: Loaded ${breakfast.length} breakfast recipes, ${lunch.length} lunch recipes, ${dinner.length} dinner recipes`);
+    console.log(`🔍 DEBUG: Sample breakfast recipes:`, breakfast.slice(0, 3).map((r: any) => r.name));
+    console.log(`🔍 DEBUG: Sample lunch recipes:`, lunch.slice(0, 3).map((r: any) => r.name));
+    console.log(`🔍 DEBUG: Sample dinner recipes:`, dinner.slice(0, 3).map((r: any) => r.name));
+    
     // Create minimal recipe list for OpenAI (just id, name, type)
     allRecipes = fullRecipes.map((r: any) => ({ 
       id: r.id, 
