@@ -86,7 +86,29 @@ export default function Dashboard() {
       setLoading(false);
     }, 30000); // 30 second timeout
     
-    // Get current user session - run immediately
+    // Listen for auth changes first - this is faster than getUser()
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔍 DEBUG: dashboard.tsx - Auth state change:', event);
+      
+      if (event === 'SIGNED_OUT') {
+        setUser(null)
+        router.push('/signin')
+      } else if (event === 'SIGNED_IN' && session?.user) {
+        console.log('🔍 DEBUG: dashboard.tsx - User signed in via auth state change');
+        setUser(session.user)
+        setMembership('free')
+        setLoading(false)
+        clearTimeout(timeoutId);
+      } else if (event === 'INITIAL_SESSION' && session?.user) {
+        console.log('🔍 DEBUG: dashboard.tsx - Initial session found');
+        setUser(session.user)
+        setMembership('free')
+        setLoading(false)
+        clearTimeout(timeoutId);
+      }
+    })
+
+    // Fallback: Get current user session if auth state change doesn't fire quickly
     const getCurrentUser = async () => {
       console.log('🔍 DEBUG: dashboard.tsx - getCurrentUser function started');
       try {
@@ -96,55 +118,36 @@ export default function Dashboard() {
         if (user) {
           console.log('🔍 DEBUG: dashboard.tsx - User found, setting user state');
           setUser(user)
-          
-          // Skip profile fetching for now to isolate the issue
-          console.log('🔍 DEBUG: dashboard.tsx - SKIPPING profile fetch for debugging');
           setMembership('free')
-          
-          // Skip meal plan loading for now
-          console.log('🔍 DEBUG: dashboard.tsx - SKIPPING meal plan loading for debugging');
-          
         } else {
           console.log('🔍 DEBUG: dashboard.tsx - No user found, redirecting to signin');
-          // No user found, redirect to signin
           router.push('/signin')
         }
       } catch (error) {
         console.log('🔍 DEBUG: dashboard.tsx - Error in getCurrentUser:', error);
-        // Ensure loading is set to false even on error
         router.push('/signin')
       } finally {
         const elapsed = Date.now() - startTime;
         console.log('🔍 DEBUG: dashboard.tsx - Setting loading to false. Total time:', elapsed, 'ms');
         setLoading(false)
-        clearTimeout(timeoutId); // Clear timeout since we completed
+        clearTimeout(timeoutId);
       }
     }
 
-    // Run the function immediately
-    getCurrentUser().catch(error => {
-      console.log('🔍 DEBUG: dashboard.tsx - Unhandled error in getCurrentUser:', error);
-      setLoading(false);
-      clearTimeout(timeoutId);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('🔍 DEBUG: dashboard.tsx - Auth state change:', event);
-      
-      if (event === 'SIGNED_OUT') {
-        setUser(null)
-        router.push('/signin')
-      } else if (event === 'SIGNED_IN' && session?.user) {
-        setUser(session.user)
-        // Skip profile creation for now
-        setMembership('free')
-      }
-    })
+    // Run the fallback function with a shorter timeout
+    const fallbackTimeout = setTimeout(() => {
+      console.log('🔍 DEBUG: dashboard.tsx - Auth state change taking too long, using fallback');
+      getCurrentUser().catch(error => {
+        console.log('🔍 DEBUG: dashboard.tsx - Unhandled error in getCurrentUser:', error);
+        setLoading(false);
+        clearTimeout(timeoutId);
+      });
+    }, 2000); // 2 second timeout for auth state change
 
     return () => {
       subscription.unsubscribe()
-      clearTimeout(timeoutId); // Clean up timeout
+      clearTimeout(timeoutId);
+      clearTimeout(fallbackTimeout);
     }
   }, [router])
 
