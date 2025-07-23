@@ -86,30 +86,43 @@ export default function Dashboard() {
       setLoading(false);
     }, 30000); // 30 second timeout
     
+    let authStateHandled = false;
+    
     // Listen for auth changes first - this is faster than getUser()
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('🔍 DEBUG: dashboard.tsx - Auth state change:', event);
       
+      if (authStateHandled) return; // Prevent multiple calls
+      
       if (event === 'SIGNED_OUT') {
+        authStateHandled = true;
         setUser(null)
         router.push('/signin')
+        clearTimeout(timeoutId);
+        clearTimeout(fallbackTimeout);
       } else if (event === 'SIGNED_IN' && session?.user) {
+        authStateHandled = true;
         console.log('🔍 DEBUG: dashboard.tsx - User signed in via auth state change');
         setUser(session.user)
         setMembership('free')
         setLoading(false)
         clearTimeout(timeoutId);
+        clearTimeout(fallbackTimeout);
       } else if (event === 'INITIAL_SESSION' && session?.user) {
+        authStateHandled = true;
         console.log('🔍 DEBUG: dashboard.tsx - Initial session found');
         setUser(session.user)
         setMembership('free')
         setLoading(false)
         clearTimeout(timeoutId);
+        clearTimeout(fallbackTimeout);
       }
     })
 
     // Fallback: Get current user session if auth state change doesn't fire quickly
     const getCurrentUser = async () => {
+      if (authStateHandled) return; // Don't run if auth state already handled
+      
       console.log('🔍 DEBUG: dashboard.tsx - getCurrentUser function started');
       try {
         console.log('🔍 DEBUG: dashboard.tsx - Getting user...');
@@ -136,12 +149,14 @@ export default function Dashboard() {
 
     // Run the fallback function with a shorter timeout
     const fallbackTimeout = setTimeout(() => {
-      console.log('🔍 DEBUG: dashboard.tsx - Auth state change taking too long, using fallback');
-      getCurrentUser().catch(error => {
-        console.log('🔍 DEBUG: dashboard.tsx - Unhandled error in getCurrentUser:', error);
-        setLoading(false);
-        clearTimeout(timeoutId);
-      });
+      if (!authStateHandled) {
+        console.log('🔍 DEBUG: dashboard.tsx - Auth state change taking too long, using fallback');
+        getCurrentUser().catch(error => {
+          console.log('🔍 DEBUG: dashboard.tsx - Unhandled error in getCurrentUser:', error);
+          setLoading(false);
+          clearTimeout(timeoutId);
+        });
+      }
     }, 2000); // 2 second timeout for auth state change
 
     return () => {
@@ -150,6 +165,14 @@ export default function Dashboard() {
       clearTimeout(fallbackTimeout);
     }
   }, [router])
+
+  // Load user data when user is authenticated
+  useEffect(() => {
+    if (user && !loading) {
+      console.log('🔍 DEBUG: dashboard.tsx - User authenticated, loading user data...');
+      loadUserData();
+    }
+  }, [user, loading]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-GB', {
