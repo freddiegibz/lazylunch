@@ -23,7 +23,7 @@ export interface CategorizedRecipe {
   estTotalCost: number
 }
 
-// Keywords to help categorize recipes
+// Keywords to help categorize recipes (keeping for reference but not using for categorization)
 const BREAKFAST_KEYWORDS = [
   'omelette', 'eggs', 'pancake', 'waffle', 'toast', 'cereal', 'porridge', 'oatmeal',
   'bacon', 'sausage', 'ham', 'yogurt', 'smoothie', 'muffin', 'croissant', 'bagel'
@@ -38,62 +38,6 @@ const SNACK_KEYWORDS = [
   'snack', 'nibble', 'bite', 'finger food', 'dip', 'spread', 'cracker', 'chip',
   'popcorn', 'nuts', 'trail mix', 'energy bar', 'smoothie', 'juice'
 ]
-
-// Dinner is the default for main meals that don't fit other categories
-
-export function categorizeRecipe(recipe: any): MealType {
-  const name = recipe.name.toLowerCase()
-  const ingredients = recipe.ingredients.map((ing: any) => ing.item.toLowerCase()).join(' ')
-  const tags = recipe.tags.map((tag: string) => tag.toLowerCase()).join(' ')
-  const allText = `${name} ${ingredients} ${tags}`
-
-  // Check for breakfast keywords
-  if (BREAKFAST_KEYWORDS.some(keyword => allText.includes(keyword))) {
-    return 'breakfast'
-  }
-
-  // Check for snack keywords
-  if (SNACK_KEYWORDS.some(keyword => allText.includes(keyword))) {
-    return 'snack'
-  }
-
-  // Check for lunch keywords
-  if (LUNCH_KEYWORDS.some(keyword => allText.includes(keyword))) {
-    return 'lunch'
-  }
-
-  // Default to dinner for main meals
-  return 'dinner'
-}
-
-export function getCategorizedRecipes(): Record<MealType, CategorizedRecipe[]> {
-  const categorized: Record<MealType, CategorizedRecipe[]> = {
-    breakfast: [],
-    lunch: [],
-    dinner: [],
-    snack: []
-  }
-
-  const allRecipes = [
-    ...dinnerRecipes,
-    ...breakfastRecipes,
-    ...lunchRecipes
-  ]
-
-  allRecipes.forEach(recipe => {
-    const mealType = categorizeRecipe(recipe)
-    categorized[mealType].push({
-      ...recipe,
-      mealType
-    })
-  })
-
-  return categorized
-}
-
-export function getRecipesByMealType(mealType: MealType): CategorizedRecipe[] {
-  return getCategorizedRecipes()[mealType]
-}
 
 // Manual overrides for specific recipes that might be miscategorized
 const MANUAL_CATEGORIES: Record<string, MealType> = {
@@ -134,16 +78,32 @@ export function getCategorizedRecipesWithOverrides(): Record<MealType, Categoriz
     snack: []
   }
 
-  const allRecipes = [
-    ...dinnerRecipes,
-    ...breakfastRecipes,
-    ...lunchRecipes
-  ]
-
-  allRecipes.forEach(recipe => {
-    // Check for manual override first
+  // Add breakfast recipes with their source category
+  breakfastRecipes.forEach(recipe => {
     const manualCategory = MANUAL_CATEGORIES[recipe.id]
-    const mealType = manualCategory || categorizeRecipe(recipe)
+    const mealType = manualCategory || 'breakfast'
+    
+    categorized[mealType].push({
+      ...recipe,
+      mealType
+    })
+  })
+
+  // Add lunch recipes with their source category
+  lunchRecipes.forEach(recipe => {
+    const manualCategory = MANUAL_CATEGORIES[recipe.id]
+    const mealType = manualCategory || 'lunch'
+    
+    categorized[mealType].push({
+      ...recipe,
+      mealType
+    })
+  })
+
+  // Add dinner recipes with their source category
+  dinnerRecipes.forEach(recipe => {
+    const manualCategory = MANUAL_CATEGORIES[recipe.id]
+    const mealType = manualCategory || 'dinner'
     
     categorized[mealType].push({
       ...recipe,
@@ -169,4 +129,38 @@ export function getRandomRecipe(mealType: MealType): CategorizedRecipe | null {
   const recipes = getRecipesByMealTypeWithOverrides(mealType)
   if (recipes.length === 0) return null
   return recipes[Math.floor(Math.random() * recipes.length)]
+}
+
+// Legacy functions (keeping for backward compatibility but not using keyword-based categorization)
+export function categorizeRecipe(recipe: any): MealType {
+  const name = recipe.name.toLowerCase()
+  const ingredients = recipe.ingredients.map((ing: any) => ing.item.toLowerCase()).join(' ')
+  const tags = recipe.tags.map((tag: string) => tag.toLowerCase()).join(' ')
+  const allText = `${name} ${ingredients} ${tags}`
+
+  // Check for breakfast keywords
+  if (BREAKFAST_KEYWORDS.some(keyword => allText.includes(keyword))) {
+    return 'breakfast'
+  }
+
+  // Check for snack keywords
+  if (SNACK_KEYWORDS.some(keyword => allText.includes(keyword))) {
+    return 'snack'
+  }
+
+  // Check for lunch keywords
+  if (LUNCH_KEYWORDS.some(keyword => allText.includes(keyword))) {
+    return 'lunch'
+  }
+
+  // Default to dinner for main meals
+  return 'dinner'
+}
+
+export function getCategorizedRecipes(): Record<MealType, CategorizedRecipe[]> {
+  return getCategorizedRecipesWithOverrides()
+}
+
+export function getRecipesByMealType(mealType: MealType): CategorizedRecipe[] {
+  return getRecipesByMealTypeWithOverrides(mealType)
 } 

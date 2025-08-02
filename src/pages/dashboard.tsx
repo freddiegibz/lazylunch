@@ -104,7 +104,26 @@ export default function Dashboard() {
         authStateHandled = true;
         console.log('🔍 DEBUG: dashboard.tsx - User signed in via auth state change');
         setUser(session.user)
-        setMembership('free')
+        // Fetch membership from profiles table
+        try {
+          console.log('🔍 DEBUG: Fetching user profile...');
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('membership')
+            .eq('id', session.user.id)
+            .single()
+          
+          if (error) {
+            console.log('🔍 DEBUG: Profile fetch error, setting membership to free');
+            setMembership('free')
+          } else {
+            console.log('🔍 DEBUG: Profile fetched successfully');
+            setMembership(profile?.membership || 'free')
+          }
+        } catch (error) {
+          console.log('🔍 DEBUG: Profile fetch exception, setting membership to free');
+          setMembership('free')
+        }
         setLoading(false)
         clearTimeout(timeoutId);
         clearTimeout(fallbackTimeout);
@@ -112,7 +131,26 @@ export default function Dashboard() {
         authStateHandled = true;
         console.log('🔍 DEBUG: dashboard.tsx - Initial session found');
         setUser(session.user)
-        setMembership('free')
+        // Fetch membership from profiles table
+        try {
+          console.log('🔍 DEBUG: Fetching user profile...');
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('membership')
+            .eq('id', session.user.id)
+            .single()
+          
+          if (error) {
+            console.log('🔍 DEBUG: Profile fetch error, setting membership to free');
+            setMembership('free')
+          } else {
+            console.log('🔍 DEBUG: Profile fetched successfully');
+            setMembership(profile?.membership || 'free')
+          }
+        } catch (error) {
+          console.log('🔍 DEBUG: Profile fetch exception, setting membership to free');
+          setMembership('free')
+        }
         setLoading(false)
         clearTimeout(timeoutId);
         clearTimeout(fallbackTimeout);
@@ -131,7 +169,26 @@ export default function Dashboard() {
         if (user) {
           console.log('🔍 DEBUG: dashboard.tsx - User found, setting user state');
           setUser(user)
-          setMembership('free')
+          // Fetch membership from profiles table
+          try {
+            console.log('🔍 DEBUG: Fetching user profile...');
+            const { data: profile, error } = await supabase
+              .from('profiles')
+              .select('membership')
+              .eq('id', user.id)
+              .single()
+            
+            if (error) {
+              console.log('🔍 DEBUG: Profile fetch error, setting membership to free');
+              setMembership('free')
+            } else {
+              console.log('🔍 DEBUG: Profile fetched successfully');
+              setMembership(profile?.membership || 'free')
+            }
+          } catch (error) {
+            console.log('🔍 DEBUG: Profile fetch exception, setting membership to free');
+            setMembership('free')
+          }
         } else {
           console.log('🔍 DEBUG: dashboard.tsx - No user found, redirecting to signin');
           router.push('/signin')

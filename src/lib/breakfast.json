@@ -40,7 +40,7 @@
       "Drizzle honey (add crunch if desired).",
       "Serve at once."
     ],
-    "image": "/foodimageswebp/Greek Yogurt Parfait.png",
+    "image": "/foodimageswebp/greekyoghurtberrybowl.webp",
     "tags": [
       "vegetarian",
       "quick",
@@ -95,7 +95,7 @@
       "Spread avocado over toast; crown each slice with an egg.",
       "Season & serve hot."
     ],
-    "image": "/foodimageswebp/Avocado Toast.png",
+    "image": "/foodimageswebp/avocadoontoast.webp",
     "tags": [
       "vegetarian",
       "protein",
@@ -201,7 +201,7 @@
       "In the morning, loosen & top with berries (plus optional drizzle).",
       "Enjoy cold."
     ],
-    "image": "/foodimageswebp/Pear & Almond Oatmeal.png",
+    "image": "/foodimageswebp/overnightoats.webp",
     "tags": [
       "vegetarian",
       "make-ahead",
@@ -265,196 +265,7 @@
       "quick"
     ],
     "estTotalCost": 6.26
-  }
-],
-[
-  {
-    "id": "greek-yogurt-berry-bowl",
-    "name": "Greek Yogurt Berry Bowl",
-    "baseServings": 1,
-    "ingredients": [
-      {
-        "item": "Greek yogurt",
-        "qty": "200 g",
-        "estCost": 1.2,
-        "allergens": ["dairy"]
-      },
-      {
-        "item": "Mixed berries",
-        "qty": "100 g",
-        "estCost": 0.8,
-        "allergens": []
-      },
-      { "item": "Honey", "qty": "1 Tbsp", "estCost": 0.15, "allergens": [] },
-      {
-        "item": "Granola or seeds",
-        "qty": "optional",
-        "estCost": 0.47,
-        "allergens": ["nuts"]
-      }
-    ],
-    "steps": [
-      "Rinse & drain berries.",
-      "Spread yogurt in bowl.",
-      "Top with berries.",
-      "Drizzle honey (add crunch if desired).",
-      "Serve at once."
-    ],
-    "image": "/foodimages/greekyoghurtberrybowl.png",
-    "tags": ["vegetarian", "quick", "healthy"],
-    "estTotalCost": 2.62
   },
-  {
-    "id": "avocado-toast-egg",
-    "name": "Avocado Toast with Egg",
-    "baseServings": 1,
-    "ingredients": [
-      {
-        "item": "Whole-grain bread",
-        "qty": "2 slices",
-        "estCost": 0.4,
-        "allergens": ["gluten"]
-      },
-      { "item": "Ripe avocado", "qty": "1", "estCost": 1.2, "allergens": [] },
-      { "item": "Eggs", "qty": "2", "estCost": 0.76, "allergens": ["eggs"] },
-      { "item": "Salt", "qty": "pinch", "estCost": 0.01, "allergens": [] },
-      {
-        "item": "Pepper or chili flakes",
-        "qty": "to taste",
-        "estCost": 0.01,
-        "allergens": []
-      }
-    ],
-    "steps": [
-      "Toast bread.",
-      "Halve, pit & mash avocado with salt.",
-      "Fry eggs to preference.",
-      "Spread avocado over toast; crown each slice with an egg.",
-      "Season & serve hot."
-    ],
-    "image": "/foodimages/avocadoontoast.png",
-    "tags": ["vegetarian", "protein", "quick"],
-    "estTotalCost": 2.98
-  },
-  {
-    "id": "banana-oat-pancakes",
-    "name": "Banana Oat Pancakes",
-    "baseServings": 1,
-    "ingredients": [
-      { "item": "Ripe banana", "qty": "1", "estCost": 0.25, "allergens": [] },
-      {
-        "item": "Rolled oats",
-        "qty": "100 g",
-        "estCost": 0.2,
-        "allergens": ["gluten"]
-      },
-      { "item": "Eggs", "qty": "2", "estCost": 0.76, "allergens": ["eggs"] },
-      {
-        "item": "Fruit, yogurt or honey",
-        "qty": "optional",
-        "estCost": 0.15,
-        "allergens": ["dairy"]
-      }
-    ],
-    "steps": [
-      "Blend banana, oats & eggs until smooth.",
-      "Cook 8-10 cm pancakes (2-3 min per side).",
-      "Repeat until batter is finished.",
-      "Optional: fruit, yogurt or honey toppings."
-    ],
-    "image": "/foodimages/bananaoatpancake.png",
-    "tags": ["vegetarian", "gluten-free", "quick"],
-    "estTotalCost": 1.36
-  },
-  {
-    "id": "overnight-oats",
-    "name": "Overnight Oats",
-    "baseServings": 1,
-    "ingredients": [
-      {
-        "item": "Rolled oats",
-        "qty": "50 g",
-        "estCost": 0.1,
-        "allergens": ["gluten"]
-      },
-      {
-        "item": "Milk",
-        "qty": "150 ml",
-        "estCost": 0.15,
-        "allergens": ["dairy"]
-      },
-      {
-        "item": "Chia seeds",
-        "qty": "1 Tbsp",
-        "estCost": 0.2,
-        "allergens": []
-      },
-      {
-        "item": "Fresh berries",
-        "qty": "handful",
-        "estCost": 0.3,
-        "allergens": []
-      },
-      {
-        "item": "Honey or nut butter",
-        "qty": "optional",
-        "estCost": 0.14,
-        "allergens": ["nuts"]
-      }
-    ],
-    "steps": [
-      "Combine oats, chia & milk in a jar; stir.",
-      "Refrigerate ≥ 6 h.",
-      "In the morning, loosen & top with berries (plus optional drizzle).",
-      "Enjoy cold."
-    ],
-    "image": "/foodimages/overnightoats.png",
-    "tags": ["vegetarian", "make-ahead", "healthy"],
-    "estTotalCost": 0.89
-  },
-  {
-    "id": "smoked-salmon-bagel",
-    "name": "Smoked Salmon & Cream Cheese Bagel",
-    "baseServings": 1,
-    "ingredients": [
-      {
-        "item": "Plain bagel",
-        "qty": "1",
-        "estCost": 0.75,
-        "allergens": ["gluten"]
-      },
-      {
-        "item": "Cream cheese",
-        "qty": "50 g",
-        "estCost": 0.4,
-        "allergens": ["dairy"]
-      },
-      {
-        "item": "Cold-smoked salmon",
-        "qty": "70 g",
-        "estCost": 4.5,
-        "allergens": ["fish"]
-      },
-      { "item": "Lemon wedge", "qty": "1", "estCost": 0.1, "allergens": [] },
-      {
-        "item": "Dill or pepper",
-        "qty": "to taste",
-        "estCost": 0.01,
-        "allergens": []
-      }
-    ],
-    "steps": [
-      "Split & toast bagel.",
-      "Spread cream cheese evenly.",
-      "Layer salmon slices.",
-      "Squeeze lemon, add herbs/pepper.",
-      "Serve immediately."
-    ],
-    "image": "/foodimages/smokedsalmoncreamcheesebagel.png",
-    "tags": ["fish", "protein", "quick"],
-    "estTotalCost": 6.26
-  },
-
   {
     "id": "cottage-cheese-fruit-pot",
     "name": "Cottage Cheese Fruit Pot",
@@ -464,7 +275,9 @@
         "item": "Cottage cheese",
         "qty": "150 g",
         "estCost": 0.9,
-        "allergens": ["dairy"]
+        "allergens": [
+          "dairy"
+        ]
       },
       {
         "item": "Pineapple chunks",
@@ -476,9 +289,16 @@
         "item": "Chopped almonds",
         "qty": "1 Tbsp",
         "estCost": 0.25,
-        "allergens": ["nuts"]
+        "allergens": [
+          "nuts"
+        ]
       },
-      { "item": "Mint leaves", "qty": "few", "estCost": 0.05, "allergens": [] }
+      {
+        "item": "Mint leaves",
+        "qty": "few",
+        "estCost": 0.05,
+        "allergens": []
+      }
     ],
     "steps": [
       "Spoon cottage cheese into a bowl or jar.",
@@ -486,8 +306,12 @@
       "Sprinkle almonds & garnish with mint.",
       "Serve chilled or room temp."
     ],
-    "image": "/foodimages/cottagecheesefruitpot.png",
-    "tags": ["vegetarian", "protein", "healthy"],
+    "image": "/foodimageswebp/Cottage Cheese Fruit Pot.webp",
+    "tags": [
+      "vegetarian",
+      "protein",
+      "healthy"
+    ],
     "estTotalCost": 1.8
   },
   {
@@ -495,15 +319,32 @@
     "name": "Mushroom Spinach Omelette",
     "baseServings": 1,
     "ingredients": [
-      { "item": "Eggs", "qty": "2", "estCost": 0.76, "allergens": ["eggs"] },
+      {
+        "item": "Eggs",
+        "qty": "2",
+        "estCost": 0.76,
+        "allergens": [
+          "eggs"
+        ]
+      },
       {
         "item": "Fresh spinach",
         "qty": "30 g",
         "estCost": 0.25,
         "allergens": []
       },
-      { "item": "Mushrooms", "qty": "50 g", "estCost": 0.3, "allergens": [] },
-      { "item": "Olive oil", "qty": "1 tsp", "estCost": 0.1, "allergens": [] },
+      {
+        "item": "Mushrooms",
+        "qty": "50 g",
+        "estCost": 0.3,
+        "allergens": []
+      },
+      {
+        "item": "Olive oil",
+        "qty": "1 tsp",
+        "estCost": 0.1,
+        "allergens": []
+      },
       {
         "item": "Salt & pepper",
         "qty": "to taste",
@@ -517,8 +358,12 @@
       "Whisk eggs, season, pour over veg.",
       "Cook until set; fold & serve warm."
     ],
-    "image": "/foodimages/mushroomspinachomelette.png",
-    "tags": ["vegetarian", "protein", "quick"],
+    "image": "/foodimageswebp/Mushroom Spinach Omelette.webp",
+    "tags": [
+      "vegetarian",
+      "protein",
+      "quick"
+    ],
     "estTotalCost": 1.42
   },
   {
@@ -530,15 +375,24 @@
         "item": "Whole-grain bread",
         "qty": "2 slices",
         "estCost": 0.4,
-        "allergens": ["gluten"]
+        "allergens": [
+          "gluten"
+        ]
       },
       {
         "item": "Peanut butter",
         "qty": "2 Tbsp",
         "estCost": 0.3,
-        "allergens": ["nuts"]
+        "allergens": [
+          "nuts"
+        ]
       },
-      { "item": "Banana", "qty": "1", "estCost": 0.25, "allergens": [] },
+      {
+        "item": "Banana",
+        "qty": "1",
+        "estCost": 0.25,
+        "allergens": []
+      },
       {
         "item": "Chia or flax seeds",
         "qty": "optional",
@@ -552,8 +406,12 @@
       "Slice banana & arrange on top.",
       "Sprinkle seeds if using & serve."
     ],
-    "image": "/foodimages/peanutbutterbananatoast.png",
-    "tags": ["vegetarian", "quick", "healthy"],
+    "image": "/foodimageswebp/Peanut Butter Banana Toast.webp",
+    "tags": [
+      "vegetarian",
+      "quick",
+      "healthy"
+    ],
     "estTotalCost": 1.05
   },
   {
@@ -561,14 +419,33 @@
     "name": "Egg & Veggie Breakfast Muffins",
     "baseServings": 1,
     "ingredients": [
-      { "item": "Eggs", "qty": "2", "estCost": 0.76, "allergens": ["eggs"] },
-      { "item": "Bell pepper", "qty": "30 g", "estCost": 0.2, "allergens": [] },
-      { "item": "Spinach", "qty": "20 g", "estCost": 0.15, "allergens": [] },
+      {
+        "item": "Eggs",
+        "qty": "2",
+        "estCost": 0.76,
+        "allergens": [
+          "eggs"
+        ]
+      },
+      {
+        "item": "Bell pepper",
+        "qty": "30 g",
+        "estCost": 0.2,
+        "allergens": []
+      },
+      {
+        "item": "Spinach",
+        "qty": "20 g",
+        "estCost": 0.15,
+        "allergens": []
+      },
       {
         "item": "Grated cheese",
         "qty": "20 g",
         "estCost": 0.25,
-        "allergens": ["dairy"]
+        "allergens": [
+          "dairy"
+        ]
       },
       {
         "item": "Salt & pepper",
@@ -584,8 +461,12 @@
       "Bake 18–20 min or until set.",
       "Cool slightly & serve."
     ],
-    "image": "/foodimages/eggveggiemuffins.png",
-    "tags": ["vegetarian", "make-ahead", "protein"],
+    "image": "/foodimageswebp/Egg & Veggie Breakfast Muffins.webp",
+    "tags": [
+      "vegetarian",
+      "make-ahead",
+      "protein"
+    ],
     "estTotalCost": 1.37
   },
   {
@@ -597,22 +478,36 @@
         "item": "Rolled oats",
         "qty": "50 g",
         "estCost": 0.1,
-        "allergens": ["gluten"]
+        "allergens": [
+          "gluten"
+        ]
       },
       {
         "item": "Milk or water",
         "qty": "150 ml",
         "estCost": 0.12,
-        "allergens": ["dairy"]
+        "allergens": [
+          "dairy"
+        ]
       },
-      { "item": "Apple", "qty": "1 small", "estCost": 0.3, "allergens": [] },
+      {
+        "item": "Apple",
+        "qty": "1 small",
+        "estCost": 0.3,
+        "allergens": []
+      },
       {
         "item": "Cinnamon",
         "qty": "1/4 tsp",
         "estCost": 0.03,
         "allergens": []
       },
-      { "item": "Honey", "qty": "1 tsp", "estCost": 0.1, "allergens": [] }
+      {
+        "item": "Honey",
+        "qty": "1 tsp",
+        "estCost": 0.1,
+        "allergens": []
+      }
     ],
     "steps": [
       "Dice apple; simmer with cinnamon until soft.",
@@ -620,11 +515,14 @@
       "Stir in honey.",
       "Serve warm."
     ],
-    "image": "/foodimages/applecinnamonporridge.png",
-    "tags": ["vegetarian", "healthy", "quick"],
+    "image": "/foodimageswebp/Apple Cinnamon Porridge.webp",
+    "tags": [
+      "vegetarian",
+      "healthy",
+      "quick"
+    ],
     "estTotalCost": 0.65
   },
-
   {
     "id": "tofu-breakfast-scramble",
     "name": "Tofu Breakfast Scramble",
@@ -634,7 +532,9 @@
         "item": "Firm tofu",
         "qty": "100 g",
         "estCost": 0.7,
-        "allergens": ["soy"]
+        "allergens": [
+          "soy"
+        ]
       },
       {
         "item": "Turmeric",
@@ -642,9 +542,24 @@
         "estCost": 0.02,
         "allergens": []
       },
-      { "item": "Bell pepper", "qty": "30 g", "estCost": 0.2, "allergens": [] },
-      { "item": "Spinach", "qty": "20 g", "estCost": 0.15, "allergens": [] },
-      { "item": "Olive oil", "qty": "1 tsp", "estCost": 0.1, "allergens": [] }
+      {
+        "item": "Bell pepper",
+        "qty": "30 g",
+        "estCost": 0.2,
+        "allergens": []
+      },
+      {
+        "item": "Spinach",
+        "qty": "20 g",
+        "estCost": 0.15,
+        "allergens": []
+      },
+      {
+        "item": "Olive oil",
+        "qty": "1 tsp",
+        "estCost": 0.1,
+        "allergens": []
+      }
     ],
     "steps": [
       "Crumble tofu with hands or fork.",
@@ -652,8 +567,12 @@
       "Add tofu & turmeric; cook 5–6 min, stirring.",
       "Season & serve hot."
     ],
-    "image": "/foodimages/tofubreakfastscramble.png",
-    "tags": ["vegetarian", "protein", "healthy"],
+    "image": "/foodimageswebp/Tofu Breakfast Scramble.webp",
+    "tags": [
+      "vegetarian",
+      "protein",
+      "healthy"
+    ],
     "estTotalCost": 1.17
   },
   {
@@ -661,18 +580,27 @@
     "name": "Apple Peanut Butter Slices",
     "baseServings": 1,
     "ingredients": [
-      { "item": "Apple", "qty": "1", "estCost": 0.3, "allergens": [] },
+      {
+        "item": "Apple",
+        "qty": "1",
+        "estCost": 0.3,
+        "allergens": []
+      },
       {
         "item": "Peanut butter",
         "qty": "2 Tbsp",
         "estCost": 0.3,
-        "allergens": ["nuts"]
+        "allergens": [
+          "nuts"
+        ]
       },
       {
         "item": "Granola",
         "qty": "1 Tbsp",
         "estCost": 0.15,
-        "allergens": ["nuts"]
+        "allergens": [
+          "nuts"
+        ]
       },
       {
         "item": "Chia seeds",
@@ -687,8 +615,12 @@
       "Sprinkle granola & seeds.",
       "Enjoy fresh."
     ],
-    "image": "/foodimages/applepeanutbutterslices.png",
-    "tags": ["vegetarian", "quick", "healthy"],
+    "image": "/foodimageswebp/Apple Peanut Butter Slices.webp",
+    "tags": [
+      "vegetarian",
+      "quick",
+      "healthy"
+    ],
     "estTotalCost": 0.85
   },
   {
@@ -702,9 +634,24 @@
         "estCost": 0.4,
         "allergens": []
       },
-      { "item": "Red onion", "qty": "30 g", "estCost": 0.1, "allergens": [] },
-      { "item": "Bell pepper", "qty": "30 g", "estCost": 0.2, "allergens": [] },
-      { "item": "Olive oil", "qty": "1 Tbsp", "estCost": 0.1, "allergens": [] },
+      {
+        "item": "Red onion",
+        "qty": "30 g",
+        "estCost": 0.1,
+        "allergens": []
+      },
+      {
+        "item": "Bell pepper",
+        "qty": "30 g",
+        "estCost": 0.2,
+        "allergens": []
+      },
+      {
+        "item": "Olive oil",
+        "qty": "1 Tbsp",
+        "estCost": 0.1,
+        "allergens": []
+      },
       {
         "item": "Herbs or chili flakes",
         "qty": "to taste",
@@ -718,8 +665,12 @@
       "Stir occasionally until golden & soft.",
       "Season & serve hot."
     ],
-    "image": "/foodimages/sweetpotatohash.png",
-    "tags": ["vegetarian", "healthy", "quick"],
+    "image": "/foodimageswebp/Sweet Potato Breakfast Hash.webp",
+    "tags": [
+      "vegetarian",
+      "healthy",
+      "quick"
+    ],
     "estTotalCost": 0.81
   },
   {
@@ -733,22 +684,38 @@
         "estCost": 0.8,
         "allergens": []
       },
-      { "item": "Banana", "qty": "1", "estCost": 0.25, "allergens": [] },
+      {
+        "item": "Banana",
+        "qty": "1",
+        "estCost": 0.25,
+        "allergens": []
+      },
       {
         "item": "Greek yogurt or plant milk",
         "qty": "100 ml",
         "estCost": 0.6,
-        "allergens": ["dairy"]
+        "allergens": [
+          "dairy"
+        ]
       },
-      { "item": "Honey", "qty": "1 tsp", "estCost": 0.1, "allergens": [] }
+      {
+        "item": "Honey",
+        "qty": "1 tsp",
+        "estCost": 0.1,
+        "allergens": []
+      }
     ],
     "steps": [
       "Combine all ingredients in blender.",
       "Blend until smooth.",
       "Serve chilled in glass or bottle."
     ],
-    "image": "/foodimages/berrysmoothie.png",
-    "tags": ["vegetarian", "quick", "healthy"],
+    "image": "/foodimageswebp/Berry Breakfast Smoothie.webp",
+    "tags": [
+      "vegetarian",
+      "quick",
+      "healthy"
+    ],
     "estTotalCost": 1.75
   },
   {
@@ -766,16 +733,28 @@
         "item": "Milk",
         "qty": "100 ml",
         "estCost": 0.1,
-        "allergens": ["dairy"]
+        "allergens": [
+          "dairy"
+        ]
       },
-      { "item": "Blueberries", "qty": "50 g", "estCost": 0.4, "allergens": [] },
+      {
+        "item": "Blueberries",
+        "qty": "50 g",
+        "estCost": 0.4,
+        "allergens": []
+      },
       {
         "item": "Maple syrup or honey",
         "qty": "1 tsp",
         "estCost": 0.1,
         "allergens": []
       },
-      { "item": "Cinnamon", "qty": "pinch", "estCost": 0.02, "allergens": [] }
+      {
+        "item": "Cinnamon",
+        "qty": "pinch",
+        "estCost": 0.02,
+        "allergens": []
+      }
     ],
     "steps": [
       "Warm quinoa with milk over low heat.",
@@ -783,11 +762,14 @@
       "Top with blueberries.",
       "Serve warm or cold."
     ],
-    "image": "/foodimages/quinoabreakfastbowl.png",
-    "tags": ["vegetarian", "healthy", "make-ahead"],
+    "image": "/foodimageswebp/Breakfast Quinoa Bowl.webp",
+    "tags": [
+      "vegetarian",
+      "healthy",
+      "make-ahead"
+    ],
     "estTotalCost": 1.12
   },
-
   {
     "id": "ricotta-toast-honey-fig",
     "name": "Ricotta Toast with Honey & Fig",
@@ -797,16 +779,30 @@
         "item": "Whole-grain bread",
         "qty": "2 slices",
         "estCost": 0.4,
-        "allergens": ["gluten"]
+        "allergens": [
+          "gluten"
+        ]
       },
       {
         "item": "Ricotta cheese",
         "qty": "60 g",
         "estCost": 0.6,
-        "allergens": ["dairy"]
+        "allergens": [
+          "dairy"
+        ]
       },
-      { "item": "Fresh figs", "qty": "2", "estCost": 0.7, "allergens": [] },
-      { "item": "Honey", "qty": "1 tsp", "estCost": 0.1, "allergens": [] }
+      {
+        "item": "Fresh figs",
+        "qty": "2",
+        "estCost": 0.7,
+        "allergens": []
+      },
+      {
+        "item": "Honey",
+        "qty": "1 tsp",
+        "estCost": 0.1,
+        "allergens": []
+      }
     ],
     "steps": [
       "Toast the bread.",
@@ -814,8 +810,12 @@
       "Slice figs & place over ricotta.",
       "Drizzle honey & serve."
     ],
-    "image": "/foodimages/ricottatoasthoneyfig.png",
-    "tags": ["vegetarian", "quick", "healthy"],
+    "image": "/foodimageswebp/Ricotta Toast with Honey & Fig.webp",
+    "tags": [
+      "vegetarian",
+      "quick",
+      "healthy"
+    ],
     "estTotalCost": 1.8
   },
   {
@@ -823,20 +823,34 @@
     "name": "Cheesy Breakfast Polenta",
     "baseServings": 1,
     "ingredients": [
-      { "item": "Polenta", "qty": "50 g", "estCost": 0.2, "allergens": [] },
+      {
+        "item": "Polenta",
+        "qty": "50 g",
+        "estCost": 0.2,
+        "allergens": []
+      },
       {
         "item": "Milk or water",
         "qty": "200 ml",
         "estCost": 0.15,
-        "allergens": ["dairy"]
+        "allergens": [
+          "dairy"
+        ]
       },
       {
         "item": "Grated cheese",
         "qty": "30 g",
         "estCost": 0.3,
-        "allergens": ["dairy"]
+        "allergens": [
+          "dairy"
+        ]
       },
-      { "item": "Salt", "qty": "pinch", "estCost": 0.01, "allergens": [] }
+      {
+        "item": "Salt",
+        "qty": "pinch",
+        "estCost": 0.01,
+        "allergens": []
+      }
     ],
     "steps": [
       "Bring milk or water to boil.",
@@ -844,8 +858,12 @@
       "Cook 5–7 min, stirring until thick.",
       "Stir in cheese & salt. Serve hot."
     ],
-    "image": "/foodimages/cheesypolenta.png",
-    "tags": ["vegetarian", "protein", "quick"],
+    "image": "/foodimageswebp/Cheesy Breakfast Polenta.webp",
+    "tags": [
+      "vegetarian",
+      "protein",
+      "quick"
+    ],
     "estTotalCost": 0.66
   },
   {
@@ -853,7 +871,12 @@
     "name": "Avocado Breakfast Salad",
     "baseServings": 1,
     "ingredients": [
-      { "item": "Avocado", "qty": "1", "estCost": 1.2, "allergens": [] },
+      {
+        "item": "Avocado",
+        "qty": "1",
+        "estCost": 1.2,
+        "allergens": []
+      },
       {
         "item": "Cherry tomatoes",
         "qty": "6",
@@ -864,9 +887,16 @@
         "item": "Boiled egg",
         "qty": "1",
         "estCost": 0.38,
-        "allergens": ["eggs"]
+        "allergens": [
+          "eggs"
+        ]
       },
-      { "item": "Olive oil", "qty": "1 tsp", "estCost": 0.1, "allergens": [] },
+      {
+        "item": "Olive oil",
+        "qty": "1 tsp",
+        "estCost": 0.1,
+        "allergens": []
+      },
       {
         "item": "Salt & pepper",
         "qty": "to taste",
@@ -880,8 +910,12 @@
       "Toss all with oil, salt & pepper.",
       "Serve fresh."
     ],
-    "image": "/foodimages/avocadobreakfastsalad.png",
-    "tags": ["vegetarian", "healthy", "quick"],
+    "image": "/foodimageswebp/Avocado Breakfast Salad.webp",
+    "tags": [
+      "vegetarian",
+      "healthy",
+      "quick"
+    ],
     "estTotalCost": 2.09
   },
   {
@@ -893,21 +927,39 @@
         "item": "All-purpose flour",
         "qty": "50 g",
         "estCost": 0.1,
-        "allergens": ["gluten"]
+        "allergens": [
+          "gluten"
+        ]
       },
       {
         "item": "Milk",
         "qty": "100 ml",
         "estCost": 0.1,
-        "allergens": ["dairy"]
+        "allergens": [
+          "dairy"
+        ]
       },
-      { "item": "Egg", "qty": "1", "estCost": 0.38, "allergens": ["eggs"] },
-      { "item": "Spinach", "qty": "20 g", "estCost": 0.15, "allergens": [] },
+      {
+        "item": "Egg",
+        "qty": "1",
+        "estCost": 0.38,
+        "allergens": [
+          "eggs"
+        ]
+      },
+      {
+        "item": "Spinach",
+        "qty": "20 g",
+        "estCost": 0.15,
+        "allergens": []
+      },
       {
         "item": "Feta cheese",
         "qty": "20 g",
         "estCost": 0.3,
-        "allergens": ["dairy"]
+        "allergens": [
+          "dairy"
+        ]
       }
     ],
     "steps": [
@@ -916,8 +968,12 @@
       "Fill with sautéed spinach & feta.",
       "Fold & serve warm."
     ],
-    "image": "/foodimages/savorycrepes.png",
-    "tags": ["vegetarian", "protein", "quick"],
+    "image": "/foodimageswebp/Savory Breakfast Crêpes.webp",
+    "tags": [
+      "vegetarian",
+      "protein",
+      "quick"
+    ],
     "estTotalCost": 1.03
   },
   {
@@ -943,15 +999,24 @@
         "estCost": 0.1,
         "allergens": []
       },
-      { "item": "Fresh mango", "qty": "50 g", "estCost": 0.35, "allergens": [] }
+      {
+        "item": "Fresh mango",
+        "qty": "50 g",
+        "estCost": 0.35,
+        "allergens": []
+      }
     ],
     "steps": [
       "Mix chia seeds with coconut milk & syrup.",
       "Refrigerate ≥ 6 h or overnight.",
       "Top with diced mango before serving."
     ],
-    "image": "/foodimages/chiapuddingcoconut.png",
-    "tags": ["vegetarian", "make-ahead", "healthy"],
+    "image": "/foodimageswebp/Chia Pudding with Coconut.webp",
+    "tags": [
+      "vegetarian",
+      "make-ahead",
+      "healthy"
+    ],
     "estTotalCost": 1.15
   },
   {
@@ -969,9 +1034,16 @@
         "item": "Whole-grain bread",
         "qty": "2 slices",
         "estCost": 0.4,
-        "allergens": ["gluten"]
+        "allergens": [
+          "gluten"
+        ]
       },
-      { "item": "Avocado", "qty": "1/2", "estCost": 0.6, "allergens": [] },
+      {
+        "item": "Avocado",
+        "qty": "1/2",
+        "estCost": 0.6,
+        "allergens": []
+      },
       {
         "item": "Lemon juice",
         "qty": "1 tsp",
@@ -985,8 +1057,12 @@
       "Spread lentils, then avocado mash.",
       "Serve immediately."
     ],
-    "image": "/foodimages/lentiltoast.png",
-    "tags": ["vegetarian", "protein", "healthy"],
+    "image": "/foodimageswebp/Breakfast Lentil Toast.webp",
+    "tags": [
+      "vegetarian",
+      "protein",
+      "healthy"
+    ],
     "estTotalCost": 1.3
   },
   {
@@ -998,30 +1074,50 @@
         "item": "Rolled oats",
         "qty": "50 g",
         "estCost": 0.1,
-        "allergens": ["gluten"]
+        "allergens": [
+          "gluten"
+        ]
       },
       {
         "item": "Milk",
         "qty": "150 ml",
         "estCost": 0.15,
-        "allergens": ["dairy"]
+        "allergens": [
+          "dairy"
+        ]
       },
-      { "item": "Pear", "qty": "1 small", "estCost": 0.3, "allergens": [] },
+      {
+        "item": "Pear",
+        "qty": "1 small",
+        "estCost": 0.3,
+        "allergens": []
+      },
       {
         "item": "Sliced almonds",
         "qty": "1 Tbsp",
         "estCost": 0.25,
-        "allergens": ["nuts"]
+        "allergens": [
+          "nuts"
+        ]
       },
-      { "item": "Cinnamon", "qty": "pinch", "estCost": 0.02, "allergens": [] }
+      {
+        "item": "Cinnamon",
+        "qty": "pinch",
+        "estCost": 0.02,
+        "allergens": []
+      }
     ],
     "steps": [
       "Cook oats & milk over low heat.",
       "Stir in chopped pear & cinnamon.",
       "Top with almonds & serve warm."
     ],
-    "image": "/foodimages/pearoatmeal.png",
-    "tags": ["vegetarian", "healthy", "quick"],
+    "image": "/foodimageswebp/Pear & Almond Oatmeal.webp",
+    "tags": [
+      "vegetarian",
+      "healthy",
+      "quick"
+    ],
     "estTotalCost": 0.82
   },
   {
@@ -1033,16 +1129,32 @@
         "item": "Tortilla wrap",
         "qty": "1",
         "estCost": 0.4,
-        "allergens": ["gluten"]
+        "allergens": [
+          "gluten"
+        ]
       },
-      { "item": "Eggs", "qty": "2", "estCost": 0.76, "allergens": ["eggs"] },
+      {
+        "item": "Eggs",
+        "qty": "2",
+        "estCost": 0.76,
+        "allergens": [
+          "eggs"
+        ]
+      },
       {
         "item": "Cheddar cheese",
         "qty": "20 g",
         "estCost": 0.25,
-        "allergens": ["dairy"]
+        "allergens": [
+          "dairy"
+        ]
       },
-      { "item": "Spinach", "qty": "20 g", "estCost": 0.15, "allergens": [] }
+      {
+        "item": "Spinach",
+        "qty": "20 g",
+        "estCost": 0.15,
+        "allergens": []
+      }
     ],
     "steps": [
       "Scramble eggs & mix in spinach.",
@@ -1050,8 +1162,12 @@
       "Roll up tightly.",
       "Serve warm or wrap to-go."
     ],
-    "image": "/foodimages/eggbreakfastwrap.png",
-    "tags": ["vegetarian", "protein", "quick"],
+    "image": "/foodimageswebp/Egg Breakfast Wrap.webp",
+    "tags": [
+      "vegetarian",
+      "protein",
+      "quick"
+    ],
     "estTotalCost": 1.56
   },
   {
@@ -1069,18 +1185,34 @@
         "item": "Milk or water",
         "qty": "150 ml",
         "estCost": 0.1,
-        "allergens": ["dairy"]
+        "allergens": [
+          "dairy"
+        ]
       },
-      { "item": "Honey", "qty": "1 tsp", "estCost": 0.1, "allergens": [] },
-      { "item": "Raisins", "qty": "1 Tbsp", "estCost": 0.2, "allergens": [] }
+      {
+        "item": "Honey",
+        "qty": "1 tsp",
+        "estCost": 0.1,
+        "allergens": []
+      },
+      {
+        "item": "Raisins",
+        "qty": "1 Tbsp",
+        "estCost": 0.2,
+        "allergens": []
+      }
     ],
     "steps": [
       "Simmer buckwheat in liquid until soft.",
       "Stir in honey & raisins.",
       "Serve warm."
     ],
-    "image": "/foodimages/buckwheatporridge.png",
-    "tags": ["vegetarian", "healthy", "quick"],
+    "image": "/foodimageswebp/Buckwheat Breakfast Porridge.webp",
+    "tags": [
+      "vegetarian",
+      "healthy",
+      "quick"
+    ],
     "estTotalCost": 0.7
   },
   {
@@ -1092,7 +1224,9 @@
         "item": "Whole-grain bread",
         "qty": "2 slices",
         "estCost": 0.4,
-        "allergens": ["gluten"]
+        "allergens": [
+          "gluten"
+        ]
       },
       {
         "item": "Cooked chickpeas",
@@ -1100,7 +1234,12 @@
         "estCost": 0.3,
         "allergens": []
       },
-      { "item": "Avocado", "qty": "1/2", "estCost": 0.6, "allergens": [] },
+      {
+        "item": "Avocado",
+        "qty": "1/2",
+        "estCost": 0.6,
+        "allergens": []
+      },
       {
         "item": "Lemon juice",
         "qty": "1 tsp",
@@ -1113,8 +1252,12 @@
       "Toast bread & spread mash.",
       "Serve immediately."
     ],
-    "image": "/foodimages/chickpeatoast.png",
-    "tags": ["vegetarian", "protein", "quick"],
+    "image": "/foodimageswebp/Chickpea Breakfast Toast.webp",
+    "tags": [
+      "vegetarian",
+      "protein",
+      "quick"
+    ],
     "estTotalCost": 1.35
   },
   {
@@ -1128,8 +1271,18 @@
         "estCost": 0.6,
         "allergens": []
       },
-      { "item": "Spinach", "qty": "30 g", "estCost": 0.25, "allergens": [] },
-      { "item": "Banana", "qty": "1", "estCost": 0.25, "allergens": [] },
+      {
+        "item": "Spinach",
+        "qty": "30 g",
+        "estCost": 0.25,
+        "allergens": []
+      },
+      {
+        "item": "Banana",
+        "qty": "1",
+        "estCost": 0.25,
+        "allergens": []
+      },
       {
         "item": "Water or coconut water",
         "qty": "150 ml",
@@ -1142,8 +1295,12 @@
       "Blend until smooth.",
       "Serve cold."
     ],
-    "image": "/foodimages/pineapplespinachsmoothie.png",
-    "tags": ["vegetarian", "quick", "healthy"],
+    "image": "/foodimageswebp/Pineapple Spinach Smoothie.webp",
+    "tags": [
+      "vegetarian",
+      "quick",
+      "healthy"
+    ],
     "estTotalCost": 1.2
   },
   {
@@ -1155,7 +1312,9 @@
         "item": "Granola",
         "qty": "50 g",
         "estCost": 0.4,
-        "allergens": ["nuts"]
+        "allergens": [
+          "nuts"
+        ]
       },
       {
         "item": "Sunflower seeds",
@@ -1167,17 +1326,28 @@
         "item": "Yogurt",
         "qty": "150 g",
         "estCost": 0.9,
-        "allergens": ["dairy"]
+        "allergens": [
+          "dairy"
+        ]
       },
-      { "item": "Diced apple", "qty": "50 g", "estCost": 0.2, "allergens": [] }
+      {
+        "item": "Diced apple",
+        "qty": "50 g",
+        "estCost": 0.2,
+        "allergens": []
+      }
     ],
     "steps": [
       "Spoon yogurt into bowl.",
       "Top with granola, seeds & apple.",
       "Serve immediately."
     ],
-    "image": "/foodimages/sunflowergranolabowl.png",
-    "tags": ["vegetarian", "quick", "healthy"],
+    "image": "/foodimageswebp/Sunflower Seed Granola Bowl.webp",
+    "tags": [
+      "vegetarian",
+      "quick",
+      "healthy"
+    ],
     "estTotalCost": 1.7
   },
   {
@@ -1185,21 +1355,40 @@
     "name": "Spiced Carrot Breakfast Loaf",
     "baseServings": 1,
     "ingredients": [
-      { "item": "Carrot", "qty": "1 medium", "estCost": 0.2, "allergens": [] },
+      {
+        "item": "Carrot",
+        "qty": "1 medium",
+        "estCost": 0.2,
+        "allergens": []
+      },
       {
         "item": "Rolled oats",
         "qty": "50 g",
         "estCost": 0.1,
-        "allergens": ["gluten"]
+        "allergens": [
+          "gluten"
+        ]
       },
-      { "item": "Egg", "qty": "1", "estCost": 0.38, "allergens": ["eggs"] },
+      {
+        "item": "Egg",
+        "qty": "1",
+        "estCost": 0.38,
+        "allergens": [
+          "eggs"
+        ]
+      },
       {
         "item": "Cinnamon",
         "qty": "1/2 tsp",
         "estCost": 0.03,
         "allergens": []
       },
-      { "item": "Honey", "qty": "1 Tbsp", "estCost": 0.15, "allergens": [] }
+      {
+        "item": "Honey",
+        "qty": "1 Tbsp",
+        "estCost": 0.15,
+        "allergens": []
+      }
     ],
     "steps": [
       "Grate carrot; mix all ingredients.",
@@ -1207,8 +1396,12 @@
       "Bake at 180°C for 20–25 min.",
       "Cool slightly & serve."
     ],
-    "image": "/foodimages/carrotbreakfastloaf.png",
-    "tags": ["vegetarian", "healthy", "make-ahead"],
+    "image": "/foodimageswebp/Spiced Carrot Breakfast Loaf.webp",
+    "tags": [
+      "vegetarian",
+      "healthy",
+      "make-ahead"
+    ],
     "estTotalCost": 0.86
   },
   {
@@ -1220,15 +1413,24 @@
         "item": "Whole-grain bread",
         "qty": "2 slices",
         "estCost": 0.4,
-        "allergens": ["gluten"]
+        "allergens": [
+          "gluten"
+        ]
       },
       {
         "item": "Cottage cheese",
         "qty": "60 g",
         "estCost": 0.5,
-        "allergens": ["dairy"]
+        "allergens": [
+          "dairy"
+        ]
       },
-      { "item": "Cucumber", "qty": "30 g", "estCost": 0.15, "allergens": [] },
+      {
+        "item": "Cucumber",
+        "qty": "30 g",
+        "estCost": 0.15,
+        "allergens": []
+      },
       {
         "item": "Black pepper",
         "qty": "to taste",
@@ -1242,8 +1444,12 @@
       "Top with sliced cucumber & pepper.",
       "Serve chilled or room temp."
     ],
-    "image": "/foodimages/cucumbercottagetoast.png",
-    "tags": ["vegetarian", "quick", "healthy"],
+    "image": "/foodimageswebp/Cucumber & Cottage Cheese Toast.webp",
+    "tags": [
+      "vegetarian",
+      "quick",
+      "healthy"
+    ],
     "estTotalCost": 1.06
   }
 ]

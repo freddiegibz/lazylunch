@@ -1,0 +1,89 @@
+# LazyLunch Version Logs
+
+## Generate Meal Plan Form - Version 2.0 (Current)
+**Date:** December 2024
+**Status:** ACTIVE
+
+### Form Fields (Essential Only):
+1. **Servings** - Dropdown (1-8 people), default: 1
+2. **Weekly Budget** - Radio buttons with options:
+   - Under £30
+   - £30-50
+   - £50-80
+   - No budget limit
+   - Custom (with input field)
+3. **Allergies** - Checkboxes for:
+   - gluten, dairy, nuts, eggs, fish, shellfish, soy, wheat
+
+### Removed Fields (Previous Version):
+- Focus preferences (variety, taste, budget, healthy, quick)
+- Dietary restrictions (vegetarian, vegan, etc.)
+- Cuisine preferences
+- Budget options (low/medium/high per meal)
+
+### Preferences State Structure:
+```typescript
+const [preferences, setPreferences] = useState({
+  servings: 1,
+  allergens: [] as string[],
+  weeklyBudget: 'none',
+  customWeeklyBudget: '',
+})
+```
+
+### Constants Used:
+- `ALLERGEN_OPTIONS` - Array of allergen strings
+- `WEEKLY_BUDGET_OPTIONS` - Array of budget option objects
+
+### Notes:
+- Form is simplified to essential fields only
+- Default servings set to 1 person
+- Weekly budget has custom option with input field
+- Allergies are optional checkboxes
+- Form maintains clean, professional design with CSS styling
+
+## Generate Meal Plan Form - Version 3.0 (Current)
+**Date:** December 2024
+**Status:** ACTIVE
+
+### New Features Added:
+1. **Cuisine Preferences** - Checkbox selection for preferred cuisines:
+   - italian, mexican, asian, indian, mediterranean, british, french, thai, japanese, chinese, greek, moroccan, american, caribbean, middle-eastern
+
+### Enhanced Shopping List Structure:
+- **Categorized shopping lists** with produce, meat, dairy, pantry, spices sections
+- **Quantified ingredients** (e.g., "2 onions" instead of just "onions")
+- **Smart aggregation** that accounts for recipe overlap and servings
+- **AI-generated shopping lists** with proper quantities and categories
+
+### Enhanced AI Prompt:
+- **Cuisine preference consideration** in recipe selection
+- **Smart shopping list generation** with quantities and categories
+- **Better ingredient optimization** instructions
+- **Explicit recipe repetition encouragement** for efficiency
+
+### Form Fields (Current):
+1. **Servings** - Dropdown (1-8 people), default: 1
+2. **Weekly Budget** - Radio buttons with custom option
+3. **Allergies** - Checkboxes for common allergens
+4. **Cuisine Preferences** - Checkboxes for preferred cuisines (NEW)
+
+### Preferences State Structure:
+```typescript
+const [preferences, setPreferences] = useState({
+  servings: 1,
+  allergens: [] as string[],
+  weeklyBudget: 'none',
+  customWeeklyBudget: '',
+  cuisinePreferences: [] as string[], // NEW
+})
+```
+
+### Previous Issues:
+- Form was accidentally reverted to old version with too many fields
+- This log prevents future confusion about required fields
+- Only 3 essential fields needed: servings, weekly budget, allergies
+- **CRITICAL FIX (Dec 2024)**: Removed `generateMealPlanWithRecipes()` function that was generating meal plans locally instead of using AI API
+- **IMPORTANT**: Always use `/api/generate-meal-plan` endpoint for AI-powered meal plan generation
+
+--- 
