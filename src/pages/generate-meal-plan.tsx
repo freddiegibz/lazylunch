@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
 import { MealPlanService } from '../lib/meal-plan-service'
-import { getRandomRecipe, MealType } from '../lib/recipe-categories'
+import { MealType } from '../lib/recipe-categories'
 import breakfastRecipes from '../lib/breakfast.json'
 import lunchRecipes from '../lib/lunch.json'
 import dinnerRecipes from '../lib/dinner.json'
@@ -11,33 +11,8 @@ import { supabase } from '../lib/supabase'
 import DashboardNavbar from '../components/DashboardNavbar'
 
 // Preference options
-const FOCUS_OPTIONS = [
-  { value: 'variety', label: 'Variety - Mix of different cuisines and flavors' },
-  { value: 'taste', label: 'Taste - Focus on delicious, flavorful meals' },
-  { value: 'budget', label: 'Save Money - Budget-friendly recipes' },
-  { value: 'healthy', label: 'Healthy - Nutritious and balanced meals' },
-  { value: 'quick', label: 'Quick & Easy - Fast preparation meals' }
-]
-
 const ALLERGEN_OPTIONS = [
   'gluten', 'dairy', 'nuts', 'eggs', 'fish', 'shellfish', 'soy', 'wheat'
-]
-
-const BUDGET_OPTIONS = [
-  { value: 'low', label: 'Budget-Friendly (£2-4 per meal)' },
-  { value: 'medium', label: 'Moderate (£4-7 per meal)' },
-  { value: 'high', label: 'Premium (£7+ per meal)' }
-]
-
-const CUISINE_OPTIONS = [
-  'italian', 'mexican', 'indian', 'chinese', 'thai', 'mediterranean', 
-  'british', 'american', 'french', 'japanese', 'greek', 'spanish',
-  'caribbean', 'middle eastern', 'african', 'vietnamese'
-]
-
-const DIETARY_OPTIONS = [
-  'vegetarian', 'vegan', 'pescatarian', 'keto', 'paleo', 'low-carb',
-  'high-protein', 'low-sodium', 'diabetic-friendly'
 ]
 
 const WEEKLY_BUDGET_OPTIONS = [
@@ -48,77 +23,12 @@ const WEEKLY_BUDGET_OPTIONS = [
   { value: 'custom', label: 'Custom' },
 ];
 
+const CUISINE_OPTIONS = [
+  'italian', 'mexican', 'asian', 'indian', 'mediterranean', 'british', 'french', 'thai', 'japanese', 'chinese', 'greek', 'moroccan', 'american', 'caribbean', 'middle-eastern'
+];
 
-// Function to generate a meal plan using real recipes
-const generateMealPlanWithRecipes = () => {
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-  
-  // Track used recipes to avoid duplicates
-  const usedRecipes = new Set<string>()
-  const usedRecipesList: any[] = []
-  
-  const week = days.map(day => {
-    // Get recipes for this day, avoiding duplicates
-    let breakfastRecipe = getRandomRecipe('breakfast')
-    let lunchRecipe = getRandomRecipe('lunch')
-    let dinnerRecipe = getRandomRecipe('dinner')
-    
-    // Try to avoid duplicates by getting different recipes if already used
-    // Limit attempts to prevent infinite loops if we don't have enough recipes
-    let attempts = 0
-    while (breakfastRecipe && usedRecipes.has(breakfastRecipe.id) && attempts < 5) {
-      breakfastRecipe = getRandomRecipe('breakfast')
-      attempts++
-    }
-    
-    attempts = 0
-    while (lunchRecipe && usedRecipes.has(lunchRecipe.id) && attempts < 5) {
-      lunchRecipe = getRandomRecipe('lunch')
-      attempts++
-    }
-    
-    attempts = 0
-    while (dinnerRecipe && usedRecipes.has(dinnerRecipe.id) && attempts < 5) {
-      dinnerRecipe = getRandomRecipe('dinner')
-      attempts++
-    }
-    
-    // Add to used recipes and tracking list
-    if (breakfastRecipe) {
-      usedRecipes.add(breakfastRecipe.id)
-      usedRecipesList.push(breakfastRecipe)
-    }
-    if (lunchRecipe) {
-      usedRecipes.add(lunchRecipe.id)
-      usedRecipesList.push(lunchRecipe)
-    }
-    if (dinnerRecipe) {
-      usedRecipes.add(dinnerRecipe.id)
-      usedRecipesList.push(dinnerRecipe)
-    }
-    
-    return {
-      day,
-      meals: {
-        breakfast: breakfastRecipe?.name || 'No breakfast recipe available',
-        lunch: lunchRecipe?.name || 'No lunch recipe available',
-        dinner: dinnerRecipe?.name || 'No dinner recipe available'
-      }
-    }
-  })
 
-  // Extract unique ingredients from all recipes used
-  const allIngredients = new Set<string>()
-  usedRecipesList.forEach(recipe => {
-    recipe.ingredients.forEach((ingredient: any) => {
-      allIngredients.add(ingredient.item)
-    })
-  })
 
-  const shoppingList = Array.from(allIngredients)
-
-  return { week, shoppingList }
-}
 
 export default function GenerateMealPlan() {
   const [loading, setLoading] = useState(false)
@@ -129,18 +39,17 @@ export default function GenerateMealPlan() {
   const [currentDayIndex, setCurrentDayIndex] = useState(0)
   const [showPreferences, setShowPreferences] = useState(false)
   const [preferences, setPreferences] = useState({
-    servings: 4,
-    focus: 'variety',
+    servings: 1,
     allergens: [] as string[],
-    budget: 'medium',
-    cuisine: [] as string[],
-    dietaryRestrictions: [] as string[],
     weeklyBudget: 'none',
     customWeeklyBudget: '',
+    cuisinePreferences: [] as string[],
   })
   const [user, setUser] = useState<any>(null)
   const [membership, setMembership] = useState<string>('')
   const [loadingUser, setLoadingUser] = useState(true)
+  const [planCount, setPlanCount] = useState<number>(0)
+  const [planLimit, setPlanLimit] = useState<number>(0)
   const router = useRouter()
 
   // Check user authentication and membership
@@ -158,13 +67,33 @@ export default function GenerateMealPlan() {
               .eq('id', user.id)
               .single()
             
-            if (error) {
-              setMembership('free')
-            } else {
-              setMembership(profile?.membership || 'free')
+            const userMembership = profile?.membership || 'free'
+            setMembership(userMembership)
+            
+            // Set plan limits based on membership
+            const membershipLimits = {
+              'free': 0,
+              'basic': 2,
+              'standard': 5,
+              'premium': 10
+            };
+            setPlanLimit(membershipLimits[userMembership as keyof typeof membershipLimits] || 0)
+            
+            // Fetch current plan count for the week
+            if (userMembership !== 'free') {
+              const { data: plans, error: plansError } = await supabase
+                .from('meal_plans')
+                .select('created_at')
+                .eq('user_id', user.id)
+                .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+              
+              if (!plansError) {
+                setPlanCount(plans?.length || 0)
+              }
             }
           } catch (error) {
             setMembership('free')
+            setPlanLimit(0)
           }
         } else {
           // No user found, redirect to signin
@@ -225,19 +154,21 @@ export default function GenerateMealPlan() {
 
   // Function to generate shopping list from recipe objects
   const generateShoppingList = (weekData: any[]) => {
-    const allIngredients = new Set<string>();
+    const ingredientCounts: { [key: string]: number } = {};
     
     weekData.forEach((day: any) => {
       Object.values(day.meals).forEach((meal: any) => {
         if (meal && typeof meal === 'object' && meal.ingredients) {
           meal.ingredients.forEach((ingredient: any) => {
-            allIngredients.add(ingredient.item);
+            const item = ingredient.item;
+            ingredientCounts[item] = (ingredientCounts[item] || 0) + 1;
           });
         }
       });
     });
     
-    return Array.from(allIngredients).sort();
+    // Convert to array format for backward compatibility
+    return Object.keys(ingredientCounts).sort();
   };
 
   const generateMealPlan = async () => {
@@ -261,8 +192,14 @@ export default function GenerateMealPlan() {
       });
       if (!res.ok) {
         const errorData = await res.json();
-        if (res.status === 429) {
-          alert(`Rate limit exceeded. Please try again in ${errorData.retryAfter || 60} seconds.`);
+        if (res.status === 403) {
+          alert('Meal plan generation requires a paid membership. Please upgrade to continue.');
+          router.push('/upgrade-membership');
+        } else if (res.status === 429) {
+          const hoursLeft = Math.ceil((errorData.msLeft || 0) / (1000 * 60 * 60));
+          const daysLeft = Math.ceil((errorData.msLeft || 0) / (1000 * 60 * 60 * 24));
+          const timeMessage = daysLeft > 1 ? `${daysLeft} days` : `${hoursLeft} hours`;
+          alert(`Meal plan limit reached (${errorData.currentPlans}/${errorData.planLimit} this week). You can generate a new plan in ${timeMessage}.`);
         } else if (res.status === 402) {
           alert('OpenAI quota exceeded. Please check your API billing.');
         } else if (res.status === 401) {
@@ -514,6 +451,26 @@ export default function GenerateMealPlan() {
             <p className="dashboard-subtitle">
               Get a personalized meal plan tailored to your preferences and dietary needs.
             </p>
+            
+            {membership !== 'free' && (
+              <div style={{ 
+                background: '#F8F9FA', 
+                border: '1px solid #E9ECEF', 
+                borderRadius: '8px', 
+                padding: '12px 16px', 
+                marginBottom: '20px',
+                textAlign: 'center'
+              }}>
+                <span style={{ color: '#2C3E50', fontWeight: '600' }}>
+                  📊 Plan Usage: {planCount}/{planLimit} this week
+                </span>
+                {planCount >= planLimit && (
+                  <div style={{ color: '#E74C3C', fontSize: '0.9rem', marginTop: '4px' }}>
+                    You've reached your weekly limit. New plans will be available in 7 days.
+                  </div>
+                )}
+              </div>
+            )}
 
             {!mealPlan && (
               <div className="meal-plan-generator">
@@ -540,25 +497,6 @@ export default function GenerateMealPlan() {
                         <option value={7}>7 people</option>
                         <option value={8}>8 people</option>
                       </select>
-                    </div>
-
-                    {/* Focus */}
-                    <div className="preference-section">
-                      <label className="preference-label">What's your main focus?</label>
-                      <div className="preference-options">
-                        {FOCUS_OPTIONS.map(option => (
-                          <label key={option.value} className="preference-option">
-                            <input
-                              type="radio"
-                              name="focus"
-                              value={option.value}
-                              checked={preferences.focus === option.value}
-                              onChange={(e) => setPreferences({...preferences, focus: e.target.value})}
-                            />
-                            <span className="option-label">{option.label}</span>
-                          </label>
-                        ))}
-                      </div>
                     </div>
 
                     {/* Weekly Budget */}
@@ -621,30 +559,30 @@ export default function GenerateMealPlan() {
                       </div>
                     </div>
 
-                    {/* Dietary Restrictions */}
+                    {/* Cuisine Preferences */}
                     <div className="preference-section">
-                      <label className="preference-label">Any dietary preferences?</label>
+                      <label className="preference-label">What cuisines do you enjoy? (Optional)</label>
                       <div className="preference-checkboxes">
-                        {DIETARY_OPTIONS.map(diet => (
-                          <label key={diet} className="preference-checkbox">
+                        {CUISINE_OPTIONS.map(cuisine => (
+                          <label key={cuisine} className="preference-checkbox">
                             <input
                               type="checkbox"
-                              checked={preferences.dietaryRestrictions.includes(diet)}
+                              checked={preferences.cuisinePreferences.includes(cuisine)}
                               onChange={(e) => {
                                 if (e.target.checked) {
                                   setPreferences({
                                     ...preferences, 
-                                    dietaryRestrictions: [...preferences.dietaryRestrictions, diet]
+                                    cuisinePreferences: [...preferences.cuisinePreferences, cuisine]
                                   })
                                 } else {
                                   setPreferences({
                                     ...preferences, 
-                                    dietaryRestrictions: preferences.dietaryRestrictions.filter(d => d !== diet)
+                                    cuisinePreferences: preferences.cuisinePreferences.filter(c => c !== cuisine)
                                   })
                                 }
                               }}
                             />
-                            <span className="checkbox-label">{diet.charAt(0).toUpperCase() + diet.slice(1)}</span>
+                            <span className="checkbox-label">{cuisine.charAt(0).toUpperCase() + cuisine.slice(1)}</span>
                           </label>
                         ))}
                       </div>
@@ -653,11 +591,16 @@ export default function GenerateMealPlan() {
                   
                   <button
                     onClick={generateMealPlan}
-                    disabled={loading}
+                    disabled={loading || (membership !== 'free' && planCount >= planLimit)}
                     className="auth-button"
-                    style={{ marginTop: '20px' }}
+                    style={{ 
+                      marginTop: '20px',
+                      opacity: (membership !== 'free' && planCount >= planLimit) ? 0.6 : 1
+                    }}
                   >
-                    {loading ? 'Generating Meal Plan...' : 'Generate Personalized Meal Plan'}
+                    {loading ? 'Generating Meal Plan...' : 
+                     (membership !== 'free' && planCount >= planLimit) ? 'Weekly Limit Reached' : 
+                     'Generate Personalized Meal Plan'}
                   </button>
 
                   {/* Load Saved Plans Section */}
@@ -848,12 +791,30 @@ export default function GenerateMealPlan() {
                   <div className="shopping-list-section">
                     <h3>Shopping List</h3>
                     <div className="shopping-list">
-                      {mealPlan.shoppingList.map((item: string, index: number) => (
-                        <div key={index} className="shopping-item">
-                          <input type="checkbox" id={`item-${index}`} />
-                          <label htmlFor={`item-${index}`}>{item}</label>
-                        </div>
-                      ))}
+                      {typeof mealPlan.shoppingList === 'object' && mealPlan.shoppingList !== null ? (
+                        // Handle structured shopping list (categorized)
+                        Object.entries(mealPlan.shoppingList).map(([category, items]: [string, any]) => (
+                          <div key={category} className="shopping-category">
+                            <h4 className="category-title">{category.charAt(0).toUpperCase() + category.slice(1)}</h4>
+                            <div className="category-items">
+                              {Array.isArray(items) && items.map((item: string, index: number) => (
+                                <div key={`${category}-${index}`} className="shopping-item">
+                                  <input type="checkbox" id={`item-${category}-${index}`} />
+                                  <label htmlFor={`item-${category}-${index}`}>{item}</label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        // Handle flat shopping list (backward compatibility)
+                        Array.isArray(mealPlan.shoppingList) && mealPlan.shoppingList.map((item: string, index: number) => (
+                          <div key={index} className="shopping-item">
+                            <input type="checkbox" id={`item-${index}`} />
+                            <label htmlFor={`item-${index}`}>{item}</label>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 )}

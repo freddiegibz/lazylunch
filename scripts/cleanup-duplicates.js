@@ -1,65 +1,66 @@
 const fs = require('fs');
 const path = require('path');
 
-const foodImagesDir = path.join(__dirname, '../public/foodimages');
-const imagesDir = path.join(__dirname, '../public/images');
+const recipeFiles = [
+  '../src/lib/breakfast.json',
+  '../src/lib/lunch.json', 
+  '../src/lib/dinner.json'
+];
 
-function getFileSizeInMB(filePath) {
-  const stats = fs.statSync(filePath);
-  return (stats.size / (1024 * 1024)).toFixed(2);
-}
-
-function analyzeDuplicates() {
-  const foodImages = fs.readdirSync(foodImagesDir).filter(f => f.endsWith('.png'));
-  const images = fs.readdirSync(imagesDir).filter(f => f.endsWith('.png'));
+function cleanupDuplicates() {
+  console.log('🧹 Cleaning up duplicate recipes and fixing image paths...\n');
   
-  console.log('📊 Image Analysis:\n');
-  console.log(`📁 /public/foodimages/: ${foodImages.length} images`);
-  console.log(`📁 /public/images/: ${images.length} images`);
-  
-  const duplicates = [];
-  const uniqueInImages = [];
-  
-  images.forEach(img => {
-    if (foodImages.includes(img)) {
-      const foodSize = getFileSizeInMB(path.join(foodImagesDir, img));
-      const imageSize = getFileSizeInMB(path.join(imagesDir, img));
-      duplicates.push({ name: img, foodSize, imageSize });
-    } else {
-      uniqueInImages.push(img);
-    }
+  recipeFiles.forEach(filePath => {
+    const fullPath = path.join(__dirname, filePath);
+    const recipes = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+    
+    console.log(`📄 Processing ${path.basename(filePath)}...`);
+    
+    // Remove duplicates based on recipe name
+    const uniqueRecipes = [];
+    const seenNames = new Set();
+    
+    recipes.forEach(recipe => {
+      if (!seenNames.has(recipe.name)) {
+        seenNames.add(recipe.name);
+        uniqueRecipes.push(recipe);
+      } else {
+        console.log(`  ❌ Removed duplicate: ${recipe.name}`);
+      }
+    });
+    
+    // Fix image paths
+    let fixedCount = 0;
+    uniqueRecipes.forEach(recipe => {
+      if (recipe.image) {
+        // Fix paths that use /foodimages/ instead of /foodimageswebp/
+        if (recipe.image.includes('/foodimages/')) {
+          recipe.image = recipe.image.replace('/foodimages/', '/foodimageswebp/');
+          fixedCount++;
+        }
+        
+        // Fix .png extensions to .webp for files that exist as .webp
+        if (recipe.image.endsWith('.png')) {
+          const webpPath = recipe.image.replace('.png', '.webp');
+          // Check if the .webp file exists
+          const webpFile = path.join(__dirname, '..', 'public', webpPath.substring(1));
+          if (fs.existsSync(webpFile)) {
+            recipe.image = webpPath;
+            fixedCount++;
+          }
+        }
+      }
+    });
+    
+    // Write updated recipes back to file
+    fs.writeFileSync(fullPath, JSON.stringify(uniqueRecipes, null, 2));
+    
+    console.log(`  ✅ Removed ${recipes.length - uniqueRecipes.length} duplicates`);
+    console.log(`  ✅ Fixed ${fixedCount} image paths`);
+    console.log(`  📊 Final count: ${uniqueRecipes.length} recipes\n`);
   });
   
-  console.log(`\n🔄 Duplicates found: ${duplicates.length}`);
-  console.log(`📄 Unique in /images/: ${uniqueInImages.length}`);
-  
-  if (duplicates.length > 0) {
-    console.log('\n📋 Duplicate files:');
-    duplicates.forEach(({ name, foodSize, imageSize }) => {
-      console.log(`  🔄 ${name}: foodimages(${foodSize}MB) / images(${imageSize}MB)`);
-    });
-  }
-  
-  if (uniqueInImages.length > 0) {
-    console.log('\n📄 Files only in /images/:');
-    uniqueInImages.forEach(img => {
-      const size = getFileSizeInMB(path.join(imagesDir, img));
-      console.log(`  📄 ${img}: ${size}MB`);
-    });
-  }
-  
-  const totalSize = duplicates.reduce((sum, { foodSize, imageSize }) => {
-    return sum + parseFloat(foodSize) + parseFloat(imageSize);
-  }, 0);
-  
-  console.log(`\n💾 Total duplicate storage: ${totalSize.toFixed(2)}MB`);
-  console.log(`🎯 Potential savings: ${(totalSize / 2).toFixed(2)}MB`);
-  
-  console.log('\n💡 Recommendation:');
-  console.log('1. Keep only /public/foodimages/ (more complete set)');
-  console.log('2. Delete duplicate files from /public/images/');
-  console.log('3. Update code to reference /foodimages/ consistently');
-  console.log('4. Compress remaining images');
+  console.log('🎯 All recipe files cleaned up!');
 }
 
-analyzeDuplicates(); 
+cleanupDuplicates(); 
