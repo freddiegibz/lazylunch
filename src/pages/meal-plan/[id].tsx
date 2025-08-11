@@ -342,7 +342,7 @@ export default function MealPlanDetail() {
   }
 
   return (
-    <>
+    <div>
       <Head>
         <title>Meal Plan - LazyLunch</title>
         <meta name="description" content="View your saved meal plan" />
@@ -612,160 +612,254 @@ export default function MealPlanDetail() {
             {/* Recipe Book Modal */}
             {selectedMeal && (
               <div className="recipe-modal-overlay" onClick={() => setSelectedMeal(null)}>
-                <div className="recipe-book-modal" onClick={(e) => e.stopPropagation()}>
-                  <div className="recipe-modal-header">
-                              <button 
-                      className="close-button"
-                      onClick={() => setSelectedMeal(null)}
-                    >
-                      ×
-                    </button>
-                  </div>
-                  {/* Navigation Arrows Overlay */}
-                  <button
-                    className="book-arrow book-arrow-left"
-                    onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
-                                disabled={currentPage === 0}
-                    aria-label="Previous page"
-                              >
-                    &#8592;
-                              </button>
-                              <button 
-                    className="book-arrow book-arrow-right"
-                    onClick={() => setCurrentPage(Math.min(Math.ceil(selectedMeal.steps.length / 2), currentPage + 1))}
-                    disabled={currentPage >= Math.ceil(selectedMeal.steps.length / 2)}
-                    aria-label="Next page"
-                  >
-                    &#8594;
-                              </button>
-                  <div className="recipe-book-container">
-                    {/* Book Spread */}
-                    <div className="book-spread">
-                      {/* Left Page */}
-                      <div className="book-page left-page">
-                        <div className="page-content">
-                          {currentPage === 0 ? (
-                            // Cover Page
-                            <div className="page-cover">
-                              <div className="cover-image">
-                                <img 
-                                  src={selectedMeal.image} 
-                                  alt={selectedMeal.name}
-                                />
-                            </div>
-                              <div className="cover-content">
-                                <h1 className="recipe-title">{selectedMeal.name}</h1>
-                                <div className="recipe-meta">
-                                  <span className="recipe-cost">£{selectedMeal.estTotalCost.toFixed(2)}</span>
-                                  <span className="recipe-servings">{selectedMeal.baseServings} servings</span>
-                                  {selectedMeal.allergens && selectedMeal.allergens.length > 0 && (
-                                    <div className="allergen-badges">
-                                      {selectedMeal.allergens.map((a: string, i: number) => (
-                                        <span key={i} className="allergen-badge">{a}</span>
-                                      ))}
+                {isMobile ? (
+                  <div className="mobile-recipe-modal" onClick={(e) => e.stopPropagation()}>
+                    <div className="mobile-recipe-header">
+                      <button
+                        className="mobile-close-button"
+                        onClick={() => setSelectedMeal(null)}
+                      >
+                        ×
+                      </button>
+                      <div className="mobile-recipe-title">{selectedMeal.name}</div>
+                    </div>
+
+                    <div className="mobile-recipe-content" ref={modalContentRef}>
+                      {currentMobilePage === 0 && (
+                        <div className="mobile-cover-page">
+                          <div className="mobile-cover-image">
+                            <img src={selectedMeal.image} alt={selectedMeal.name} />
                           </div>
-                        )}
+                          <div className="mobile-recipe-info">
+                            <div className="mobile-recipe-meta">
+                              <span className="mobile-recipe-cost">£{selectedMeal.estTotalCost.toFixed(2)}</span>
+                              <span className="mobile-recipe-servings">{selectedMeal.baseServings} servings</span>
+                            </div>
+                            {selectedMeal.allergens && selectedMeal.allergens.length > 0 && (
+                              <div className="mobile-allergen-badges">
+                                {selectedMeal.allergens.map((a: string, i: number) => (
+                                  <span key={i} className="mobile-allergen-badge">{a}</span>
+                                ))}
+                              </div>
+                            )}
+                            <div className="mobile-recipe-tags">
+                              {selectedMeal.tags.map((tag: string, index: number) => (
+                                <span key={index} className="mobile-recipe-tag">{tag}</span>
+                              ))}
+                            </div>
+                            <div className="mobile-feedback">
+                              <button className="mobile-feedback-button thumbs-up" onClick={() => handleRecipeFeedback(selectedMeal.id || selectedMeal.name, 'like')} aria-label="Thumbs up">
+                                👍
+                                {feedbackStatus[selectedMeal.id || selectedMeal.name] === 'like' && <span className="mobile-feedback-confirm">Saved!</span>}
+                              </button>
+                              <button className="mobile-feedback-button thumbs-down" onClick={() => handleRecipeFeedback(selectedMeal.id || selectedMeal.name, 'dislike')} aria-label="Thumbs down">
+                                👎
+                                {feedbackStatus[selectedMeal.id || selectedMeal.name] === 'dislike' && <span className="mobile-feedback-confirm">Saved!</span>}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {currentMobilePage === 1 && (
+                        <div className="mobile-ingredients-page">
+                          <div className="mobile-page-title">Ingredients</div>
+                          <div className="mobile-ingredients-list">
+                            {selectedMeal.ingredients.map((ingredient: any, index: number) => (
+                              <div key={index} className="mobile-ingredient-item">
+                                <div className="mobile-ingredient-main">
+                                  <span className="mobile-ingredient-name">{ingredient.item}</span>
+                                  <span className="mobile-ingredient-qty">{ingredient.qty}{ingredient.note ? ` (${ingredient.note})` : ''}</span>
+                                </div>
+                                <span className="mobile-ingredient-cost">£{ingredient.estCost.toFixed(2)}</span>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="mobile-total-cost">
+                            <strong>Total Cost: £{selectedMeal.estTotalCost.toFixed(2)}</strong>
+                          </div>
+                        </div>
+                      )}
+
+                      {currentMobilePage > 1 && (
+                        <div className="mobile-instruction-page">
+                          <div className="mobile-step-header">
+                            <h2 className="mobile-step-title">Step {currentMobilePage - 1}</h2>
+                            <div className="mobile-step-progress">
+                              {currentMobilePage - 1} of {selectedMeal.steps.length}
+                            </div>
+                          </div>
+                          <div className="mobile-step-content">
+                            <p className="mobile-step-text">{selectedMeal.steps[currentMobilePage - 2]}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mobile-navigation">
+                      <button
+                        className="mobile-nav-button"
+                        onClick={() => setCurrentMobilePage(Math.max(0, currentMobilePage - 1))}
+                        disabled={currentMobilePage === 0}
+                      >
+                        ← Previous
+                      </button>
+                      <div className="mobile-page-indicator">
+                        {currentMobilePage + 1} of {getMaxMobilePage() + 1}
                       </div>
-                                <div className="recipe-tags">
-                                  {selectedMeal.tags.map((tag: string, index: number) => (
-                                    <span key={index} className="recipe-tag">{tag}</span>
-                                  ))}
+                      <button
+                        className="mobile-nav-button"
+                        onClick={() => setCurrentMobilePage(Math.min(getMaxMobilePage(), currentMobilePage + 1))}
+                        disabled={currentMobilePage >= getMaxMobilePage()}
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="recipe-book-modal" onClick={(e) => e.stopPropagation()}>
+                    <div className="recipe-modal-header">
+                      <button
+                        className="close-button"
+                        onClick={() => setSelectedMeal(null)}
+                      >
+                        ×
+                      </button>
+                    </div>
+
+                    <button
+                      className="book-arrow book-arrow-left"
+                      onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                      disabled={currentPage === 0}
+                      aria-label="Previous page"
+                    >
+                      &#8592;
+                    </button>
+                    <button
+                      className="book-arrow book-arrow-right"
+                      onClick={() => setCurrentPage(Math.min(Math.ceil(selectedMeal.steps.length / 2), currentPage + 1))}
+                      disabled={currentPage >= Math.ceil(selectedMeal.steps.length / 2)}
+                      aria-label="Next page"
+                    >
+                      &#8594;
+                    </button>
+
+                    <div className="recipe-book-container">
+                      <div className="book-spread">
+                        <div className="book-page left-page">
+                          <div className="page-content">
+                            {currentPage === 0 ? (
+                              <div className="page-cover">
+                                <div className="cover-image">
+                                  <img src={selectedMeal.image} alt={selectedMeal.name} />
                                 </div>
-                                <div className="modal-feedback">
-                                  <button className="feedback-button thumbs-up" onClick={() => handleRecipeFeedback(selectedMeal.id || selectedMeal.name, 'like')} aria-label="Thumbs up">
-                                    👍
-                                    {feedbackStatus[selectedMeal.id || selectedMeal.name] === 'like' && <span className="feedback-confirm">Saved!</span>}
-                                  </button>
-                                  <button className="feedback-button thumbs-down" onClick={() => handleRecipeFeedback(selectedMeal.id || selectedMeal.name, 'dislike')} aria-label="Thumbs down">
-                                    👎
-                                    {feedbackStatus[selectedMeal.id || selectedMeal.name] === 'dislike' && <span className="feedback-confirm">Saved!</span>}
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          ) : (
-                            // Instruction Step (left)
-                            (() => {
-                              const stepIndex = (currentPage - 1) * 2;
-                              if (selectedMeal.steps[stepIndex]) {
-                    return (
-                                  <div className="page-instruction">
-                                    <div className="step-header">
-                                      <h2>Step {stepIndex + 1}</h2>
-                                      <div className="step-progress">
-                                        {stepIndex + 1} of {selectedMeal.steps.length}
-                          </div>
-                        </div>
-                                    <div className="step-content">
-                                      <p className="step-text">{selectedMeal.steps[stepIndex]}</p>
-                            </div>
+                                <div className="cover-content">
+                                  <h1 className="recipe-title">{selectedMeal.name}</h1>
+                                  <div className="recipe-meta">
+                                    <span className="recipe-cost">£{selectedMeal.estTotalCost.toFixed(2)}</span>
+                                    <span className="recipe-servings">{selectedMeal.baseServings} servings</span>
+                                    {selectedMeal.allergens && selectedMeal.allergens.length > 0 && (
+                                      <div className="allergen-badges">
+                                        {selectedMeal.allergens.map((a: string, i: number) => (
+                                          <span key={i} className="allergen-badge">{a}</span>
+                                        ))}
+                                      </div>
+                                    )}
                                   </div>
-                                );
-                              } else {
-                                return null;
-                              }
-                            })()
-                          )}
-                        </div>
-                              </div>
-                      {/* Spine */}
-                      <div className="book-spine"></div>
-                      {/* Right Page */}
-                      <div className="book-page right-page">
-                        <div className="page-content">
-                          {currentPage === 0 ? (
-                            // Ingredients Page
-                            <div className="page-ingredients">
-                              <div className="ingredients-header-sticky">Ingredients</div>
-                              <div className="ingredients-list">
-                                {selectedMeal.ingredients.map((ingredient: any, index: number) => (
-                                  <div key={index} className="ingredient-row">
-                                    <span className="ingredient-name">{ingredient.item}</span>
-                                    <span className="ingredient-qty">{ingredient.qty}{ingredient.note ? ` (${ingredient.note})` : ''}</span>
-                                    <span className="ingredient-cost">£{ingredient.estCost.toFixed(2)}</span>
-                            </div>
+                                  <div className="recipe-tags">
+                                    {selectedMeal.tags.map((tag: string, index: number) => (
+                                      <span key={index} className="recipe-tag">{tag}</span>
                                     ))}
                                   </div>
-                              <div className="total-cost">
-                                <strong>Total Cost: £{selectedMeal.estTotalCost.toFixed(2)}</strong>
+                                  <div className="modal-feedback">
+                                    <button className="feedback-button thumbs-up" onClick={() => handleRecipeFeedback(selectedMeal.id || selectedMeal.name, 'like')} aria-label="Thumbs up">
+                                      👍
+                                      {feedbackStatus[selectedMeal.id || selectedMeal.name] === 'like' && <span className="feedback-confirm">Saved!</span>}
+                                    </button>
+                                    <button className="feedback-button thumbs-down" onClick={() => handleRecipeFeedback(selectedMeal.id || selectedMeal.name, 'dislike')} aria-label="Thumbs down">
+                                      👎
+                                      {feedbackStatus[selectedMeal.id || selectedMeal.name] === 'dislike' && <span className="feedback-confirm">Saved!</span>}
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
-                          ) : (
-                            // Instruction Step (right)
-                            (() => {
-                              const stepIndex = (currentPage - 1) * 2 + 1;
-                              if (selectedMeal.steps[stepIndex]) {
-                                return (
-                                  <div className="page-instruction">
-                                    <div className="step-header">
-                                      <h2>Step {stepIndex + 1}</h2>
-                                      <div className="step-progress">
-                                        {stepIndex + 1} of {selectedMeal.steps.length}
-                              </div>
-                            </div>
-                                    <div className="step-content">
-                                      <p className="step-text">{selectedMeal.steps[stepIndex]}</p>
-                            </div>
+                            ) : (
+                              (() => {
+                                const stepIndex = (currentPage - 1) * 2;
+                                if (selectedMeal.steps[stepIndex]) {
+                                  return (
+                                    <div className="page-instruction">
+                                      <div className="step-header">
+                                        <h2>Step {stepIndex + 1}</h2>
+                                        <div className="step-progress">{stepIndex + 1} of {selectedMeal.steps.length}</div>
+                                      </div>
+                                      <div className="step-content">
+                                        <p className="step-text">{selectedMeal.steps[stepIndex]}</p>
+                                      </div>
+                                    </div>
+                                  );
+                                } else {
+                                  return null;
+                                }
+                              })()
+                            )}
                           </div>
-                                );
-                              } else {
-                                return null;
-                              }
-                            })()
-                        )}
+                        </div>
+
+                        <div className="book-spine"></div>
+
+                        <div className="book-page right-page">
+                          <div className="page-content">
+                            {currentPage === 0 ? (
+                              <div className="page-ingredients">
+                                <div className="ingredients-header-sticky">Ingredients</div>
+                                <div className="ingredients-list">
+                                  {selectedMeal.ingredients.map((ingredient: any, index: number) => (
+                                    <div key={index} className="ingredient-row">
+                                      <span className="ingredient-name">{ingredient.item}</span>
+                                      <span className="ingredient-qty">{ingredient.qty}{ingredient.note ? ` (${ingredient.note})` : ''}</span>
+                                      <span className="ingredient-cost">£{ingredient.estCost.toFixed(2)}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className="total-cost">
+                                  <strong>Total Cost: £{selectedMeal.estTotalCost.toFixed(2)}</strong>
+                                </div>
+                              </div>
+                            ) : (
+                              (() => {
+                                const stepIndex = (currentPage - 1) * 2 + 1;
+                                if (selectedMeal.steps[stepIndex]) {
+                                  return (
+                                    <div className="page-instruction">
+                                      <div className="step-header">
+                                        <h2>Step {stepIndex + 1}</h2>
+                                        <div className="step-progress">{stepIndex + 1} of {selectedMeal.steps.length}</div>
+                                      </div>
+                                      <div className="step-content">
+                                        <p className="step-text">{selectedMeal.steps[stepIndex]}</p>
+                                      </div>
+                                    </div>
+                                  );
+                                } else {
+                                  return null;
+                                }
+                              })()
+                            )}
+                          </div>
+                        </div>
                       </div>
-                </div>
-              </div>
-                    {/* Page X of Y indicator */}
+                    </div>
+
                     <div style={{ textAlign: 'center', marginTop: '8px', fontWeight: 600, color: 'var(--navy-blue)' }}>
                       Page {currentPage + 1} of {Math.ceil(selectedMeal.steps.length / 2) + 1}
-            </div>
                     </div>
-                </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
-        </main>
+          </main>
       </div>
 
       <style jsx>{`
@@ -1646,6 +1740,365 @@ export default function MealPlanDetail() {
           cursor: not-allowed;
         }
 
+        /* Mobile Recipe Book Modal Styles */
+        .mobile-recipe-modal {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.6);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+          padding: 1rem; /* Add some padding for mobile screens */
+        }
+
+        .mobile-recipe-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1rem;
+          border-bottom: 1px solid var(--border-grey);
+          background: var(--white);
+          border-radius: 16px 16px 0 0;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-close-button {
+          background: none;
+          border: none;
+          font-size: 2rem;
+          color: var(--dark-grey);
+          cursor: pointer;
+          transition: color 0.3s;
+        }
+
+        .mobile-close-button:hover {
+          color: var(--navy-blue);
+        }
+
+        .mobile-recipe-title {
+          font-size: 1.8rem;
+          font-weight: 700;
+          color: var(--navy-blue);
+          text-align: center;
+          flex: 1;
+        }
+
+        .mobile-recipe-content {
+          background: var(--white);
+          border-radius: 16px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+          width: 100%;
+          max-width: 600px; /* Max width for mobile screens */
+          height: 90%;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .mobile-cover-page,
+        .mobile-ingredients-page,
+        .mobile-instruction-page {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          padding: 2rem;
+          position: relative;
+          background: var(--white);
+          border: 1px solid var(--border-grey);
+          border-radius: 12px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          overflow-y: auto;
+        }
+
+        .mobile-cover-page {
+          align-items: center;
+          text-align: center;
+        }
+
+        .mobile-cover-image {
+          width: 200px;
+          height: 200px;
+          border-radius: 10px;
+          overflow: hidden;
+          margin-bottom: 1.5rem;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-cover-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .mobile-recipe-info {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .mobile-recipe-meta {
+          display: flex;
+          gap: 1rem;
+          font-size: 1.1rem;
+          color: var(--dark-grey);
+        }
+
+        .mobile-allergen-badges {
+          display: flex;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+        }
+
+        .mobile-allergen-badge {
+          background: var(--light-grey);
+          color: var(--navy-blue);
+          padding: 0.3rem 0.7rem;
+          border-radius: 15px;
+          font-size: 0.75rem;
+          font-weight: 600;
+        }
+
+        .mobile-recipe-tags {
+          display: flex;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+        }
+
+        .mobile-recipe-tag {
+          background: var(--light-grey);
+          color: var(--navy-blue);
+          padding: 0.5rem 1rem;
+          border-radius: 20px;
+          font-size: 0.8rem;
+          font-weight: 600;
+        }
+
+        .mobile-feedback {
+          display: flex;
+          gap: 1rem;
+          margin-top: 1.5rem;
+        }
+
+        .mobile-feedback-button {
+          background: var(--light-grey);
+          border: 1px solid var(--border-grey);
+          border-radius: 20px;
+          padding: 0.75rem 1.5rem;
+          cursor: pointer;
+          font-size: 1.2rem;
+          transition: all 0.3s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+        }
+
+        .mobile-feedback-button:hover {
+          background: var(--pastel-green);
+          border-color: var(--pastel-green);
+          transform: translateY(-2px);
+        }
+
+        .mobile-feedback-button.thumbs-up {
+          color: var(--green);
+        }
+
+        .mobile-feedback-button.thumbs-down {
+          color: var(--red);
+        }
+
+        .mobile-feedback-confirm {
+          font-size: 0.8rem;
+          color: var(--dark-grey);
+          margin-left: 0.5rem;
+        }
+
+        .mobile-ingredients-page {
+          padding: 2rem;
+        }
+
+        .mobile-page-title {
+          font-size: 2rem;
+          font-weight: 700;
+          color: var(--navy-blue);
+          margin-bottom: 1.5rem;
+          text-align: center;
+        }
+
+        .mobile-ingredients-list {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+          margin-bottom: 2rem;
+        }
+
+        .mobile-ingredient-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 1rem;
+          padding: 0.75rem 0;
+          border-bottom: 1px dashed var(--border-grey);
+        }
+
+        .mobile-ingredient-item:last-child {
+          border-bottom: none;
+        }
+
+        .mobile-ingredient-main {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+        }
+
+        .mobile-ingredient-name {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: var(--navy-blue);
+        }
+
+        .mobile-ingredient-qty {
+          font-size: 0.9rem;
+          color: var(--dark-grey);
+          font-weight: 600;
+        }
+
+        .mobile-ingredient-cost {
+          font-size: 0.9rem;
+          color: var(--navy-blue);
+          font-weight: 600;
+        }
+
+        .mobile-total-cost {
+          text-align: right;
+          font-size: 1.2rem;
+          font-weight: 700;
+          color: var(--navy-blue);
+          margin-top: 1rem;
+        }
+
+        .mobile-instruction-page {
+          padding: 2rem;
+        }
+
+        .mobile-step-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+          margin-bottom: 1.5rem;
+        }
+
+        .mobile-step-title {
+          font-size: 1.8rem;
+          font-weight: 700;
+          color: var(--navy-blue);
+          margin: 0;
+        }
+
+        .mobile-step-progress {
+          font-size: 0.9rem;
+          color: var(--dark-grey);
+          font-weight: 500;
+        }
+
+        .mobile-step-content {
+          font-size: 1.1rem;
+          color: var(--dark-grey);
+          line-height: 1.8;
+          margin-bottom: 1.5rem;
+        }
+
+        .mobile-step-text {
+          font-size: 1.1rem;
+          color: var(--dark-grey);
+          line-height: 1.8;
+        }
+
+        .mobile-navigation {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1rem 2rem;
+          border-top: 1px solid var(--border-grey);
+          background: var(--light-grey);
+          border-radius: 0 0 16px 16px;
+          box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-nav-button {
+          background: var(--pastel-green);
+          color: var(--navy-blue);
+          border: none;
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 0.9rem;
+          font-weight: 600;
+          transition: all 0.3s;
+          white-space: nowrap;
+        }
+
+        .mobile-nav-button:hover {
+          background: #9BC8AB;
+          transform: translateY(-2px);
+        }
+
+        .mobile-nav-button:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          background: var(--border-grey);
+          color: var(--dark-grey);
+        }
+
+        .mobile-page-indicator {
+          font-size: 0.9rem;
+          color: var(--dark-grey);
+          font-weight: 500;
+        }
+
+        .mobile-page-counter {
+          font-weight: 600;
+          color: var(--navy-blue);
+        }
+
+        .mobile-page-dots {
+          display: flex;
+          gap: 0.5rem;
+        }
+
+        .mobile-page-dot {
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          background: var(--border-grey);
+          color: var(--dark-grey);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.8rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+        }
+
+        .mobile-page-dot:hover:not(.active) {
+          background: var(--light-grey);
+          transform: scale(1.1);
+        }
+
+        .mobile-page-dot.active {
+          background: var(--pastel-green);
+          color: var(--navy-blue);
+          border: 2px solid var(--navy-blue);
+        }
+
         @media (max-width: 768px) {
           .dashboard-header-content {
             padding: 0 1rem;
@@ -1898,8 +2351,226 @@ export default function MealPlanDetail() {
           .book-arrow-right {
             right: 0.5rem;
           }
+
+          /* Mobile Recipe Book Modal Media Queries */
+          .mobile-recipe-modal {
+            padding: 0; /* Remove padding on mobile */
+          }
+
+          .mobile-recipe-header {
+            padding: 0.75rem 1rem;
+            border-radius: 16px 16px 0 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          }
+
+          .mobile-close-button {
+            font-size: 1.8rem;
+          }
+
+          .mobile-recipe-title {
+            font-size: 1.5rem;
+          }
+
+          .mobile-recipe-content {
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 600px;
+            height: 90%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+          }
+
+          .mobile-cover-page,
+          .mobile-ingredients-page,
+          .mobile-instruction-page {
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 600px;
+            height: 90%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+          }
+
+          .mobile-cover-page {
+            align-items: center;
+            text-align: center;
+          }
+
+          .mobile-cover-image {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 1rem;
+          }
+
+          .mobile-recipe-info {
+            margin-bottom: 1.5rem;
+          }
+
+          .mobile-recipe-meta {
+            font-size: 1rem;
+            gap: 0.5rem;
+          }
+
+          .mobile-allergen-badges {
+            gap: 0.5rem;
+          }
+
+          .mobile-allergen-badge {
+            padding: 0.3rem 0.7rem;
+            font-size: 0.75rem;
+          }
+
+          .mobile-recipe-tags {
+            gap: 0.5rem;
+          }
+
+          .mobile-recipe-tag {
+            padding: 0.3rem 0.7rem;
+            font-size: 0.7rem;
+          }
+
+          .mobile-feedback {
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: center;
+          }
+
+          .mobile-feedback-button {
+            width: 100%;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+          }
+
+          .mobile-feedback-confirm {
+            font-size: 0.7rem;
+            margin-left: 0;
+          }
+
+          .mobile-ingredients-page {
+            padding: 2rem;
+          }
+
+          .mobile-page-title {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+          }
+
+          .mobile-ingredients-list {
+            gap: 1rem;
+            margin-bottom: 2rem;
+          }
+
+          .mobile-ingredient-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px dashed var(--border-grey);
+          }
+
+          .mobile-ingredient-item:last-child {
+            border-bottom: none;
+          }
+
+          .mobile-ingredient-main {
+            width: 100%;
+            text-align: left;
+          }
+
+          .mobile-ingredient-name {
+            font-size: 1rem;
+          }
+
+          .mobile-ingredient-qty {
+            font-size: 0.8rem;
+          }
+
+          .mobile-ingredient-cost {
+            font-size: 0.8rem;
+          }
+
+          .mobile-total-cost {
+            font-size: 1rem;
+            text-align: left;
+          }
+
+          .mobile-instruction-page {
+            padding: 2rem;
+          }
+
+          .mobile-step-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+          }
+
+          .mobile-step-title {
+            font-size: 1.5rem;
+          }
+
+          .mobile-step-progress {
+            font-size: 0.8rem;
+          }
+
+          .mobile-step-content {
+            font-size: 1rem;
+            line-height: 1.6;
+          }
+
+          .mobile-step-text {
+            font-size: 1rem;
+            line-height: 1.6;
+          }
+
+          .mobile-navigation {
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+          }
+
+          .mobile-nav-button {
+            width: 100%;
+            justify-content: center;
+          }
+
+          .mobile-page-indicator {
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.8rem;
+          }
+
+          .mobile-page-dots {
+            flex-wrap: wrap;
+            justify-content: center;
+          }
+
+          .mobile-page-dot {
+            width: 25px;
+            height: 25px;
+            font-size: 0.7rem;
+          }
+
+          .book-arrow {
+            width: 30px;
+            height: 30px;
+            font-size: 1rem;
+          }
+
+          .book-arrow-left {
+            left: 0.5rem;
+          }
+
+          .book-arrow-right {
+            right: 0.5rem;
+          }
         }
       `}</style>
-    </>
+    </div>
   )
 } 

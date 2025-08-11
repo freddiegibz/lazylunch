@@ -49,7 +49,10 @@ export default function Dashboard() {
   // Load user stats and recent meal plans
   const loadUserData = async () => {
     try {
+      console.log('🔍 DEBUG: dashboard.tsx - loadUserData - Starting...');
       const plans = await MealPlanService.getAllMealPlans()
+      console.log('🔍 DEBUG: dashboard.tsx - loadUserData - Got plans, processing...');
+      
       const thisWeek = plans.filter(plan => {
         if (!plan.created_at) return false
         const planDate = new Date(plan.created_at)
@@ -57,6 +60,7 @@ export default function Dashboard() {
         return planDate > weekAgo
       })
       
+      console.log('🔍 DEBUG: dashboard.tsx - loadUserData - Setting state...');
       setRecentMealPlans(plans.slice(0, 3)) // Get 3 most recent
       setStats({
         totalPlans: plans.length,
@@ -64,58 +68,45 @@ export default function Dashboard() {
         totalRecipes: plans.reduce((acc, plan) => acc + (plan.week_data?.length || 0), 0),
         savedMoney: Math.round(plans.length * 25) // Estimate £25 saved per plan
       })
+      console.log('🔍 DEBUG: dashboard.tsx - loadUserData - Completed successfully');
     } catch (error) {
+      console.log('🔍 DEBUG: dashboard.tsx - loadUserData - Error:', error);
       console.error('Error loading user data:', error)
     }
   }
 
   useEffect(() => {
-    // Get current user session
-    const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        setUser(user)
-        // Fetch membership from profiles table
-        try {
-          const { data: profile, error } = await supabase
-            .from('profiles')
-            .select('membership')
-            .eq('id', user.id)
-            .single()
-          
-          if (error) {
-            // If profile doesn't exist, create one with default membership
-            await createUserProfile(user.id)
-            setMembership('free')
-          } else {
-            setMembership(profile?.membership || 'free')
-          }
-        } catch (error) {
-          // Try to create profile for new users
-          await createUserProfile(user.id)
-          setMembership('free')
-        }
-        
-        // Load user data after user is set
-        await loadUserData()
-      } else {
-        // No user found, redirect to signin
-        router.push('/signin')
-      }
-      setLoading(false)
-    }
-
-    getCurrentUser()
-
-    // Listen for auth changes
+    console.log('🔍 DEBUG: dashboard.tsx - useEffect started');
+    const startTime = Date.now();
+    
+    // Add timeout to prevent infinite loading - increased to 30 seconds
+    const timeoutId = setTimeout(() => {
+      const elapsed = Date.now() - startTime;
+      console.log('🔍 DEBUG: dashboard.tsx - TIMEOUT: Loading taking too long, forcing loading to false. Elapsed:', elapsed, 'ms');
+      setLoading(false);
+    }, 30000); // 30 second timeout
+    
+    let authStateHandled = false;
+    
+    // Listen for auth changes first - this is faster than getUser()
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔍 DEBUG: dashboard.tsx - Auth state change:', event);
+      
+      if (authStateHandled) return; // Prevent multiple calls
+      
       if (event === 'SIGNED_OUT') {
+        authStateHandled = true;
         setUser(null)
         router.push('/signin')
+        clearTimeout(timeoutId);
+        clearTimeout(fallbackTimeout);
       } else if (event === 'SIGNED_IN' && session?.user) {
+        authStateHandled = true;
+        console.log('🔍 DEBUG: dashboard.tsx - User signed in via auth state change');
         setUser(session.user)
-        // For new users (including Google OAuth), ensure profile exists
+        // Fetch membership from profiles table
         try {
+          console.log('🔍 DEBUG: Fetching user profile...');
           const { data: profile, error } = await supabase
             .from('profiles')
             .select('membership')
@@ -123,21 +114,122 @@ export default function Dashboard() {
             .single()
           
           if (error) {
-            // Profile doesn't exist, create it
-            await createUserProfile(session.user.id)
+            console.log('🔍 DEBUG: Profile fetch error, setting membership to free');
             setMembership('free')
           } else {
+            console.log('🔍 DEBUG: Profile fetched successfully');
             setMembership(profile?.membership || 'free')
           }
         } catch (error) {
-          await createUserProfile(session.user.id)
+          console.log('🔍 DEBUG: Profile fetch exception, setting membership to free');
           setMembership('free')
         }
+        setLoading(false)
+        clearTimeout(timeoutId);
+        clearTimeout(fallbackTimeout);
+      } else if (event === 'INITIAL_SESSION' && session?.user) {
+        authStateHandled = true;
+        console.log('🔍 DEBUG: dashboard.tsx - Initial session found');
+        setUser(session.user)
+        // Fetch membership from profiles table
+        try {
+          console.log('🔍 DEBUG: Fetching user profile...');
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('membership')
+            .eq('id', session.user.id)
+            .single()
+          
+          if (error) {
+            console.log('🔍 DEBUG: Profile fetch error, setting membership to free');
+            setMembership('free')
+          } else {
+            console.log('🔍 DEBUG: Profile fetched successfully');
+            setMembership(profile?.membership || 'free')
+          }
+        } catch (error) {
+          console.log('🔍 DEBUG: Profile fetch exception, setting membership to free');
+          setMembership('free')
+        }
+        setLoading(false)
+        clearTimeout(timeoutId);
+        clearTimeout(fallbackTimeout);
       }
     })
 
-    return () => subscription.unsubscribe()
+    // Fallback: Get current user session if auth state change doesn't fire quickly
+    const getCurrentUser = async () => {
+      if (authStateHandled) return; // Don't run if auth state already handled
+      
+      console.log('🔍 DEBUG: dashboard.tsx - getCurrentUser function started');
+      try {
+        console.log('🔍 DEBUG: dashboard.tsx - Getting user...');
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (user) {
+          console.log('🔍 DEBUG: dashboard.tsx - User found, setting user state');
+          setUser(user)
+          // Fetch membership from profiles table
+          try {
+            console.log('🔍 DEBUG: Fetching user profile...');
+            const { data: profile, error } = await supabase
+              .from('profiles')
+              .select('membership')
+              .eq('id', user.id)
+              .single()
+            
+            if (error) {
+              console.log('🔍 DEBUG: Profile fetch error, setting membership to free');
+              setMembership('free')
+            } else {
+              console.log('🔍 DEBUG: Profile fetched successfully');
+              setMembership(profile?.membership || 'free')
+            }
+          } catch (error) {
+            console.log('🔍 DEBUG: Profile fetch exception, setting membership to free');
+            setMembership('free')
+          }
+        } else {
+          console.log('🔍 DEBUG: dashboard.tsx - No user found, redirecting to signin');
+          router.push('/signin')
+        }
+      } catch (error) {
+        console.log('🔍 DEBUG: dashboard.tsx - Error in getCurrentUser:', error);
+        router.push('/signin')
+      } finally {
+        const elapsed = Date.now() - startTime;
+        console.log('🔍 DEBUG: dashboard.tsx - Setting loading to false. Total time:', elapsed, 'ms');
+        setLoading(false)
+        clearTimeout(timeoutId);
+      }
+    }
+
+    // Run the fallback function with a shorter timeout
+    const fallbackTimeout = setTimeout(() => {
+      if (!authStateHandled) {
+        console.log('🔍 DEBUG: dashboard.tsx - Auth state change taking too long, using fallback');
+        getCurrentUser().catch(error => {
+          console.log('🔍 DEBUG: dashboard.tsx - Unhandled error in getCurrentUser:', error);
+          setLoading(false);
+          clearTimeout(timeoutId);
+        });
+      }
+    }, 2000); // 2 second timeout for auth state change
+
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(timeoutId);
+      clearTimeout(fallbackTimeout);
+    }
   }, [router])
+
+  // Load user data when user is authenticated
+  useEffect(() => {
+    if (user && !loading) {
+      console.log('🔍 DEBUG: dashboard.tsx - User authenticated, loading user data...');
+      loadUserData();
+    }
+  }, [user, loading]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-GB', {

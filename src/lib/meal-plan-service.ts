@@ -69,12 +69,15 @@ export class MealPlanService {
   // Get all meal plans for the current user
   static async getAllMealPlans(): Promise<MealPlan[]> {
     try {
+      console.log('🔍 DEBUG: MealPlanService.getAllMealPlans - Starting...');
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
+        console.log('🔍 DEBUG: MealPlanService.getAllMealPlans - No user found');
         throw new Error('User not authenticated')
       }
 
+      console.log('🔍 DEBUG: MealPlanService.getAllMealPlans - Fetching meal plans for user:', user.id);
       const { data, error } = await supabase
         .from('meal_plans')
         .select('*')
@@ -82,11 +85,14 @@ export class MealPlanService {
         .order('created_at', { ascending: false })
 
       if (error) {
+        console.log('🔍 DEBUG: MealPlanService.getAllMealPlans - Error:', error);
         throw error
       }
 
+      console.log('🔍 DEBUG: MealPlanService.getAllMealPlans - Found', data?.length || 0, 'meal plans');
       return data || []
     } catch (error) {
+      console.log('🔍 DEBUG: MealPlanService.getAllMealPlans - Exception:', error);
       throw error
     }
   }
