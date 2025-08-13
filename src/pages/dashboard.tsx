@@ -13,9 +13,9 @@ export default function Dashboard() {
   const [recentMealPlans, setRecentMealPlans] = useState<any[]>([])
   const [stats, setStats] = useState({
     totalPlans: 0,
-    thisWeek: 0,
-    totalRecipes: 0,
-    savedMoney: 0
+    recipesTried: 0,
+    likes: 0,
+    dislikes: 0,
   })
   const router = useRouter()
 
@@ -52,21 +52,31 @@ export default function Dashboard() {
       console.log('🔍 DEBUG: dashboard.tsx - loadUserData - Starting...');
       const plans = await MealPlanService.getAllMealPlans()
       console.log('🔍 DEBUG: dashboard.tsx - loadUserData - Got plans, processing...');
-      
-      const thisWeek = plans.filter(plan => {
-        if (!plan.created_at) return false
-        const planDate = new Date(plan.created_at)
-        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-        return planDate > weekAgo
-      })
+
+      // Fetch recipe feedback from current user to populate "Recipes Tried"
+      let likes = 0
+      let dislikes = 0
+      let recipesTried = 0
+      if (user?.id) {
+        const { data: feedbackRows, error: feedbackError } = await supabase
+          .from('recipe_feedback')
+          .select('feedback')
+          .eq('user_id', user.id)
+
+        if (!feedbackError && feedbackRows) {
+          recipesTried = feedbackRows.length
+          likes = feedbackRows.filter(r => r.feedback === 'like').length
+          dislikes = feedbackRows.filter(r => r.feedback === 'dislike').length
+        }
+      }
       
       console.log('🔍 DEBUG: dashboard.tsx - loadUserData - Setting state...');
       setRecentMealPlans(plans.slice(0, 3)) // Get 3 most recent
       setStats({
         totalPlans: plans.length,
-        thisWeek: thisWeek.length,
-        totalRecipes: plans.reduce((acc, plan) => acc + (plan.week_data?.length || 0), 0),
-        savedMoney: Math.round(plans.length * 25) // Estimate £25 saved per plan
+        recipesTried,
+        likes,
+        dislikes,
       })
       console.log('🔍 DEBUG: dashboard.tsx - loadUserData - Completed successfully');
     } catch (error) {
@@ -288,25 +298,12 @@ export default function Dashboard() {
                 <div className="stat-label">Total Meal Plans</div>
               </div>
             </div>
-            <div className="stat-card">
-              <div className="stat-icon">📅</div>
-              <div className="stat-content">
-                <div className="stat-number">{stats.thisWeek}</div>
-                <div className="stat-label">This Week</div>
-              </div>
-            </div>
-            <div className="stat-card">
+            <div className="stat-card" onClick={() => router.push('/recipes-tried')} style={{cursor:'pointer'}}>
               <div className="stat-icon">🍽️</div>
               <div className="stat-content">
-                <div className="stat-number">{stats.totalRecipes}</div>
+                <div className="stat-number">{stats.recipesTried}</div>
                 <div className="stat-label">Recipes Tried</div>
-              </div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-icon">💰</div>
-              <div className="stat-content">
-                <div className="stat-number">£{stats.savedMoney}</div>
-                <div className="stat-label">Money Saved</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--dark-grey)' }}>{stats.likes} likes • {stats.dislikes} dislikes</div>
               </div>
             </div>
           </div>
@@ -342,14 +339,6 @@ export default function Dashboard() {
                 <div className="quick-action-arrow">→</div>
               </Link>
               
-              <div className="quick-action-card">
-                <div className="quick-action-icon">🛒</div>
-                <div className="quick-action-content">
-                  <h4>Shopping Lists</h4>
-                  <p>Coming soon!</p>
-                </div>
-                <div className="quick-action-arrow">🔒</div>
-              </div>
             </div>
           </div>
 

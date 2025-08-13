@@ -39,12 +39,24 @@ export default function GenerateMealPlan() {
   const [currentDayIndex, setCurrentDayIndex] = useState(0)
   const [showPreferences, setShowPreferences] = useState(false)
   const [preferences, setPreferences] = useState({
-    servings: 1,
+    adults: 2,
+    kids: 0,
+    mealsPerDay: 3 as 1|2|3,
+    // derived: servings will be computed from adults/kids when generating
     allergens: [] as string[],
     weeklyBudget: 'none',
     customWeeklyBudget: '',
     cuisinePreferences: [] as string[],
   })
+  const [presets, setPresets] = useState<Array<{id:string,name:string,prefs:any}>>([])
+  const [presetName, setPresetName] = useState('')
+  const [savingPreset, setSavingPreset] = useState(false)
+
+  const computeServings = (adults: number, kids: number) => {
+    const a = Math.max(0, Number(adults)||0)
+    const k = Math.max(0, Number(kids)||0)
+    return a + Math.ceil(k * 0.5)
+  }
   const [user, setUser] = useState<any>(null)
   const [membership, setMembership] = useState<string>('')
   const [loadingUser, setLoadingUser] = useState(true)
@@ -188,7 +200,11 @@ export default function GenerateMealPlan() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify({ preferences })
+        body: JSON.stringify({ preferences: {
+          ...preferences,
+          servings: computeServings(preferences.adults, preferences.kids),
+          weeklyBudgetValue: getWeeklyBudgetValue(),
+        } })
       });
       if (!res.ok) {
         const errorData = await res.json();
@@ -333,6 +349,63 @@ export default function GenerateMealPlan() {
     return null;
   };
 
+  // Presets: Supabase-backed, with localStorage fallback
+  const loadPresets = async () => {
+    try {
+      if (!user) return
+      const { data, error } = await supabase
+        .from('meal_plan_presets')
+        .select('id,name,preferences')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+      if (!error && data) {
+        setPresets(data.map((r:any)=>({id:r.id,name:r.name,prefs:r.preferences})))
+        return
+      }
+    } catch {}
+    // Fallback
+    const raw = localStorage.getItem(`ll_presets_${user?.id||'guest'}`)
+    if (raw) {
+      try { setPresets(JSON.parse(raw)) } catch {}
+    }
+  }
+
+  const savePresetsLocally = (items: any[]) => {
+    if (!user) return
+    localStorage.setItem(`ll_presets_${user.id}`, JSON.stringify(items))
+  }
+
+  const savePreset = async () => {
+    if (!user || !presetName.trim()) return
+    setSavingPreset(true)
+    const record = { name: presetName.trim(), preferences: preferences, user_id: user.id }
+    try {
+      const { data, error } = await supabase
+        .from('meal_plan_presets')
+        .insert([record])
+        .select('id,name,preferences')
+        .single()
+      if (!error && data) {
+        const next = [{id:data.id,name:data.name,prefs:data.preferences}, ...presets]
+        setPresets(next)
+        setPresetName('')
+        return
+      }
+    } catch {}
+    // Fallback to localStorage
+    const localId = `${Date.now()}`
+    const next = [{id:localId,name:presetName.trim(),prefs:preferences}, ...presets]
+    setPresets(next)
+    savePresetsLocally(next)
+    setPresetName('')
+    setSavingPreset(false)
+  }
+
+  const applyPreset = (p: any) => {
+    setPreferences(p)
+  }
+
+  useEffect(()=>{ if (user) loadPresets() }, [user])
 
   // Show paywall for free users
   if (loadingUser) {
@@ -480,23 +553,33 @@ export default function GenerateMealPlan() {
                   
                   {/* Preferences Form */}
                   <div className="preferences-form">
-                    {/* Servings */}
+                    {/* People & Volume */}
                     <div className="preference-section">
-                      <label className="preference-label">How many people are you cooking for?</label>
-                      <select 
-                        value={preferences.servings}
-                        onChange={(e) => setPreferences({...preferences, servings: parseInt(e.target.value)})}
-                        className="preference-select"
-                      >
-                        <option value={1}>1 person</option>
-                        <option value={2}>2 people</option>
-                        <option value={3}>3 people</option>
-                        <option value={4}>4 people</option>
-                        <option value={5}>5 people</option>
-                        <option value={6}>6 people</option>
-                        <option value={7}>7 people</option>
-                        <option value={8}>8 people</option>
-                      </select>
+                      <label className="preference-label">People & volume</label>
+                      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:'12px'}}>
+                        <div>
+                          <div className="preference-label" style={{fontSize:'0.9rem'}}>Adults (number)</div>
+                          <input type="number" min={0} className="preference-input" value={preferences.adults}
+                            onChange={e=>setPreferences({...preferences, adults: Math.max(0, parseInt(e.target.value||'0'))})} />
+                        </div>
+                        <div>
+                          <div className="preference-label" style={{fontSize:'0.9rem'}}>Kids (number)</div>
+                          <input type="number" min={0} className="preference-input" value={preferences.kids}
+                            onChange={e=>setPreferences({...preferences, kids: Math.max(0, parseInt(e.target.value||'0'))})} />
+                        </div>
+                        <div>
+                          <div className="preference-label" style={{fontSize:'0.9rem'}}>Meals needed per day</div>
+                          <select className="preference-select" value={preferences.mealsPerDay}
+                            onChange={e=>setPreferences({...preferences, mealsPerDay: Number(e.target.value) as 1|2|3})}>
+                            <option value={1}>1 meal</option>
+                            <option value={2}>2 meals</option>
+                            <option value={3}>3 meals</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div style={{marginTop:8, color:'var(--dark-grey)', fontSize:'0.85rem'}}>
+                        Calculated servings: {computeServings(preferences.adults, preferences.kids)}
+                      </div>
                     </div>
 
                     {/* Weekly Budget */}
@@ -602,6 +685,33 @@ export default function GenerateMealPlan() {
                      (membership !== 'free' && planCount >= planLimit) ? 'Weekly Limit Reached' : 
                      'Generate Personalized Meal Plan'}
                   </button>
+
+                  {/* Presets Save/Load */}
+                  <div style={{marginTop:16, textAlign:'left'}}>
+                    <div style={{display:'flex', gap:8, alignItems:'center', flexWrap:'wrap'}}>
+                      <input
+                        type="text"
+                        placeholder="Preset name (e.g., Weeknights)"
+                        className="preference-input"
+                        style={{maxWidth:280}}
+                        value={presetName}
+                        onChange={e=>setPresetName(e.target.value)}
+                      />
+                      <button className="dashboard-card-button" onClick={savePreset} disabled={savingPreset || !presetName.trim()}>
+                        Save preset
+                      </button>
+                    </div>
+                    {presets.length>0 && (
+                      <div style={{marginTop:12}}>
+                        <div className="preference-label" style={{marginBottom:8}}>Quick presets</div>
+                        <div style={{display:'flex', flexWrap:'wrap', gap:8}}>
+                          {presets.map(p=> (
+                            <button key={p.id} className="load-plan-button" onClick={()=>applyPreset(p.prefs)}>{p.name}</button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Load Saved Plans Section */}
                   {!loadingSavedPlans && savedMealPlans.length > 0 && (

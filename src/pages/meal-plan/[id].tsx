@@ -57,6 +57,16 @@ export default function MealPlanDetail() {
     return null;
   };
 
+  const recipeKey = (r: any): string => {
+    const raw = typeof r === 'object' && r?.id
+      ? String(r.id)
+      : (typeof r === 'string' ? r : String(r?.name || ''))
+    return raw
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+  }
+
   async function handleRecipeFeedback(recipeId: string, feedback: 'like' | 'dislike') {
     setFeedbackStatus((prev) => ({ ...prev, [recipeId]: 'loading' }));
     try {
@@ -99,7 +109,7 @@ export default function MealPlanDetail() {
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 900);
+      setIsMobile(window.innerWidth <= 1024);
     };
     handleResize();
     window.addEventListener('resize', handleResize);
@@ -451,6 +461,7 @@ export default function MealPlanDetail() {
                         setSelectedMeal(breakfastRecipe)
                           setCurrentPage(0)
                         setCurrentInstructionStep(0)
+                        setCurrentMobilePage(0)
                       }}>
                         <div className="meal-image">
                           <img
@@ -503,6 +514,7 @@ export default function MealPlanDetail() {
                         setSelectedMeal(lunchRecipe)
                         setCurrentPage(0)
                         setCurrentInstructionStep(0)
+                        setCurrentMobilePage(0)
                       }}>
                         <div className="meal-image">
                           <img 
@@ -554,6 +566,7 @@ export default function MealPlanDetail() {
                         setSelectedMeal(dinnerRecipe)
                           setCurrentPage(0)
                         setCurrentInstructionStep(0)
+                        setCurrentMobilePage(0)
                       }}>
                         <div className="meal-image">
                           <img 
@@ -615,48 +628,36 @@ export default function MealPlanDetail() {
                 {isMobile ? (
                   <div className="mobile-recipe-modal" onClick={(e) => e.stopPropagation()}>
                     <div className="mobile-recipe-header">
-                      <button
-                        className="mobile-close-button"
-                        onClick={() => setSelectedMeal(null)}
-                      >
-                        ×
-                      </button>
+                      <button className="mobile-close-button" onClick={() => setSelectedMeal(null)}>×</button>
                       <div className="mobile-recipe-title">{selectedMeal.name}</div>
                     </div>
 
-                    <div className="mobile-recipe-content" ref={modalContentRef}>
+                    <div className="mobile-single-page" ref={modalContentRef}>
                       {currentMobilePage === 0 && (
-                        <div className="mobile-cover-page">
+                        <div className="mobile-cover">
                           <div className="mobile-cover-image">
                             <img src={selectedMeal.image} alt={selectedMeal.name} />
                           </div>
-                          <div className="mobile-recipe-info">
-                            <div className="mobile-recipe-meta">
-                              <span className="mobile-recipe-cost">£{selectedMeal.estTotalCost.toFixed(2)}</span>
-                              <span className="mobile-recipe-servings">{selectedMeal.baseServings} servings</span>
-                            </div>
-                            {selectedMeal.allergens && selectedMeal.allergens.length > 0 && (
-                              <div className="mobile-allergen-badges">
-                                {selectedMeal.allergens.map((a: string, i: number) => (
-                                  <span key={i} className="mobile-allergen-badge">{a}</span>
-                                ))}
-                              </div>
-                            )}
-                            <div className="mobile-recipe-tags">
-                              {selectedMeal.tags.map((tag: string, index: number) => (
-                                <span key={index} className="mobile-recipe-tag">{tag}</span>
+                          <h1 className="mobile-cover-title">{selectedMeal.name}</h1>
+                          <div className="mobile-cover-meta">
+                            <span>£{selectedMeal.estTotalCost.toFixed(2)}</span>
+                            <span>{selectedMeal.baseServings} servings</span>
+                          </div>
+                          {selectedMeal.allergens && selectedMeal.allergens.length > 0 && (
+                            <div className="mobile-allergen-badges">
+                              {selectedMeal.allergens.map((a: string, i: number) => (
+                                <span key={i} className="mobile-allergen-badge">{a}</span>
                               ))}
                             </div>
-                            <div className="mobile-feedback">
-                              <button className="mobile-feedback-button thumbs-up" onClick={() => handleRecipeFeedback(selectedMeal.id || selectedMeal.name, 'like')} aria-label="Thumbs up">
-                                👍
-                                {feedbackStatus[selectedMeal.id || selectedMeal.name] === 'like' && <span className="mobile-feedback-confirm">Saved!</span>}
-                              </button>
-                              <button className="mobile-feedback-button thumbs-down" onClick={() => handleRecipeFeedback(selectedMeal.id || selectedMeal.name, 'dislike')} aria-label="Thumbs down">
-                                👎
-                                {feedbackStatus[selectedMeal.id || selectedMeal.name] === 'dislike' && <span className="mobile-feedback-confirm">Saved!</span>}
-                              </button>
-                            </div>
+                          )}
+                          <div className="mobile-recipe-tags">
+                            {selectedMeal.tags.map((tag: string, index: number) => (
+                              <span key={index} className="mobile-recipe-tag">{tag}</span>
+                            ))}
+                          </div>
+                          <div className="mobile-feedback">
+                            <button className="mobile-feedback-button thumbs-up" onClick={() => handleRecipeFeedback(recipeKey(selectedMeal), 'like')} aria-label="Thumbs up">👍{feedbackStatus[recipeKey(selectedMeal)] === 'like' && <span className="mobile-feedback-confirm">Saved!</span>}</button>
+                            <button className="mobile-feedback-button thumbs-down" onClick={() => handleRecipeFeedback(recipeKey(selectedMeal), 'dislike')} aria-label="Thumbs down">👎{feedbackStatus[recipeKey(selectedMeal)] === 'dislike' && <span className="mobile-feedback-confirm">Saved!</span>}</button>
                           </div>
                         </div>
                       )}
@@ -675,45 +676,31 @@ export default function MealPlanDetail() {
                               </div>
                             ))}
                           </div>
-                          <div className="mobile-total-cost">
-                            <strong>Total Cost: £{selectedMeal.estTotalCost.toFixed(2)}</strong>
-                          </div>
+                          <div className="mobile-total-cost"><strong>Total Cost: £{selectedMeal.estTotalCost.toFixed(2)}</strong></div>
                         </div>
                       )}
 
                       {currentMobilePage > 1 && (
                         <div className="mobile-instruction-page">
-                          <div className="mobile-step-header">
-                            <h2 className="mobile-step-title">Step {currentMobilePage - 1}</h2>
-                            <div className="mobile-step-progress">
-                              {currentMobilePage - 1} of {selectedMeal.steps.length}
-                            </div>
-                          </div>
-                          <div className="mobile-step-content">
-                            <p className="mobile-step-text">{selectedMeal.steps[currentMobilePage - 2]}</p>
-                          </div>
+                          {(() => {
+                            const stepIndex = currentMobilePage - 2;
+                            return (
+                              <>
+                                <div className="mobile-step-header">
+                                  <h2 className="mobile-step-title">Step {stepIndex + 1}</h2>
+                                  <div className="mobile-step-progress">{stepIndex + 1} of {selectedMeal.steps.length}</div>
+                                </div>
+                                <p className="mobile-step-text">{selectedMeal.steps[stepIndex]}</p>
+                              </>
+                            );
+                          })()}
                         </div>
                       )}
                     </div>
-
                     <div className="mobile-navigation">
-                      <button
-                        className="mobile-nav-button"
-                        onClick={() => setCurrentMobilePage(Math.max(0, currentMobilePage - 1))}
-                        disabled={currentMobilePage === 0}
-                      >
-                        ← Previous
-                      </button>
-                      <div className="mobile-page-indicator">
-                        {currentMobilePage + 1} of {getMaxMobilePage() + 1}
-                      </div>
-                      <button
-                        className="mobile-nav-button"
-                        onClick={() => setCurrentMobilePage(Math.min(getMaxMobilePage(), currentMobilePage + 1))}
-                        disabled={currentMobilePage >= getMaxMobilePage()}
-                      >
-                        Next →
-                      </button>
+                      <button className="mobile-nav-button" onClick={() => setCurrentMobilePage(Math.max(0, currentMobilePage - 1))} disabled={currentMobilePage === 0}>← Previous</button>
+                      <div className="mobile-page-indicator">{currentMobilePage + 1} of {getMaxMobilePage() + 1}</div>
+                      <button className="mobile-nav-button" onClick={() => setCurrentMobilePage(Math.min(getMaxMobilePage(), currentMobilePage + 1))} disabled={currentMobilePage >= getMaxMobilePage()}>Next →</button>
                     </div>
                   </div>
                 ) : (
@@ -772,13 +759,13 @@ export default function MealPlanDetail() {
                                     ))}
                                   </div>
                                   <div className="modal-feedback">
-                                    <button className="feedback-button thumbs-up" onClick={() => handleRecipeFeedback(selectedMeal.id || selectedMeal.name, 'like')} aria-label="Thumbs up">
+                                    <button className="feedback-button thumbs-up" onClick={() => handleRecipeFeedback(recipeKey(selectedMeal), 'like')} aria-label="Thumbs up">
                                       👍
-                                      {feedbackStatus[selectedMeal.id || selectedMeal.name] === 'like' && <span className="feedback-confirm">Saved!</span>}
+                                      {feedbackStatus[recipeKey(selectedMeal)] === 'like' && <span className="feedback-confirm">Saved!</span>}
                                     </button>
-                                    <button className="feedback-button thumbs-down" onClick={() => handleRecipeFeedback(selectedMeal.id || selectedMeal.name, 'dislike')} aria-label="Thumbs down">
+                                    <button className="feedback-button thumbs-down" onClick={() => handleRecipeFeedback(recipeKey(selectedMeal), 'dislike')} aria-label="Thumbs down">
                                       👎
-                                      {feedbackStatus[selectedMeal.id || selectedMeal.name] === 'dislike' && <span className="feedback-confirm">Saved!</span>}
+                                      {feedbackStatus[recipeKey(selectedMeal)] === 'dislike' && <span className="feedback-confirm">Saved!</span>}
                                     </button>
                                   </div>
                                 </div>
@@ -1742,104 +1729,94 @@ export default function MealPlanDetail() {
 
         /* Mobile Recipe Book Modal Styles */
         .mobile-recipe-modal {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.6);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          z-index: 1000;
-          padding: 1rem; /* Add some padding for mobile screens */
+          /* single stacked panel */
+          width: 92vw;
+          max-width: 560px;
+          height: min(96vh, calc(100dvh - 8px));
+          background: var(--white);
+          border-radius: 16px;
+          display: grid;
+          grid-template-rows: auto 1fr auto; /* header, content, footer */
+          overflow: hidden;
         }
-
+        
         .mobile-recipe-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 1rem;
+          padding: 0.9rem 1rem;
           border-bottom: 1px solid var(--border-grey);
           background: var(--white);
-          border-radius: 16px 16px 0 0;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-
-        .mobile-close-button {
-          background: none;
-          border: none;
-          font-size: 2rem;
-          color: var(--dark-grey);
-          cursor: pointer;
-          transition: color 0.3s;
+        
+        .mobile-single-page {
+          width: 100%;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior: contain;
+          min-height: 0; /* allow grid child to shrink and scroll */
+          padding: 1rem;
         }
-
-        .mobile-close-button:hover {
-          color: var(--navy-blue);
+        
+        .mobile-navigation {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.75rem 1rem;
+          padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+          border-top: 1px solid var(--border-grey);
+          background: var(--white);
         }
-
+        
         .mobile-recipe-title {
-          font-size: 1.8rem;
+          font-size: 1.4rem;
           font-weight: 700;
           color: var(--navy-blue);
-          text-align: center;
-          flex: 1;
         }
-
+        
         .mobile-recipe-content {
           background: var(--white);
-          border-radius: 16px;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+          border-radius: 0 0 16px 16px;
           width: 100%;
-          max-width: 600px; /* Max width for mobile screens */
-          height: 90%;
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-          position: relative;
+          max-width: 560px;
+          max-height: none;
+          overflow: visible;
+          padding: 1.25rem 1rem 1.5rem 1rem;
         }
-
-        .mobile-cover-page,
-        .mobile-ingredients-page,
-        .mobile-instruction-page {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          padding: 2rem;
-          position: relative;
-          background: var(--white);
-          border: 1px solid var(--border-grey);
-          border-radius: 12px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        
+        .mobile-recipe-content.vertical {
           overflow-y: auto;
         }
-
-        .mobile-cover-page {
-          align-items: center;
-          text-align: center;
+        
+        .mobile-steps { padding: 2rem; }
+        .mobile-steps-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1.25rem; }
+        .mobile-step-item { background: var(--white); border: 1px solid var(--border-grey); border-radius: 10px; padding: 1.25rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
+        .mobile-cover, .mobile-ingredients-page, .mobile-instruction-page {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
         }
-
+        
+        .mobile-cover { align-items: center; text-align: center; }
+        
         .mobile-cover-image {
-          width: 200px;
-          height: 200px;
-          border-radius: 10px;
+          width: 100%;
+          aspect-ratio: 16 / 9;
+          border-radius: 12px;
           overflow: hidden;
-          margin-bottom: 1.5rem;
+          margin-bottom: 0.75rem;
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-
-        .mobile-cover-image img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
+        
+        .mobile-cover-title { font-size: 1.6rem; color: var(--navy-blue); font-weight: 800; }
+        .mobile-cover-meta { display: flex; gap: 0.75rem; justify-content: center; color: var(--dark-grey); font-weight: 600; margin-bottom: 0.25rem; }
+        
         .mobile-recipe-info {
           display: flex;
           flex-direction: column;
           gap: 0.5rem;
-          margin-bottom: 1.5rem;
+          margin-bottom: 1rem;
         }
 
         .mobile-recipe-meta {
@@ -1853,6 +1830,7 @@ export default function MealPlanDetail() {
           display: flex;
           gap: 0.5rem;
           flex-wrap: wrap;
+          justify-content: center;
         }
 
         .mobile-allergen-badge {
@@ -1866,238 +1844,37 @@ export default function MealPlanDetail() {
 
         .mobile-recipe-tags {
           display: flex;
-          gap: 0.75rem;
+          gap: 0.5rem;
           flex-wrap: wrap;
+          justify-content: center;
         }
 
         .mobile-recipe-tag {
           background: var(--light-grey);
           color: var(--navy-blue);
-          padding: 0.5rem 1rem;
+          padding: 0.4rem 0.8rem;
           border-radius: 20px;
-          font-size: 0.8rem;
+          font-size: 0.75rem;
           font-weight: 600;
         }
 
-        .mobile-feedback {
-          display: flex;
-          gap: 1rem;
-          margin-top: 1.5rem;
-        }
+        .mobile-feedback { display: flex; gap: 0.75rem; justify-content: center; margin-top: 0.5rem; }
 
-        .mobile-feedback-button {
-          background: var(--light-grey);
-          border: 1px solid var(--border-grey);
-          border-radius: 20px;
-          padding: 0.75rem 1.5rem;
-          cursor: pointer;
-          font-size: 1.2rem;
-          transition: all 0.3s;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.5rem;
-        }
+        .mobile-ingredients-page { padding-top: 0.5rem; }
+        .mobile-page-title { font-size: 1.4rem; font-weight: 800; color: var(--navy-blue); margin: 0.25rem 0 0.5rem; text-align: center; }
+        .mobile-ingredients-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .mobile-ingredient-item { display: flex; justify-content: space-between; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px dashed var(--border-grey); }
+        .mobile-ingredient-item:last-child { border-bottom: none; }
 
-        .mobile-feedback-button:hover {
-          background: var(--pastel-green);
-          border-color: var(--pastel-green);
-          transform: translateY(-2px);
-        }
+        .mobile-total-cost { text-align: right; font-size: 1rem; font-weight: 700; color: var(--navy-blue); margin-top: 0.5rem; }
 
-        .mobile-feedback-button.thumbs-up {
-          color: var(--green);
-        }
+        .mobile-step-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .mobile-step-title { font-size: 1.3rem; font-weight: 800; color: var(--navy-blue); }
+        .mobile-step-progress { font-size: 0.85rem; color: var(--dark-grey); font-weight: 600; }
+        .mobile-step-text { font-size: 1rem; line-height: 1.6; color: var(--dark-grey); }
 
-        .mobile-feedback-button.thumbs-down {
-          color: var(--red);
-        }
-
-        .mobile-feedback-confirm {
-          font-size: 0.8rem;
-          color: var(--dark-grey);
-          margin-left: 0.5rem;
-        }
-
-        .mobile-ingredients-page {
-          padding: 2rem;
-        }
-
-        .mobile-page-title {
-          font-size: 2rem;
-          font-weight: 700;
-          color: var(--navy-blue);
-          margin-bottom: 1.5rem;
-          text-align: center;
-        }
-
-        .mobile-ingredients-list {
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-          margin-bottom: 2rem;
-        }
-
-        .mobile-ingredient-item {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 1rem;
-          padding: 0.75rem 0;
-          border-bottom: 1px dashed var(--border-grey);
-        }
-
-        .mobile-ingredient-item:last-child {
-          border-bottom: none;
-        }
-
-        .mobile-ingredient-main {
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
-        }
-
-        .mobile-ingredient-name {
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: var(--navy-blue);
-        }
-
-        .mobile-ingredient-qty {
-          font-size: 0.9rem;
-          color: var(--dark-grey);
-          font-weight: 600;
-        }
-
-        .mobile-ingredient-cost {
-          font-size: 0.9rem;
-          color: var(--navy-blue);
-          font-weight: 600;
-        }
-
-        .mobile-total-cost {
-          text-align: right;
-          font-size: 1.2rem;
-          font-weight: 700;
-          color: var(--navy-blue);
-          margin-top: 1rem;
-        }
-
-        .mobile-instruction-page {
-          padding: 2rem;
-        }
-
-        .mobile-step-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          width: 100%;
-          margin-bottom: 1.5rem;
-        }
-
-        .mobile-step-title {
-          font-size: 1.8rem;
-          font-weight: 700;
-          color: var(--navy-blue);
-          margin: 0;
-        }
-
-        .mobile-step-progress {
-          font-size: 0.9rem;
-          color: var(--dark-grey);
-          font-weight: 500;
-        }
-
-        .mobile-step-content {
-          font-size: 1.1rem;
-          color: var(--dark-grey);
-          line-height: 1.8;
-          margin-bottom: 1.5rem;
-        }
-
-        .mobile-step-text {
-          font-size: 1.1rem;
-          color: var(--dark-grey);
-          line-height: 1.8;
-        }
-
-        .mobile-navigation {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 1rem 2rem;
-          border-top: 1px solid var(--border-grey);
-          background: var(--light-grey);
-          border-radius: 0 0 16px 16px;
-          box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .mobile-nav-button {
-          background: var(--pastel-green);
-          color: var(--navy-blue);
-          border: none;
-          padding: 0.75rem 1.5rem;
-          border-radius: 8px;
-          cursor: pointer;
-          font-size: 0.9rem;
-          font-weight: 600;
-          transition: all 0.3s;
-          white-space: nowrap;
-        }
-
-        .mobile-nav-button:hover {
-          background: #9BC8AB;
-          transform: translateY(-2px);
-        }
-
-        .mobile-nav-button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-          background: var(--border-grey);
-          color: var(--dark-grey);
-        }
-
-        .mobile-page-indicator {
-          font-size: 0.9rem;
-          color: var(--dark-grey);
-          font-weight: 500;
-        }
-
-        .mobile-page-counter {
-          font-weight: 600;
-          color: var(--navy-blue);
-        }
-
-        .mobile-page-dots {
-          display: flex;
-          gap: 0.5rem;
-        }
-
-        .mobile-page-dot {
-          width: 30px;
-          height: 30px;
-          border-radius: 50%;
-          background: var(--border-grey);
-          color: var(--dark-grey);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 0.8rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s;
-        }
-
-        .mobile-page-dot:hover:not(.active) {
-          background: var(--light-grey);
-          transform: scale(1.1);
-        }
-
-        .mobile-page-dot.active {
-          background: var(--pastel-green);
-          color: var(--navy-blue);
-          border: 2px solid var(--navy-blue);
-        }
+        .mobile-nav-button { background: var(--pastel-green); color: var(--navy-blue); border: none; padding: 0.6rem 1rem; border-radius: 8px; font-weight: 700; }
+        .mobile-page-indicator { font-size: 0.9rem; color: var(--dark-grey); font-weight: 600; }
 
         @media (max-width: 768px) {
           .dashboard-header-content {
