@@ -82,24 +82,29 @@ export default function UpgradeMembership() {
         <div className="container">
           <h2 className="section-title">Choose Your Membership</h2>
           <div className="pricing-grid">
-            {plans.map((plan) => (
-              <div key={plan.name} className={`pricing-card${plan.name === 'Standard' ? ' featured' : ''}`}>
-                <h3>{plan.name}</h3>
-                <div className="price">${plan.price}<span>/mo</span></div>
-                <ul>
-                  {plan.features.map((feature) => (
-                    <li key={feature}>{feature}</li>
-                  ))}
-                </ul>
-                <button
-                  className={`pricing-cta${plan.name === 'Standard' ? ' featured' : ''}`}
-                  onClick={() => handleUpgrade(plan.priceId)}
-                  disabled={loadingPlan === plan.priceId}
-                >
-                  {loadingPlan === plan.priceId ? 'Redirecting...' : 'Upgrade'}
-                </button>
-              </div>
-            ))}
+            {plans.map((plan) => {
+              const isBasic = plan.name === 'Basic'
+              return (
+                <div key={plan.name} className={`pricing-card${plan.name === 'Standard' ? ' featured' : ''}`}>
+                  <h3>{plan.name}</h3>
+                  <div className="price">${plan.price}<span>/mo</span></div>
+                  <ul>
+                    {plan.features.map((feature) => (
+                      <li key={feature}>{feature}</li>
+                    ))}
+                  </ul>
+                  <button
+                    className={`pricing-cta${plan.name === 'Standard' ? ' featured' : ''}`}
+                    onClick={() => isBasic && handleUpgrade(plan.priceId)}
+                    disabled={loadingPlan === plan.priceId || !isBasic}
+                    aria-disabled={!isBasic}
+                    aria-label={isBasic ? `Upgrade to ${plan.name}` : `${plan.name} coming soon`}
+                  >
+                    {isBasic ? (loadingPlan === plan.priceId ? 'Redirecting...' : 'Upgrade') : 'Coming soon'}
+                  </button>
+                </div>
+              )
+            })}
           </div>
         </div>
       </div>

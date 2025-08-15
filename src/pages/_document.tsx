@@ -1,6 +1,7 @@
 import { Html, Head, Main, NextScript } from 'next/document'
 
 export default function Document() {
+  const isDev = process.env.NODE_ENV !== 'production'
   return (
     <Html lang="en">
       <Head>
@@ -14,6 +15,12 @@ export default function Document() {
         <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png" />
         <link rel="manifest" href="/site.webmanifest" />
         <meta name="theme-color" content="#4ade80" />
+        {isDev && (
+          <meta
+            httpEquiv="Content-Security-Policy"
+            content="script-src 'self' 'unsafe-eval' blob: data:; connect-src 'self' http: https: ws: wss:; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline' https:; font-src 'self' https: data:; worker-src 'self' blob:;"
+          />
+        )}
       </Head>
       <body>
         <Main />

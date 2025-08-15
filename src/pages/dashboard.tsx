@@ -86,13 +86,10 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
-    console.log('🔍 DEBUG: dashboard.tsx - useEffect started');
     const startTime = Date.now();
     
     // Add timeout to prevent infinite loading - increased to 30 seconds
     const timeoutId = setTimeout(() => {
-      const elapsed = Date.now() - startTime;
-      console.log('🔍 DEBUG: dashboard.tsx - TIMEOUT: Loading taking too long, forcing loading to false. Elapsed:', elapsed, 'ms');
       setLoading(false);
     }, 30000); // 30 second timeout
     
@@ -100,8 +97,7 @@ export default function Dashboard() {
     
     // Listen for auth changes first - this is faster than getUser()
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('🔍 DEBUG: dashboard.tsx - Auth state change:', event);
-      
+       
       if (authStateHandled) return; // Prevent multiple calls
       
       if (event === 'SIGNED_OUT') {
@@ -112,11 +108,9 @@ export default function Dashboard() {
         clearTimeout(fallbackTimeout);
       } else if (event === 'SIGNED_IN' && session?.user) {
         authStateHandled = true;
-        console.log('🔍 DEBUG: dashboard.tsx - User signed in via auth state change');
         setUser(session.user)
         // Fetch membership from profiles table
         try {
-          console.log('🔍 DEBUG: Fetching user profile...');
           const { data: profile, error } = await supabase
             .from('profiles')
             .select('membership')
@@ -124,14 +118,11 @@ export default function Dashboard() {
             .single()
           
           if (error) {
-            console.log('🔍 DEBUG: Profile fetch error, setting membership to free');
             setMembership('free')
           } else {
-            console.log('🔍 DEBUG: Profile fetched successfully');
             setMembership(profile?.membership || 'free')
           }
         } catch (error) {
-          console.log('🔍 DEBUG: Profile fetch exception, setting membership to free');
           setMembership('free')
         }
         setLoading(false)
@@ -139,11 +130,9 @@ export default function Dashboard() {
         clearTimeout(fallbackTimeout);
       } else if (event === 'INITIAL_SESSION' && session?.user) {
         authStateHandled = true;
-        console.log('🔍 DEBUG: dashboard.tsx - Initial session found');
         setUser(session.user)
         // Fetch membership from profiles table
         try {
-          console.log('🔍 DEBUG: Fetching user profile...');
           const { data: profile, error } = await supabase
             .from('profiles')
             .select('membership')
@@ -151,14 +140,11 @@ export default function Dashboard() {
             .single()
           
           if (error) {
-            console.log('🔍 DEBUG: Profile fetch error, setting membership to free');
             setMembership('free')
           } else {
-            console.log('🔍 DEBUG: Profile fetched successfully');
             setMembership(profile?.membership || 'free')
           }
         } catch (error) {
-          console.log('🔍 DEBUG: Profile fetch exception, setting membership to free');
           setMembership('free')
         }
         setLoading(false)
@@ -171,17 +157,13 @@ export default function Dashboard() {
     const getCurrentUser = async () => {
       if (authStateHandled) return; // Don't run if auth state already handled
       
-      console.log('🔍 DEBUG: dashboard.tsx - getCurrentUser function started');
       try {
-        console.log('🔍 DEBUG: dashboard.tsx - Getting user...');
         const { data: { user } } = await supabase.auth.getUser()
         
         if (user) {
-          console.log('🔍 DEBUG: dashboard.tsx - User found, setting user state');
           setUser(user)
           // Fetch membership from profiles table
           try {
-            console.log('🔍 DEBUG: Fetching user profile...');
             const { data: profile, error } = await supabase
               .from('profiles')
               .select('membership')
@@ -189,26 +171,19 @@ export default function Dashboard() {
               .single()
             
             if (error) {
-              console.log('🔍 DEBUG: Profile fetch error, setting membership to free');
               setMembership('free')
             } else {
-              console.log('🔍 DEBUG: Profile fetched successfully');
               setMembership(profile?.membership || 'free')
             }
           } catch (error) {
-            console.log('🔍 DEBUG: Profile fetch exception, setting membership to free');
             setMembership('free')
           }
         } else {
-          console.log('🔍 DEBUG: dashboard.tsx - No user found, redirecting to signin');
           router.push('/signin')
         }
       } catch (error) {
-        console.log('🔍 DEBUG: dashboard.tsx - Error in getCurrentUser:', error);
         router.push('/signin')
       } finally {
-        const elapsed = Date.now() - startTime;
-        console.log('🔍 DEBUG: dashboard.tsx - Setting loading to false. Total time:', elapsed, 'ms');
         setLoading(false)
         clearTimeout(timeoutId);
       }
@@ -217,7 +192,6 @@ export default function Dashboard() {
     // Run the fallback function with a shorter timeout
     const fallbackTimeout = setTimeout(() => {
       if (!authStateHandled) {
-        console.log('🔍 DEBUG: dashboard.tsx - Auth state change taking too long, using fallback');
         getCurrentUser().catch(error => {
           console.log('🔍 DEBUG: dashboard.tsx - Unhandled error in getCurrentUser:', error);
           setLoading(false);
@@ -248,7 +222,7 @@ export default function Dashboard() {
     })
   }
 
-  if (loading) {
+  if (loading || !user) {
     return (
       <div className="loading-container">
         <div className="text-center">
@@ -257,10 +231,6 @@ export default function Dashboard() {
         </div>
       </div>
     )
-  }
-
-  if (!user) {
-    return null // Will redirect to signin
   }
 
   return (

@@ -34,7 +34,14 @@ export default function DashboardNavbar({
   const handleUpgrade = async () => {
     setUpgradeLoading(true)
     try {
-      const res = await fetch('/api/create-checkout-session', { method: 'POST' })
+      const res = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          priceId: 'price_1RifEpB4uyQdSSUI7iRCrIcE', // Basic ($5) plan
+          supabaseUserId: user?.id,
+        })
+      })
       
       const data = await res.json()
       
@@ -65,7 +72,7 @@ export default function DashboardNavbar({
               </Link>
             )}
             <span className="dashboard-user">
-              Welcome, {user.email} 
+              Welcome{user?.email ? `, ${user.email}` : ''} 
               <span style={{color:'#2C3E50', fontWeight:600, marginLeft:8}}>
                 [{displayMembership} Member]
               </span>
@@ -78,16 +85,14 @@ export default function DashboardNavbar({
             >
               ⚙️
             </button>
-            {membership !== 'premium' && (
-              <button
-                onClick={handleUpgrade}
-                className="dashboard-signout"
-                style={{ backgroundColor: '#A8D5BA', color: '#2C3E50', marginLeft: 8 }}
-                disabled={upgradeLoading}
-              >
-                Upgrade Membership
-              </button>
-            )}
+            <button
+              onClick={() => router.push('/manage-membership')}
+              className="dashboard-signout"
+              style={{ backgroundColor: '#A8D5BA', color: '#2C3E50', marginLeft: 8 }}
+              disabled={upgradeLoading}
+            >
+              Manage Membership
+            </button>
             <button
               onClick={handleSignOut}
               className="dashboard-signout"

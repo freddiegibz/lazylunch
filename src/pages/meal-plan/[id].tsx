@@ -382,6 +382,12 @@ export default function MealPlanDetail() {
                 <p className="dashboard-subtitle">
                   Created on {formatDate(mealPlan.created_at)}
                 </p>
+                {(mealPlan?.budgetAnalysis || mealPlan?.aiNotes) && (
+                  <div className="ai-notes">
+                    <div className="ai-notes-title">AI Notes</div>
+                    <div className="ai-notes-body">{mealPlan.budgetAnalysis || mealPlan.aiNotes}</div>
+                  </div>
+                )}
               </div>
               <div className="meal-plan-actions">
                 <button
@@ -704,149 +710,149 @@ export default function MealPlanDetail() {
                     </div>
                   </div>
                 ) : (
-                  <div className="recipe-book-modal" onClick={(e) => e.stopPropagation()}>
-                    <div className="recipe-modal-header">
-                      <button
-                        className="close-button"
-                        onClick={() => setSelectedMeal(null)}
-                      >
-                        ×
-                      </button>
-                    </div>
-
-                    <button
-                      className="book-arrow book-arrow-left"
-                      onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
-                      disabled={currentPage === 0}
-                      aria-label="Previous page"
+                <div className="recipe-book-modal" onClick={(e) => e.stopPropagation()}>
+                  <div className="recipe-modal-header">
+                              <button 
+                      className="close-button"
+                      onClick={() => setSelectedMeal(null)}
                     >
-                      &#8592;
+                      ×
                     </button>
-                    <button
-                      className="book-arrow book-arrow-right"
-                      onClick={() => setCurrentPage(Math.min(Math.ceil(selectedMeal.steps.length / 2), currentPage + 1))}
-                      disabled={currentPage >= Math.ceil(selectedMeal.steps.length / 2)}
-                      aria-label="Next page"
-                    >
-                      &#8594;
-                    </button>
+                  </div>
 
-                    <div className="recipe-book-container">
-                      <div className="book-spread">
-                        <div className="book-page left-page">
-                          <div className="page-content">
-                            {currentPage === 0 ? (
-                              <div className="page-cover">
-                                <div className="cover-image">
+                  <button
+                    className="book-arrow book-arrow-left"
+                    onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                                disabled={currentPage === 0}
+                    aria-label="Previous page"
+                              >
+                    &#8592;
+                              </button>
+                              <button 
+                    className="book-arrow book-arrow-right"
+                    onClick={() => setCurrentPage(Math.min(Math.ceil(selectedMeal.steps.length / 2), currentPage + 1))}
+                    disabled={currentPage >= Math.ceil(selectedMeal.steps.length / 2)}
+                    aria-label="Next page"
+                  >
+                    &#8594;
+                              </button>
+
+                  <div className="recipe-book-container">
+                    <div className="book-spread">
+                      <div className="book-page left-page">
+                        <div className="page-content">
+                          {currentPage === 0 ? (
+                            <div className="page-cover">
+                              <div className="cover-image">
                                   <img src={selectedMeal.image} alt={selectedMeal.name} />
-                                </div>
-                                <div className="cover-content">
-                                  <h1 className="recipe-title">{selectedMeal.name}</h1>
-                                  <div className="recipe-meta">
-                                    <span className="recipe-cost">£{selectedMeal.estTotalCost.toFixed(2)}</span>
-                                    <span className="recipe-servings">{selectedMeal.baseServings} servings</span>
-                                    {selectedMeal.allergens && selectedMeal.allergens.length > 0 && (
-                                      <div className="allergen-badges">
-                                        {selectedMeal.allergens.map((a: string, i: number) => (
-                                          <span key={i} className="allergen-badge">{a}</span>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                  <div className="recipe-tags">
-                                    {selectedMeal.tags.map((tag: string, index: number) => (
-                                      <span key={index} className="recipe-tag">{tag}</span>
-                                    ))}
-                                  </div>
-                                  <div className="modal-feedback">
-                                    <button className="feedback-button thumbs-up" onClick={() => handleRecipeFeedback(recipeKey(selectedMeal), 'like')} aria-label="Thumbs up">
-                                      👍
-                                      {feedbackStatus[recipeKey(selectedMeal)] === 'like' && <span className="feedback-confirm">Saved!</span>}
-                                    </button>
-                                    <button className="feedback-button thumbs-down" onClick={() => handleRecipeFeedback(recipeKey(selectedMeal), 'dislike')} aria-label="Thumbs down">
-                                      👎
-                                      {feedbackStatus[recipeKey(selectedMeal)] === 'dislike' && <span className="feedback-confirm">Saved!</span>}
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            ) : (
-                              (() => {
-                                const stepIndex = (currentPage - 1) * 2;
-                                if (selectedMeal.steps[stepIndex]) {
-                                  return (
-                                    <div className="page-instruction">
-                                      <div className="step-header">
-                                        <h2>Step {stepIndex + 1}</h2>
-                                        <div className="step-progress">{stepIndex + 1} of {selectedMeal.steps.length}</div>
-                                      </div>
-                                      <div className="step-content">
-                                        <p className="step-text">{selectedMeal.steps[stepIndex]}</p>
-                                      </div>
-                                    </div>
-                                  );
-                                } else {
-                                  return null;
-                                }
-                              })()
-                            )}
+                            </div>
+                              <div className="cover-content">
+                                <h1 className="recipe-title">{selectedMeal.name}</h1>
+                                <div className="recipe-meta">
+                                  <span className="recipe-cost">£{selectedMeal.estTotalCost.toFixed(2)}</span>
+                                  <span className="recipe-servings">{selectedMeal.baseServings} servings</span>
+                                  {selectedMeal.allergens && selectedMeal.allergens.length > 0 && (
+                                    <div className="allergen-badges">
+                                      {selectedMeal.allergens.map((a: string, i: number) => (
+                                        <span key={i} className="allergen-badge">{a}</span>
+                                      ))}
                           </div>
-                        </div>
-
-                        <div className="book-spine"></div>
-
-                        <div className="book-page right-page">
-                          <div className="page-content">
-                            {currentPage === 0 ? (
-                              <div className="page-ingredients">
-                                <div className="ingredients-header-sticky">Ingredients</div>
-                                <div className="ingredients-list">
-                                  {selectedMeal.ingredients.map((ingredient: any, index: number) => (
-                                    <div key={index} className="ingredient-row">
-                                      <span className="ingredient-name">{ingredient.item}</span>
-                                      <span className="ingredient-qty">{ingredient.qty}{ingredient.note ? ` (${ingredient.note})` : ''}</span>
-                                      <span className="ingredient-cost">£{ingredient.estCost.toFixed(2)}</span>
-                                    </div>
+                        )}
+                      </div>
+                                <div className="recipe-tags">
+                                  {selectedMeal.tags.map((tag: string, index: number) => (
+                                    <span key={index} className="recipe-tag">{tag}</span>
                                   ))}
                                 </div>
-                                <div className="total-cost">
-                                  <strong>Total Cost: £{selectedMeal.estTotalCost.toFixed(2)}</strong>
+                                <div className="modal-feedback">
+                                    <button className="feedback-button thumbs-up" onClick={() => handleRecipeFeedback(recipeKey(selectedMeal), 'like')} aria-label="Thumbs up">
+                                    👍
+                                      {feedbackStatus[recipeKey(selectedMeal)] === 'like' && <span className="feedback-confirm">Saved!</span>}
+                                  </button>
+                                    <button className="feedback-button thumbs-down" onClick={() => handleRecipeFeedback(recipeKey(selectedMeal), 'dislike')} aria-label="Thumbs down">
+                                    👎
+                                      {feedbackStatus[recipeKey(selectedMeal)] === 'dislike' && <span className="feedback-confirm">Saved!</span>}
+                                  </button>
                                 </div>
                               </div>
-                            ) : (
-                              (() => {
-                                const stepIndex = (currentPage - 1) * 2 + 1;
-                                if (selectedMeal.steps[stepIndex]) {
-                                  return (
-                                    <div className="page-instruction">
-                                      <div className="step-header">
-                                        <h2>Step {stepIndex + 1}</h2>
+                            </div>
+                          ) : (
+                            (() => {
+                              const stepIndex = (currentPage - 1) * 2;
+                              if (selectedMeal.steps[stepIndex]) {
+                    return (
+                                  <div className="page-instruction">
+                                    <div className="step-header">
+                                      <h2>Step {stepIndex + 1}</h2>
                                         <div className="step-progress">{stepIndex + 1} of {selectedMeal.steps.length}</div>
-                                      </div>
-                                      <div className="step-content">
-                                        <p className="step-text">{selectedMeal.steps[stepIndex]}</p>
-                                      </div>
-                                    </div>
-                                  );
-                                } else {
-                                  return null;
-                                }
-                              })()
-                            )}
-                          </div>
                         </div>
+                                    <div className="step-content">
+                                      <p className="step-text">{selectedMeal.steps[stepIndex]}</p>
+                            </div>
+                                  </div>
+                                );
+                              } else {
+                                return null;
+                              }
+                            })()
+                          )}
+                        </div>
+                              </div>
+
+                      <div className="book-spine"></div>
+
+                      <div className="book-page right-page">
+                        <div className="page-content">
+                          {currentPage === 0 ? (
+                            <div className="page-ingredients">
+                              <div className="ingredients-header-sticky">Ingredients</div>
+                              <div className="ingredients-list">
+                                {selectedMeal.ingredients.map((ingredient: any, index: number) => (
+                                  <div key={index} className="ingredient-row">
+                                    <span className="ingredient-name">{ingredient.item}</span>
+                                    <span className="ingredient-qty">{ingredient.qty}{ingredient.note ? ` (${ingredient.note})` : ''}</span>
+                                    <span className="ingredient-cost">£{ingredient.estCost.toFixed(2)}</span>
+                            </div>
+                                    ))}
+                                  </div>
+                              <div className="total-cost">
+                                <strong>Total Cost: £{selectedMeal.estTotalCost.toFixed(2)}</strong>
+                                </div>
+                              </div>
+                          ) : (
+                            (() => {
+                              const stepIndex = (currentPage - 1) * 2 + 1;
+                              if (selectedMeal.steps[stepIndex]) {
+                                return (
+                                  <div className="page-instruction">
+                                    <div className="step-header">
+                                      <h2>Step {stepIndex + 1}</h2>
+                                        <div className="step-progress">{stepIndex + 1} of {selectedMeal.steps.length}</div>
+                            </div>
+                                    <div className="step-content">
+                                      <p className="step-text">{selectedMeal.steps[stepIndex]}</p>
+                            </div>
+                          </div>
+                                );
+                              } else {
+                                return null;
+                              }
+                            })()
+                        )}
                       </div>
+                </div>
+              </div>
                     </div>
 
                     <div style={{ textAlign: 'center', marginTop: '8px', fontWeight: 600, color: 'var(--navy-blue)' }}>
                       Page {currentPage + 1} of {Math.ceil(selectedMeal.steps.length / 2) + 1}
+            </div>
                     </div>
-                  </div>
                 )}
               </div>
             )}
           </div>
-          </main>
+        </main>
       </div>
 
       <style jsx>{`
@@ -2347,6 +2353,22 @@ export default function MealPlanDetail() {
             right: 0.5rem;
           }
         }
+
+        .ai-notes {
+          background: var(--light-grey);
+          border: 1px solid var(--border-grey);
+          border-radius: 12px;
+          padding: 12px 16px;
+          margin-top: 8px;
+          color: var(--dark-grey);
+          text-align: left;
+        }
+        .ai-notes-title {
+          font-weight: 700;
+          color: var(--navy-blue);
+          margin-bottom: 6px;
+        }
+        .ai-notes-body { white-space: pre-wrap; }
       `}</style>
     </div>
   )

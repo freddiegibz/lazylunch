@@ -41,12 +41,18 @@ export default function GenerateMealPlan() {
   const [preferences, setPreferences] = useState({
     adults: 2,
     kids: 0,
-    mealsPerDay: 3 as 1|2|3,
+    mealsPerDay: 3 as 1|2|3, // derived at submission from mealSlots
     // derived: servings will be computed from adults/kids when generating
+    mealSlots: { breakfast: true, lunch: true, dinner: true },
     allergens: [] as string[],
+    dietaryPattern: [] as string[],
+    dislikedIngredients: '',
     weeklyBudget: 'none',
     customWeeklyBudget: '',
     cuisinePreferences: [] as string[],
+    maxCookTime: 30,
+    daysToPlan: 7,
+    allowedDays: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'] as string[],
   })
   const [presets, setPresets] = useState<Array<{id:string,name:string,prefs:any}>>([])
   const [presetName, setPresetName] = useState('')
@@ -203,6 +209,14 @@ export default function GenerateMealPlan() {
         body: JSON.stringify({ preferences: {
           ...preferences,
           servings: computeServings(preferences.adults, preferences.kids),
+          mealsPerDay: (preferences.mealSlots.breakfast?1:0) + (preferences.mealSlots.lunch?1:0) + (preferences.mealSlots.dinner?1:0),
+          allowedMealSlots: [
+            ...(preferences.mealSlots.breakfast ? ['breakfast'] : []),
+            ...(preferences.mealSlots.lunch ? ['lunch'] : []),
+            ...(preferences.mealSlots.dinner ? ['dinner'] : []),
+          ],
+          daysToPlan: preferences.allowedDays.length,
+          allowedDays: preferences.allowedDays,
           weeklyBudgetValue: getWeeklyBudgetValue(),
         } })
       });
@@ -567,18 +581,32 @@ export default function GenerateMealPlan() {
                           <input type="number" min={0} className="preference-input" value={preferences.kids}
                             onChange={e=>setPreferences({...preferences, kids: Math.max(0, parseInt(e.target.value||'0'))})} />
                         </div>
-                        <div>
-                          <div className="preference-label" style={{fontSize:'0.9rem'}}>Meals needed per day</div>
-                          <select className="preference-select" value={preferences.mealsPerDay}
-                            onChange={e=>setPreferences({...preferences, mealsPerDay: Number(e.target.value) as 1|2|3})}>
-                            <option value={1}>1 meal</option>
-                            <option value={2}>2 meals</option>
-                            <option value={3}>3 meals</option>
-                          </select>
-                        </div>
                       </div>
                       <div style={{marginTop:8, color:'var(--dark-grey)', fontSize:'0.85rem'}}>
                         Calculated servings: {computeServings(preferences.adults, preferences.kids)}
+                      </div>
+                    </div>
+
+                    {/* Meals per day (slots) */}
+                    <div className="preference-section">
+                      <label className="preference-label">Meals to include each day</label>
+                      <div className="preference-checkboxes">
+                        {(['breakfast','lunch','dinner'] as const).map(slot => (
+                          <label key={slot} className="preference-checkbox">
+                            <input
+                              type="checkbox"
+                              checked={(preferences.mealSlots as any)[slot]}
+                              onChange={(e)=> setPreferences(prev => ({
+                                ...prev,
+                                mealSlots: { ...prev.mealSlots, [slot]: e.target.checked }
+                              }))}
+                            />
+                            <span className="checkbox-label">{slot.charAt(0).toUpperCase()+slot.slice(1)}</span>
+                          </label>
+                        ))}
+                      </div>
+                      <div style={{marginTop:8, color:'var(--dark-grey)', fontSize:'0.85rem'}}>
+                        Selected meals per day: {(preferences.mealSlots.breakfast?1:0) + (preferences.mealSlots.lunch?1:0) + (preferences.mealSlots.dinner?1:0)}
                       </div>
                     </div>
 
@@ -642,6 +670,42 @@ export default function GenerateMealPlan() {
                       </div>
                     </div>
 
+                    {/* Dietary Pattern */}
+                    <div className="preference-section">
+                      <label className="preference-label">Dietary pattern (choose any)</label>
+                      <div className="preference-checkboxes">
+                        {['vegetarian','vegan','pescatarian','halal','kosher','low-carb','high-protein'].map(opt => (
+                          <label key={opt} className="preference-checkbox">
+                            <input
+                              type="checkbox"
+                              checked={preferences.dietaryPattern.includes(opt)}
+                              onChange={(e)=>{
+                                setPreferences(prev => ({
+                                  ...prev,
+                                  dietaryPattern: e.target.checked
+                                    ? [...prev.dietaryPattern, opt]
+                                    : prev.dietaryPattern.filter(o=>o!==opt)
+                                }))
+                              }}
+                            />
+                            <span className="checkbox-label">{opt.replace('-', ' ').replace(/\b\w/g,c=>c.toUpperCase())}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Disliked Ingredients */}
+                    <div className="preference-section">
+                      <label className="preference-label">Disliked ingredients (comma separated)</label>
+                      <textarea
+                        className="preference-input"
+                        style={{minHeight: 80}}
+                        placeholder="e.g., mushrooms, olives, blue cheese"
+                        value={preferences.dislikedIngredients}
+                        onChange={e=>setPreferences({...preferences, dislikedIngredients: e.target.value})}
+                      />
+                    </div>
+
                     {/* Cuisine Preferences */}
                     <div className="preference-section">
                       <label className="preference-label">What cuisines do you enjoy? (Optional)</label>
@@ -668,6 +732,45 @@ export default function GenerateMealPlan() {
                             <span className="checkbox-label">{cuisine.charAt(0).toUpperCase() + cuisine.slice(1)}</span>
                           </label>
                         ))}
+                      </div>
+                    </div>
+
+                    {/* Max Cook Time */}
+                    <div className="preference-section">
+                      <label className="preference-label">Max cook time per meal</label>
+                      <select className="preference-select" value={preferences.maxCookTime}
+                        onChange={e=>setPreferences({...preferences, maxCookTime: parseInt(e.target.value)})}>
+                        {[15, 20, 30, 45, 60].map(m => (
+                          <option key={m} value={m}>{m} minutes</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Days to Plan */}
+                    <div className="preference-section">
+                      <label className="preference-label">Days to plan (choose days)</label>
+                      <div className="preference-checkboxes" style={{display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))', gap:'8px'}}>
+                        {['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].map(day => (
+                          <label key={day} className="preference-checkbox">
+                            <input
+                              type="checkbox"
+                              checked={preferences.allowedDays.includes(day)}
+                              onChange={(e)=> setPreferences(prev => ({
+                                ...prev,
+                                allowedDays: e.target.checked
+                                  ? Array.from(new Set([...prev.allowedDays, day]))
+                                  : prev.allowedDays.filter(d => d !== day),
+                                daysToPlan: (e.target.checked
+                                  ? Array.from(new Set([...prev.allowedDays, day]))
+                                  : prev.allowedDays.filter(d => d !== day)).length
+                              }))}
+                            />
+                            <span className="checkbox-label">{day}</span>
+                          </label>
+                        ))}
+                      </div>
+                      <div style={{marginTop:8, color:'var(--dark-grey)', fontSize:'0.85rem'}}>
+                        Selected days: {preferences.allowedDays.length}
                       </div>
                     </div>
                   </div>
